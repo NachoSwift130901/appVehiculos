@@ -109,6 +109,12 @@ class ActualizarCategoria extends AppEvento{
 
   ActualizarCategoria({required this.oldCategoria, required this.newCategoria});
 }
+
+
+
+
+
+
 /* ----------------------------------------*/
 
 class AppBloc extends Bloc<AppEvento, AppEstado> {
@@ -131,9 +137,11 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     _listaCategorias.insert(index, newCategoria);
 
   }
+  
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) {
       _listaCategorias = _listaCategorias..addAll(categorias);
+      _listaVehiculos = _listaVehiculos..addAll(vehiculos);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
 
@@ -160,8 +168,8 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
 
 final List<String> categorias = ['Encerado', 'Aceite', 'Aspirada'];
 final List<Vehiculo> vehiculos = [
-  Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS'),
-  Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI'),
-  Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS'),
+  Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado'),
+  Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI', categoria: 'Encerado'),
+  Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado'),
 
 ];

@@ -41,6 +41,8 @@ class MainApp extends StatelessWidget {
   }
 }
 
+/* Pantalla de categorias */
+
 class ListaCategorias extends StatelessWidget {
   const ListaCategorias({super.key});
 
@@ -56,7 +58,18 @@ class ListaCategorias extends StatelessWidget {
       child: ListView.builder(
         itemCount: categorias.length,
         itemBuilder:(context, index) {
-          return TileCategoria(categoria: categorias[index]);
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                builder: (context) => 
+                          VehiculosEnCategoria(categoria: categorias[index]),
+                ),
+              );
+            },
+            child: TileCategoria(categoria: categorias[index]),
+          );
         },
       ),
     );
@@ -143,6 +156,7 @@ class TileCategoria extends StatelessWidget {
     );
   }
 }
+
 class AgregarCategoriaWidget extends StatefulWidget {
   const AgregarCategoriaWidget({super.key});
 
@@ -183,3 +197,43 @@ class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
   }
 }
 
+/* Pantalla de categoria seleccionada */
+
+class VehiculosEnCategoria extends StatelessWidget {
+  final String categoria;
+
+  const VehiculosEnCategoria({super.key, required this.categoria});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(categoria),
+      ),
+      body: BlocBuilder<AppBloc, AppEstado>(
+        builder: (context, state) {
+          if(state is Operacional){
+            final vehiculosEnCategoria = state.listaVehiculos
+            .where((vehiculo) => vehiculo.categoria == categoria)
+            .toList();
+
+          return ListView.builder(
+            itemCount: vehiculosEnCategoria.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(vehiculosEnCategoria[index].marca),
+                subtitle: Text(vehiculosEnCategoria[index].matricula),
+              );
+            },
+          );
+         }
+         else{
+          return const Center(
+            child: Text('Error al cargar los detalles de la categoria'),
+          );
+         }
+        },
+      ),
+    );
+  }
+}

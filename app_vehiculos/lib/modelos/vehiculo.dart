@@ -5,8 +5,9 @@ class Vehiculo with EquatableMixin {
   final int modelo;
   final String color;
   final String matricula;
+  final String categoria;
 
-  Vehiculo({required this.marca, required this.modelo, required this.color, required this.matricula});
+  Vehiculo({required this.marca, required this.modelo, required this.color, required this.matricula, required this.categoria});
 
   
   @override
