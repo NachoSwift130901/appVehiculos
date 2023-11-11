@@ -1,4 +1,4 @@
-// ignore_for_file: depend_on_referenced_packages
+// ignore_for_file: depend_on_referenced_packages, prefer_final_fields
 
 import 'package:app_vehiculos/modelos/gastos.dart';
 import 'package:app_vehiculos/modelos/vehiculo.dart';
@@ -82,15 +82,26 @@ class Operacional extends AppEstado{
   Operacional({required this.listaCategorias, required this.listaVehiculos, required this.listaGastos});
   
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [listaCategorias];
 }
+
 /* -------------- EVENTOS  ----------------*/
 
 sealed class AppEvento {}
 
 class Inicializado extends AppEvento {}
 
+class AgregarCategoria extends AppEvento{
+  final String categoriaAAgregar;
 
+  AgregarCategoria({required this.categoriaAAgregar});
+}
+
+class EliminarCategoria extends AppEvento{
+  final String categoriaAEliminar;
+
+  EliminarCategoria({required this.categoriaAEliminar});
+}
 /* ----------------------------------------*/
 
 class AppBloc extends Bloc<AppEvento, AppEstado> {
@@ -98,7 +109,14 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   List<Vehiculo> _listaVehiculos = [];
   List<Gastos> _listaGastos= [];
 
-  
+  void agregarCategoria(categoriaAAgregar){
+    _listaCategorias = _listaCategorias.toList()..add(categoriaAAgregar);
+  }
+  void eliminarCategoria(categoriaAEliminar){
+    
+    _listaCategorias = _listaCategorias.toList()..remove(categoriaAEliminar);    
+    
+  }
 
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) {
@@ -106,7 +124,24 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
 
+    on<AgregarCategoria>((event, emit){
+      agregarCategoria(event.categoriaAAgregar);
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+    });
+    
+    on<EliminarCategoria>((event, emit){
+      eliminarCategoria(event.categoriaAEliminar);
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+    });
+
+
   }
 }
 
-final List<String> categorias = ['Encerado, Cambio de aceite', 'Aspirada'];
+final List<String> categorias = ['Encerado', 'Cambio de aceite', 'Aspirada'];
+final List<Vehiculo> vehiculos = [
+  Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS'),
+  Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI'),
+  Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS'),
+
+];

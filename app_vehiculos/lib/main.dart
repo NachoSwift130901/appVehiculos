@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/bloc.dart';
 
+
 void main() {
   runApp(const AplicacionInyectada());
 }
@@ -28,7 +29,12 @@ class MainApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Lista de Categorias'),
         ),
-        body: const ListaCategorias(),
+        body: const Column(
+          children: [
+            ListaCategorias(),
+            AgregarCategoriaWidget(),
+          ],
+        ),
       ),
       
     );
@@ -41,6 +47,7 @@ class ListaCategorias extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var estado = context.watch<AppBloc>().state;
+    print(estado);
     if(estado is Inicial) return const Text('Oh no');
     List<String> categorias = (estado as Operacional).listaCategorias;
     return SizedBox(
@@ -49,7 +56,7 @@ class ListaCategorias extends StatelessWidget {
       child: ListView.builder(
         itemCount: categorias.length,
         itemBuilder:(context, index) {
-          return TileCategoria(categoria: categorias[index],);
+          return TileCategoria(categoria: categorias[index]);
         },
       ),
     );
@@ -57,14 +64,71 @@ class ListaCategorias extends StatelessWidget {
 }
 
 class TileCategoria extends StatelessWidget {
+
+
   final String categoria;
 
   const TileCategoria({super.key, required this.categoria});
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(categoria),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            categoria,
+            style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+            context.read<AppBloc>().add(EliminarCategoria(categoriaAEliminar: categoria));
+            
+          }, 
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AgregarCategoriaWidget extends StatefulWidget {
+  const AgregarCategoriaWidget({super.key});
+
+  @override
+  State<AgregarCategoriaWidget> createState() => _AgregarCategoriaWidgetState();
+}
+
+class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
+  final TextEditingController controlador = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controlador,
+              decoration: const InputDecoration(
+                hintText: 'Nueva categoria',
+              ),
+            ),
+          ),
+          const SizedBox(width: 10,),
+          ElevatedButton(onPressed: () {
+            final nuevaCategoria = controlador.text.trim();
+            if(nuevaCategoria.isNotEmpty) {
+              context.read<AppBloc>().add(AgregarCategoria(categoriaAAgregar: nuevaCategoria));
+              controlador.clear();
+            }
+          }, 
+          child: const Text('Agrgar'),
+          ),
+        ],
+      ),
     );
   }
 }
