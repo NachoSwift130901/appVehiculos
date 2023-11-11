@@ -5,7 +5,7 @@ import 'package:app_vehiculos/modelos/vehiculo.dart';
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-
+import 'package:app_vehiculos/extensiones/extensiones.dart';
 late Database db;
 
 class RepositorioBD {
@@ -102,6 +102,13 @@ class EliminarCategoria extends AppEvento{
 
   EliminarCategoria({required this.categoriaAEliminar});
 }
+
+class ActualizarCategoria extends AppEvento{
+  final String oldCategoria;
+  final String newCategoria;
+
+  ActualizarCategoria({required this.oldCategoria, required this.newCategoria});
+}
 /* ----------------------------------------*/
 
 class AppBloc extends Bloc<AppEvento, AppEstado> {
@@ -117,7 +124,13 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     _listaCategorias = _listaCategorias.toList()..remove(categoriaAEliminar);    
     
   }
+  void actualizarCategoria(oldCategoria, newCategoria){
+    final index = _listaCategorias.indexOf(oldCategoria);
 
+    _listaCategorias = _listaCategorias.toList()..remove(oldCategoria);
+    _listaCategorias.insert(index, newCategoria);
+
+  }
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) {
       _listaCategorias = _listaCategorias..addAll(categorias);
@@ -134,11 +147,18 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
 
+    on<ActualizarCategoria>((event, emit){
+      actualizarCategoria(event.oldCategoria, event.newCategoria);
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+    });
+
+    
+
 
   }
 }
 
-final List<String> categorias = ['Encerado', 'Cambio de aceite', 'Aspirada'];
+final List<String> categorias = ['Encerado', 'Aceite', 'Aspirada'];
 final List<Vehiculo> vehiculos = [
   Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS'),
   Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI'),

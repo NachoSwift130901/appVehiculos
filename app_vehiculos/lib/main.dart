@@ -64,11 +64,9 @@ class ListaCategorias extends StatelessWidget {
 }
 
 class TileCategoria extends StatelessWidget {
-
-
   final String categoria;
 
-  const TileCategoria({super.key, required this.categoria});
+  const TileCategoria({Key? key, required this.categoria}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -77,23 +75,74 @@ class TileCategoria extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            categoria,
-            style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                categoria,
+                style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () => _mostrarDialogoEditar(context, categoria),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      
+                      context.read<AppBloc>().add(EliminarCategoria(categoriaAEliminar: categoria));
+                      
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {
-            context.read<AppBloc>().add(EliminarCategoria(categoriaAEliminar: categoria));
-            
-          }, 
-          ),
+          const Divider(),
         ],
       ),
     );
   }
-}
 
+  void _mostrarDialogoEditar(BuildContext context, String categoriaVieja) {
+    final controlador = TextEditingController(text: categoriaVieja);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Editar Categoría'),
+          content: TextFormField(
+            controller: controlador,
+            decoration: const InputDecoration(
+              hintText: 'Nueva categoría',
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                final nuevaCategoria = controlador.text.trim();
+                if (nuevaCategoria.isNotEmpty) {
+                  context.read<AppBloc>().add(ActualizarCategoria(oldCategoria: categoriaVieja, newCategoria: nuevaCategoria));
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Guardar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
 class AgregarCategoriaWidget extends StatefulWidget {
   const AgregarCategoriaWidget({super.key});
 
@@ -102,6 +151,7 @@ class AgregarCategoriaWidget extends StatefulWidget {
 }
 
 class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
+
   final TextEditingController controlador = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -132,3 +182,4 @@ class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
     );
   }
 }
+
