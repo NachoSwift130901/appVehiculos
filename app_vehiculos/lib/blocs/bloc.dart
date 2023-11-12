@@ -91,6 +91,8 @@ sealed class AppEvento {}
 
 class Inicializado extends AppEvento {}
 
+//Categorias
+
 class AgregarCategoria extends AppEvento{
   final String categoriaAAgregar;
 
@@ -110,9 +112,13 @@ class ActualizarCategoria extends AppEvento{
   ActualizarCategoria({required this.oldCategoria, required this.newCategoria});
 }
 
+//Vehiculos
 
+class AgregarVehiculo extends AppEvento{
+  final Vehiculo vehiculoAAgregar;
 
-
+  AgregarVehiculo({required this.vehiculoAAgregar});
+}
 
 
 /* ----------------------------------------*/
@@ -138,6 +144,9 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
 
   }
   
+  void agregarVehiculo(vehiculoAAgregar) {
+    _listaVehiculos = _listaVehiculos.toList()..add(vehiculoAAgregar);
+  }
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) {
       _listaCategorias = _listaCategorias..addAll(categorias);
@@ -149,18 +158,20 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       agregarCategoria(event.categoriaAAgregar);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
-    
     on<EliminarCategoria>((event, emit){
       eliminarCategoria(event.categoriaAEliminar);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
-
     on<ActualizarCategoria>((event, emit){
       actualizarCategoria(event.oldCategoria, event.newCategoria);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
 
-    
+    on<AgregarVehiculo>((event, emit){
+      agregarCategoria(event.vehiculoAAgregar);
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+    });
+
 
 
   }
