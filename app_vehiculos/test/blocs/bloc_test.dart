@@ -1,4 +1,5 @@
 import 'package:app_vehiculos/blocs/bloc.dart';
+import 'package:app_vehiculos/modelos/gastos.dart';
 import 'package:app_vehiculos/modelos/vehiculo.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
@@ -8,7 +9,7 @@ void main() {
     'Se inicializan las categorias',
     build: () => AppBloc(),
     act: (bloc) => bloc.add(Inicializado()),
-    expect: () => <AppEstado>[Operacional(listaCategorias: categorias, listaVehiculos: [], listaGastos: [])],
+    expect: () => <AppEstado>[Operacional(listaCategorias: categorias, listaVehiculos: [])],
   );
 
   blocTest<AppBloc, AppEstado>(
@@ -22,12 +23,11 @@ void main() {
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
         listaVehiculos: [],
-        listaGastos: []
+
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada','Repintada'], 
         listaVehiculos: [],
-        listaGastos: []
       ),
     ],
   );
@@ -45,17 +45,14 @@ void main() {
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
         listaVehiculos: [],
-        listaGastos: []
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada','Repintada'], 
         listaVehiculos: [],
-        listaGastos: []
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aspirada','Repintada'], 
         listaVehiculos: [],
-        listaGastos: []
       ),
     ],
   );
@@ -73,17 +70,15 @@ void main() {
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
         listaVehiculos: [],
-        listaGastos: []
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada','Repintada'], 
         listaVehiculos: [],
-        listaGastos: []
+
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aspirada','Repintada'], 
         listaVehiculos: [],
-        listaGastos: []
       ),
     ],
   );
@@ -102,22 +97,18 @@ void main() {
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
         listaVehiculos: [],
-        listaGastos: []
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada','Repintada'], 
         listaVehiculos: [],
-        listaGastos: []
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aspirada','Repintada'], 
         listaVehiculos: [],
-        listaGastos: []
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Limpieza','Repintada'], 
         listaVehiculos: [],
-        listaGastos: []
       ),
     ],
   );
@@ -127,19 +118,18 @@ void main() {
     build: () => AppBloc(),
     act: (bloc) => [
       bloc.add(Inicializado()),
-      bloc.add(AgregarVehiculo(vehiculoAAgregar: Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada'))),
+      bloc.add(AgregarVehiculo(vehiculoAAgregar: Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada', gastos: []))),
 
     ],
     expect: () => [
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
         listaVehiculos: [
-          Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado'),
-          Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI', categoria: 'Encerado'),
-          Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado'),
-          Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada'),
+          Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado', gastos: []),
+          Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI', categoria: 'Encerado', gastos: []),
+          Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado', gastos: []),
+          Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada', gastos: []),
           ],
-        listaGastos: []
       ),
     ],
   );
@@ -149,19 +139,18 @@ void main() {
     build: () => AppBloc(),
     act: (bloc) => [
       bloc.add(Inicializado()),
-      bloc.add(AgregarVehiculo(vehiculoAAgregar: Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada'))),
-      bloc.add(EliminarVehiculo(vehiculoAEliminar: Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI', categoria: 'Encerado'))),
-      bloc.add(EliminarVehiculo(vehiculoAEliminar: Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado'))),
+      bloc.add(AgregarVehiculo(vehiculoAAgregar: Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada', gastos: []))),
+      bloc.add(EliminarVehiculo(vehiculoAEliminar: Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI', categoria: 'Encerado', gastos: []))),
+      bloc.add(EliminarVehiculo(vehiculoAEliminar: Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado', gastos: []))),
 
     ],
     expect: () => [
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
         listaVehiculos: [
-          Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado'),
-          Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada'),
+          Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado', gastos: []),
+          Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada', gastos: []),
           ],
-        listaGastos: []
       ),
     ],
   );
@@ -171,12 +160,12 @@ void main() {
     build: () => AppBloc(),
     act: (bloc) => [
       bloc.add(Inicializado()),
-      bloc.add(AgregarVehiculo(vehiculoAAgregar: Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada'))),
-      bloc.add(EliminarVehiculo(vehiculoAEliminar: Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI', categoria: 'Encerado'))),
-      bloc.add(EliminarVehiculo(vehiculoAEliminar: Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado'))),
+      bloc.add(AgregarVehiculo(vehiculoAAgregar: Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada', gastos: []))),
+      bloc.add(EliminarVehiculo(vehiculoAEliminar: Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI', categoria: 'Encerado', gastos: []))),
+      bloc.add(EliminarVehiculo(vehiculoAEliminar: Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado', gastos: []))),
       bloc.add(ActualizarVehiculo(
-        vehiculoAnterior: Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado'), 
-        vehiculoActualizado: Vehiculo(marca: 'Tesla', modelo: 2001, color: 'Arcoiris', matricula: 'P9JS', categoria: 'Encerado'))
+        vehiculoAnterior: Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado', gastos: []), 
+        vehiculoActualizado: Vehiculo(marca: 'Tesla', modelo: 2001, color: 'Arcoiris', matricula: 'P9JS', categoria: 'Encerado', gastos: []))
       ),
 
     ],
@@ -184,13 +173,27 @@ void main() {
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
         listaVehiculos: [
-          Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado'),
-          Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada'),
+          Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado', gastos: []),
+          Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada', gastos: []),
           ],
-        listaGastos: []
       ),
     ],
   );
 
-
+  blocTest<AppBloc, AppEstado>(
+    'Se agregan gastos',
+    build: () => AppBloc(),
+    act: (bloc) => [
+      bloc.add(Inicializado()),
+      bloc.add(AgregarGasto('V2JS', Gasto(descripcion: 'Se le hizo una encerada a la puerta', lugar: 'Taller chuy', cantidad: 750.99, fecha: DateTime(2023,9,13))))
+    ],
+    expect: () => [
+      Operacional(
+        listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
+        listaVehiculos: [
+        Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado', gastos: [Gasto(descripcion: 'Se le hizo una encerada a la puerta', lugar: 'Taller chuy', cantidad: 750.99, fecha: DateTime(2023, 9, 13))]),     
+        ],
+      ),
+    ],
+  );
 }

@@ -77,9 +77,8 @@ class Inicial extends AppEstado{
 class Operacional extends AppEstado{
   final List<String> listaCategorias;
   final List<Vehiculo> listaVehiculos;
-  final List<Gastos> listaGastos;
 
-  Operacional({required this.listaCategorias, required this.listaVehiculos, required this.listaGastos});
+  Operacional({required this.listaCategorias, required this.listaVehiculos});
   
   @override
   List<Object?> get props => [listaCategorias];
@@ -133,12 +132,23 @@ class ActualizarVehiculo extends AppEvento{
   ActualizarVehiculo({required this.vehiculoAnterior, required this.vehiculoActualizado});
 }
 
+//Gastos
+
+class AgregarGasto extends AppEvento{
+  final String placaVehiculo;
+  final Gasto gastoAAgregar;
+
+  AgregarGasto(this.placaVehiculo, this.gastoAAgregar);
+
+}
+
+
 /* ----------------------------------------*/
 
 class AppBloc extends Bloc<AppEvento, AppEstado> {
   List<String> _listaCategorias = [];
   List<Vehiculo> _listaVehiculos = [];
-  List<Gastos> _listaGastos= [];
+  List<Gasto> _listaGastos= [];
 
   void agregarCategoria(categoriaAAgregar){
     _listaCategorias = _listaCategorias.toList()..add(categoriaAAgregar);
@@ -174,48 +184,63 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     _listaVehiculos.insert(index, vehiculoActualizado);
   }
 
+  void agregarGasto(placaVehiculo, gastoAAgregar){
+    // Buscar el vehículo en la lista
+  final vehiculoEnLista = _listaVehiculos.firstWhere((v) => v.matricula == placaVehiculo);
+
+  // Agregar el gasto al vehículo
+  vehiculoEnLista.gastos.add(gastoAAgregar);
+
+  
+    
+    
+  }
+
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) {
       _listaCategorias = _listaCategorias..addAll(categorias);
       _listaVehiculos = _listaVehiculos..addAll(vehiculos);
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
 
     on<AgregarCategoria>((event, emit){
       agregarCategoria(event.categoriaAAgregar);
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
     on<EliminarCategoria>((event, emit){
       eliminarCategoria(event.categoriaAEliminar);
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
     on<ActualizarCategoria>((event, emit){
       actualizarCategoria(event.oldCategoria, event.newCategoria);
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
 
     on<AgregarVehiculo>((event, emit){
       agregarVehiculo(event.vehiculoAAgregar);
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
     on<EliminarVehiculo>((event, emit){
       agregarVehiculo(event.vehiculoAEliminar);
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
     on<ActualizarVehiculo>((event, emit){
       actualizarVehiculo(event.vehiculoAnterior, event.vehiculoActualizado);
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
 
-
+    on<AgregarGasto>((event, emit){
+      agregarGasto(event.placaVehiculo, event.gastoAAgregar);
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
+    });
 
   }
 }
 
 final List<String> categorias = ['Encerado', 'Aceite', 'Aspirada'];
 final List<Vehiculo> vehiculos = [
-  Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado'),
-  Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI', categoria: 'Encerado'),
-  Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado'),
+  Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado',gastos: []),
+  // Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI', categoria: 'Encerado'),
+  // Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado'),
 
 ];
