@@ -120,6 +120,18 @@ class AgregarVehiculo extends AppEvento{
   AgregarVehiculo({required this.vehiculoAAgregar});
 }
 
+class EliminarVehiculo extends AppEvento{
+  final Vehiculo vehiculoAEliminar;
+
+  EliminarVehiculo({required this.vehiculoAEliminar});
+}
+
+class ActualizarVehiculo extends AppEvento{
+  final Vehiculo vehiculoAnterior;
+  final Vehiculo vehiculoActualizado;
+
+  ActualizarVehiculo({required this.vehiculoAnterior, required this.vehiculoActualizado});
+}
 
 /* ----------------------------------------*/
 
@@ -142,11 +154,26 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     _listaCategorias = _listaCategorias.toList()..remove(oldCategoria);
     _listaCategorias.insert(index, newCategoria);
 
+    for(var vehiculo in _listaVehiculos){
+      if(vehiculo.categoria == oldCategoria){
+        vehiculo.categoria = newCategoria;
+      }
+    }
   }
   
   void agregarVehiculo(vehiculoAAgregar) {
     _listaVehiculos = _listaVehiculos.toList()..add(vehiculoAAgregar);
   }
+  void eliminarVehiculo(vehiculoAEliminar) {
+    _listaVehiculos = _listaVehiculos.toList()..remove(vehiculoAEliminar);
+  }
+  void actualizarVehiculo(vehiculoAnterior, vehiculoActualizado){
+    final index = _listaVehiculos.indexOf(vehiculoAnterior);
+
+    _listaVehiculos = _listaVehiculos.toList()..remove(vehiculoAnterior);
+    _listaVehiculos.insert(index, vehiculoActualizado);
+  }
+
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) {
       _listaCategorias = _listaCategorias..addAll(categorias);
@@ -168,7 +195,15 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     });
 
     on<AgregarVehiculo>((event, emit){
-      agregarCategoria(event.vehiculoAAgregar);
+      agregarVehiculo(event.vehiculoAAgregar);
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+    });
+    on<EliminarVehiculo>((event, emit){
+      agregarVehiculo(event.vehiculoAEliminar);
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+    });
+    on<ActualizarVehiculo>((event, emit){
+      actualizarVehiculo(event.vehiculoAnterior, event.vehiculoActualizado);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
 
