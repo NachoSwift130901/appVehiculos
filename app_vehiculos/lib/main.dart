@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/bloc.dart';
 
 
-void main() {
+void main() async {
   runApp(const AplicacionInyectada());
+  WidgetsFlutterBinding.ensureInitialized();
+  
 }
 
 class AplicacionInyectada extends StatelessWidget {
@@ -48,10 +50,17 @@ class ListaCategorias extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     var estado = context.watch<AppBloc>().state;
     print(estado);
     if(estado is Inicial) return const Text('Oh no');
     List<String> categorias = (estado as Operacional).listaCategorias;
+
+    if(categorias.isEmpty){
+      return const Center(
+        child: Text('Aun no hay categorias'),
+      );
+    }
     return SizedBox(
       width: 200,
       height: 600,

@@ -5,14 +5,17 @@ import 'package:app_vehiculos/modelos/vehiculo.dart';
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:app_vehiculos/extensiones/extensiones.dart';
-late Database db;
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
+
+
+
+late Database db;
 class RepositorioBD {
   RepositorioBD();
 
-  void inicializar() async {
-  var fabricaBaseDatos = databaseFactoryFfi;
+  Future<void> inicializar() async {
+  var fabricaBaseDatos = databaseFactoryFfiWeb;
   String rutaBaseDatos = '${await fabricaBaseDatos.getDatabasesPath()}/base.db';
   db = await fabricaBaseDatos.openDatabase(rutaBaseDatos,
   options: OpenDatabaseOptions(
@@ -142,21 +145,35 @@ class AgregarGasto extends AppEvento{
 
 }
 
+class EliminarGasto extends AppEvento{
+  final String placaVehiculo;
+  final String gastoAEliminar;
 
+  EliminarGasto(this.placaVehiculo, this.gastoAEliminar);
+}
 /* ----------------------------------------*/
 
 class AppBloc extends Bloc<AppEvento, AppEstado> {
   List<String> _listaCategorias = [];
   List<Vehiculo> _listaVehiculos = [];
-  List<Gasto> _listaGastos= [];
 
-  void agregarCategoria(categoriaAAgregar){
-    _listaCategorias = _listaCategorias.toList()..add(categoriaAAgregar);
+  RepositorioBD repo = RepositorioBD();
+  
+
+  Future<void> todasLasCategorias() async {
+    await repo.inicializar();
+    var resultadoConsulta = await db.rawQuery("SELECT categoria FROM categorias");
+    _listaCategorias = resultadoConsulta.map((e) => e['categoria'] as String).toList();
   }
-  void eliminarCategoria(categoriaAEliminar){
-    
-    _listaCategorias = _listaCategorias.toList()..remove(categoriaAEliminar);    
-    
+
+  void agregarCategoria(categoriaAAgregar) async{
+    await db.rawInsert('INSERT INTO categorias (categoria) VALUES(?)', [categoriaAAgregar]);  
+    todasLasCategorias();
+  }
+  void eliminarCategoria(categoriaAEliminar) async{
+    await db.rawDelete('DELETE FROM categorias where categoria = ?', [categoriaAEliminar]);
+    todasLasCategorias();  
+
   }
   void actualizarCategoria(oldCategoria, newCategoria){
     final index = _listaCategorias.indexOf(oldCategoria);
@@ -185,26 +202,27 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   }
 
   void agregarGasto(placaVehiculo, gastoAAgregar){
-    // Buscar el vehículo en la lista
   final vehiculoEnLista = _listaVehiculos.firstWhere((v) => v.matricula == placaVehiculo);
 
-  // Agregar el gasto al vehículo
   vehiculoEnLista.gastos.add(gastoAAgregar);
-
-  
-    
     
   }
+  void eliminarGasto(placaVehiculo, gastoAEliminar){
+    final vehiculoEnLista = _listaVehiculos.firstWhere((v) => v.matricula == placaVehiculo);
 
+  vehiculoEnLista.gastos.remove(gastoAEliminar);
+  }
+  
   AppBloc() : super(Inicial()) {
-    on<Inicializado>((event, emit) {
-      _listaCategorias = _listaCategorias..addAll(categorias);
+    on<Inicializado>((event, emit) async{
+      todasLasCategorias();
       _listaVehiculos = _listaVehiculos..addAll(vehiculos);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
 
     on<AgregarCategoria>((event, emit){
       agregarCategoria(event.categoriaAAgregar);
+      
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
     on<EliminarCategoria>((event, emit){
@@ -233,14 +251,16 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       agregarGasto(event.placaVehiculo, event.gastoAAgregar);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
+    on<EliminarGasto>((event, emit){
+      agregarGasto(event.placaVehiculo, event.gastoAEliminar);
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
+    });
 
   }
 }
 
-final List<String> categorias = ['Encerado', 'Aceite', 'Aspirada'];
+// final List<String> categorias = ['Encerado', 'Aceite', 'Aspirada'];
 final List<Vehiculo> vehiculos = [
   Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado',gastos: []),
-  // Vehiculo(marca: 'Chevron', modelo: 2032, color: 'Amarillo', matricula: 'V3GI', categoria: 'Encerado'),
-  // Vehiculo(marca: 'Testla', modelo: 2001, color: 'Rojo', matricula: 'P9JS', categoria: 'Encerado'),
 
 ];

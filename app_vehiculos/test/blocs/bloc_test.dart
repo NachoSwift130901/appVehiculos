@@ -1,7 +1,6 @@
 import 'package:app_vehiculos/blocs/bloc.dart';
 import 'package:app_vehiculos/modelos/gastos.dart';
 import 'package:app_vehiculos/modelos/vehiculo.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
 
 void main() {
@@ -186,6 +185,24 @@ void main() {
     act: (bloc) => [
       bloc.add(Inicializado()),
       bloc.add(AgregarGasto('V2JS', Gasto(descripcion: 'Se le hizo una encerada a la puerta', lugar: 'Taller chuy', cantidad: 750.99, fecha: DateTime(2023,9,13))))
+    ],
+    expect: () => [
+      Operacional(
+        listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
+        listaVehiculos: [
+        Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado', gastos: [Gasto(descripcion: 'Se le hizo una encerada a la puerta', lugar: 'Taller chuy', cantidad: 750.99, fecha: DateTime(2023, 9, 13))]),     
+        ],
+      ),
+    ],
+  );
+
+  blocTest<AppBloc, AppEstado>(
+    'Se eliminan gastos',
+    build: () => AppBloc(),
+    act: (bloc) => [
+      bloc.add(Inicializado()),
+      bloc.add(AgregarGasto('V2JS', Gasto(descripcion: 'Se le hizo una encerada a la puerta', lugar: 'Taller chuy', cantidad: 750.99, fecha: DateTime(2023,9,13)))),
+      bloc.add(AgregarGasto('V2JS', Gasto(descripcion: 'Se le hizo una encerada a la puerta', lugar: 'Taller chuy', cantidad: 750.99, fecha: DateTime(2023,9,13)))),
     ],
     expect: () => [
       Operacional(
