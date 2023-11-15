@@ -50,36 +50,39 @@ class ListaCategorias extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
+    List<String> categorias = [];
     var estado = context.watch<AppBloc>().state;
     print(estado);
-    if(estado is Inicial) return const Text('Oh no');
-    List<String> categorias = (estado as Operacional).listaCategorias;
+    // if(estado is Inicial) return const Text('Oh no');
+    if (estado is Operacional) categorias = (estado).listaCategorias;
+    if(estado is Inicial) return const Center(child: CircularProgressIndicator());
 
     if(categorias.isEmpty){
       return const Center(
         child: Text('Aun no hay categorias'),
       );
     }
-    return SizedBox(
-      width: 200,
-      height: 600,
-      child: ListView.builder(
-        itemCount: categorias.length,
-        itemBuilder:(context, index) {
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                builder: (context) => 
-                          VehiculosEnCategoria(categoria: categorias[index]),
-                ),
-              );
-            },
-            child: TileCategoria(categoria: categorias[index]),
-          );
-        },
+    return Expanded(
+      child: SizedBox(
+        height: 200,
+        width: 200,
+        child: ListView.builder(
+          itemCount: categorias.length,
+          itemBuilder:(context, index) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                  builder: (context) => 
+                            VehiculosEnCategoria(categoria: categorias[index]),
+                  ),
+                );
+              },
+              child: TileCategoria(categoria: categorias[index]),
+            );
+          },
+        ),
       ),
     );
   }
@@ -180,17 +183,15 @@ class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: TextField(
-              controller: controlador,
-              decoration: const InputDecoration(
-                hintText: 'Nueva categoria',
-              ),
+          TextField(
+            controller: controlador,
+            decoration: const InputDecoration(
+              hintText: 'Nueva categoria',
             ),
           ),
-          const SizedBox(width: 10,),
+          const SizedBox(width: 10),
           ElevatedButton(onPressed: () {
             final nuevaCategoria = controlador.text.trim();
             if(nuevaCategoria.isNotEmpty) {
@@ -198,7 +199,7 @@ class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
               controlador.clear();
             }
           }, 
-          child: const Text('Agrgar'),
+          child: const Text('Agregar'),
           ),
         ],
       ),

@@ -170,10 +170,8 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     await db.rawInsert('INSERT INTO categorias (categoria) VALUES(?)', [categoriaAAgregar]);  
     todasLasCategorias();
   }
-  void eliminarCategoria(categoriaAEliminar) async{
-    await db.rawDelete('DELETE FROM categorias where categoria = ?', [categoriaAEliminar]);
-    todasLasCategorias();  
-
+  Future<void>eliminarCategoria(categoriaAEliminar) async{
+    await db.rawDelete('DELETE FROM categorias where categoria = ?', [categoriaAEliminar]); 
   }
   void actualizarCategoria(oldCategoria, newCategoria){
     final index = _listaCategorias.indexOf(oldCategoria);
@@ -215,18 +213,20 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async{
-      todasLasCategorias();
+      await todasLasCategorias();
       _listaVehiculos = _listaVehiculos..addAll(vehiculos);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
 
-    on<AgregarCategoria>((event, emit){
+    on<AgregarCategoria>((event, emit) async{
       agregarCategoria(event.categoriaAAgregar);
+      await todasLasCategorias();
       
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
-    on<EliminarCategoria>((event, emit){
-      eliminarCategoria(event.categoriaAEliminar);
+    on<EliminarCategoria>((event, emit) async {
+      await eliminarCategoria(event.categoriaAEliminar);
+      await todasLasCategorias();
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
     on<ActualizarCategoria>((event, emit){
