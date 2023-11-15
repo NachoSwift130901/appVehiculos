@@ -173,17 +173,9 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   Future<void>eliminarCategoria(categoriaAEliminar) async{
     await db.rawDelete('DELETE FROM categorias where categoria = ?', [categoriaAEliminar]); 
   }
-  void actualizarCategoria(oldCategoria, newCategoria){
-    final index = _listaCategorias.indexOf(oldCategoria);
+  Future<void> actualizarCategoria(oldCategoria, newCategoria) async {
+    await db.rawUpdate('UPDATE categorias SET categoria = ? WHERE categoria = ?', [newCategoria, oldCategoria]);
 
-    _listaCategorias = _listaCategorias.toList()..remove(oldCategoria);
-    _listaCategorias.insert(index, newCategoria);
-
-    for(var vehiculo in _listaVehiculos){
-      if(vehiculo.categoria == oldCategoria){
-        vehiculo.categoria = newCategoria;
-      }
-    }
   }
   
   void agregarVehiculo(vehiculoAAgregar) {
@@ -229,8 +221,9 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       await todasLasCategorias();
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
-    on<ActualizarCategoria>((event, emit){
+    on<ActualizarCategoria>((event, emit) async {
       actualizarCategoria(event.oldCategoria, event.newCategoria);
+      await todasLasCategorias();
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
 
