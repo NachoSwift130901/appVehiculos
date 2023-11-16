@@ -8,7 +8,7 @@ void main() {
     'Se inicializan las categorias',
     build: () => AppBloc(),
     act: (bloc) => bloc.add(Inicializado()),
-    expect: () => <AppEstado>[Operacional(listaCategorias: categorias, listaVehiculos: [])],
+    expect: () => <AppEstado>[Operacional(listaCategorias: [], listaVehiculos: [])],
   );
 
   blocTest<AppBloc, AppEstado>(

@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/bloc.dart';
+import 'modelos/vehiculo.dart';
 
 
 void main() async {
@@ -33,8 +35,9 @@ class MainApp extends StatelessWidget {
         ),
         body: const Column(
           children: [
-            ListaCategorias(),
-            AgregarCategoriaWidget(),
+            // ListaCategorias(),
+            // AgregarCategoriaWidget(),
+            PantallaVehiculos(),
           ],
         ),
       ),
@@ -42,6 +45,90 @@ class MainApp extends StatelessWidget {
     );
   }
 }
+
+/* NAVIGATION BAR*/
+
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _selectedIndex = 0;
+
+  // Lista de pantallas que se mostrarán en función del índice seleccionado.
+  final List<Widget> _screens = [
+    Screen1(),
+    Screen2(),
+    Screen3(),
+  ];
+
+  // Lista de elementos de la barra de navegación inferior.
+  final List<BottomNavigationBarItem> _bottomNavBarItems = [
+    BottomNavigationBarItem(
+      icon: Icon(Icons.home),
+      label: 'Inicio',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.search),
+      label: 'Buscar',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.person),
+      label: 'Perfil',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Bottom Navigation Bar Example'),
+      ),
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: _bottomNavBarItems,
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+}
+
+class Screen1 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('Pantalla 1'),
+    );
+  }
+}
+
+class Screen2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('Pantalla 2'),
+    );
+  }
+}
+
+class Screen3 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('Pantalla 3'),
+    );
+  }
+}
+
 
 /* Pantalla de categorias */
 
@@ -207,6 +294,138 @@ class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
   }
 }
 
+/* Pantalla de vehiculos */
+
+class PantallaVehiculos extends StatelessWidget {
+  const PantallaVehiculos({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Vehículos'),
+      ),
+      body: BlocBuilder<AppBloc, AppEstado>(
+        builder: (context, state) {
+          if (state is Operacional) {
+            return Column(
+              children: [
+                const Text('Vehículos', style: TextStyle(fontSize: 20)),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: state.listaVehiculos.length,
+                    itemBuilder: (context, index) {
+                      final vehiculo = state.listaVehiculos[index];
+                      return ListTile(
+                        title: Text(vehiculo.matricula),
+                        onTap: () {
+                          // Navegar a la página de detalles del vehículo
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetalleVehiculoSeleccionado(vehiculo: vehiculo),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Mostrar el formulario como un modal
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => AlertDialog(
+                        title: Text('Agregar Vehículo'),
+                        content: FormularioVehiculo(),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context); // Cerrar el AlertDialog
+                            },
+                            child: Text('Cancelar'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // Lógica para guardar el vehículo
+                              // Puedes llamar a tu Bloc para manejar la lógica de agregar el vehículo
+                              // Luego, cierra el AlertDialog
+                              Navigator.pop(context);
+                            },
+                            child: Text('Guardar'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: Text('Agregar Vehículo'),
+                ),
+              ],
+            );
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
+    );
+  }
+}
+
+class DetalleVehiculoSeleccionado extends StatelessWidget {
+  final Vehiculo vehiculo;
+  const DetalleVehiculoSeleccionado({super.key, required this.vehiculo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Detalles del Vehículo'),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Matrícula: ${vehiculo.matricula}', style: const TextStyle(fontSize: 20)),
+          // Agrega aquí más información sobre el vehículo según tus necesidades
+        ],
+      ),
+    );
+  }
+}
+
+class FormularioVehiculo extends StatelessWidget {
+  final TextEditingController _marcaController = TextEditingController();
+  final TextEditingController _modeloController = TextEditingController();
+  final TextEditingController _colorController = TextEditingController();
+  final TextEditingController _matriculaController = TextEditingController();
+
+  FormularioVehiculo({super.key});
+  
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        TextFormField(
+          controller: _marcaController,
+          decoration: const InputDecoration(labelText: 'Marca'),
+        ),
+        TextFormField(
+          controller: _modeloController,
+          decoration: const InputDecoration(labelText: 'Modelo'),
+        ),
+        TextFormField(
+          controller: _colorController,
+          decoration: const InputDecoration(labelText: 'Color'),
+        ),
+        TextFormField(
+          controller: _matriculaController,
+          decoration: const InputDecoration(labelText: 'Matrícula'),
+        ),
+      ],
+    );
+  }
+}
 /* Pantalla de categoria seleccionada */
 
 class VehiculosEnCategoria extends StatelessWidget {

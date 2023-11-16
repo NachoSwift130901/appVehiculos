@@ -194,13 +194,13 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   void agregarGasto(placaVehiculo, gastoAAgregar){
   final vehiculoEnLista = _listaVehiculos.firstWhere((v) => v.matricula == placaVehiculo);
 
-  vehiculoEnLista.gastos.add(gastoAAgregar);
+  // vehiculoEnLista.gastos.add(gastoAAgregar);
     
   }
   void eliminarGasto(placaVehiculo, gastoAEliminar){
     final vehiculoEnLista = _listaVehiculos.firstWhere((v) => v.matricula == placaVehiculo);
 
-  vehiculoEnLista.gastos.remove(gastoAEliminar);
+  // vehiculoEnLista.gastos.remove(gastoAEliminar);
   }
   
   AppBloc() : super(Inicial()) {
