@@ -1,14 +1,14 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/bloc.dart';
 import 'modelos/vehiculo.dart';
 
-
 void main() async {
   runApp(const AplicacionInyectada());
   WidgetsFlutterBinding.ensureInitialized();
-  
 }
 
 class AplicacionInyectada extends StatelessWidget {
@@ -16,9 +16,11 @@ class AplicacionInyectada extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => AppBloc()..add(Inicializado()),
-      child:const MainApp(),
+    return  MaterialApp(
+      home: BlocProvider(
+        create: (context) => AppBloc()..add(Inicializado()),
+        child: const BottomNavigationBarExample(),
+      ),
     );
   }
 }
@@ -35,102 +37,82 @@ class MainApp extends StatelessWidget {
         ),
         body: const Column(
           children: [
-            // ListaCategorias(),
-            // AgregarCategoriaWidget(),
-            PantallaVehiculos(),
+            ListaCategorias(),
+            AgregarCategoriaWidget(),
           ],
         ),
       ),
-      
     );
   }
 }
 
 /* NAVIGATION BAR*/
 
-class MyHomePage extends StatefulWidget {
+class BottomNavigationBarExample extends StatefulWidget {
+  const BottomNavigationBarExample({Key? key}) : super(key: key);
+
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _BottomNavigationBarExampleState createState() =>
+      _BottomNavigationBarExampleState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
+class _BottomNavigationBarExampleState
+    extends State<BottomNavigationBarExample> {
+  int _currentIndex = 0;
 
-  // Lista de pantallas que se mostrarán en función del índice seleccionado.
-  final List<Widget> _screens = [
-    Screen1(),
-    Screen2(),
-    Screen3(),
-  ];
-
-  // Lista de elementos de la barra de navegación inferior.
-  final List<BottomNavigationBarItem> _bottomNavBarItems = [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.home),
-      label: 'Inicio',
+  final List<Widget> _pages = [
+    Column(
+      children: [
+        const PantallaVehiculos(),
+        const SizedBox(height: 20),
+        BotonAgregarVehiculo(),
+  
+      ],
     ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.search),
-      label: 'Buscar',
+    const Column(
+      children: [
+        ListaCategorias(),
+        SizedBox(height: 20),
+        AgregarCategoriaWidget()
+      ],
     ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.person),
-      label: 'Perfil',
-    ),
+    const Text('Contenido de la página de gastos'),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bottom Navigation Bar Example'),
+        title: const Text('BottomNavigationBar Example'),
       ),
-      body: _screens[_selectedIndex],
+      body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        items: _bottomNavBarItems,
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        onTap: _onItemTapped,
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'carros',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'categorias',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'gastos',
+          ),
+        ],
       ),
     );
   }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 }
 
-class Screen1 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Pantalla 1'),
-    );
-  }
-}
-
-class Screen2 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Pantalla 2'),
-    );
-  }
-}
-
-class Screen3 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Pantalla 3'),
-    );
-  }
-}
-
-
-/* Pantalla de categorias */
+/* PANTALLA DE CATEGORIAS */
 
 class ListaCategorias extends StatelessWidget {
   const ListaCategorias({super.key});
@@ -142,9 +124,11 @@ class ListaCategorias extends StatelessWidget {
     print(estado);
     // if(estado is Inicial) return const Text('Oh no');
     if (estado is Operacional) categorias = (estado).listaCategorias;
-    if(estado is Inicial) return const Center(child: CircularProgressIndicator());
+    if (estado is Inicial) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    if(categorias.isEmpty){
+    if (categorias.isEmpty) {
       return const Center(
         child: Text('Aun no hay categorias'),
       );
@@ -155,14 +139,14 @@ class ListaCategorias extends StatelessWidget {
         width: 200,
         child: ListView.builder(
           itemCount: categorias.length,
-          itemBuilder:(context, index) {
+          itemBuilder: (context, index) {
             return GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                  builder: (context) => 
-                            VehiculosEnCategoria(categoria: categorias[index]),
+                    builder: (context) =>
+                        VehiculosEnCategoria(categoria: categorias[index]),
                   ),
                 );
               },
@@ -192,7 +176,8 @@ class TileCategoria extends StatelessWidget {
             children: [
               Text(
                 categoria,
-                style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    fontSize: 18.0, fontWeight: FontWeight.bold),
               ),
               Row(
                 children: [
@@ -203,9 +188,8 @@ class TileCategoria extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () {
-                      
-                      context.read<AppBloc>().add(EliminarCategoria(categoriaAEliminar: categoria));
-                      
+                      context.read<AppBloc>().add(
+                          EliminarCategoria(categoriaAEliminar: categoria));
                     },
                   ),
                 ],
@@ -237,7 +221,9 @@ class TileCategoria extends StatelessWidget {
               onPressed: () {
                 final nuevaCategoria = controlador.text.trim();
                 if (nuevaCategoria.isNotEmpty) {
-                  context.read<AppBloc>().add(ActualizarCategoria(oldCategoria: categoriaVieja, newCategoria: nuevaCategoria));
+                  context.read<AppBloc>().add(ActualizarCategoria(
+                      oldCategoria: categoriaVieja,
+                      newCategoria: nuevaCategoria));
                   Navigator.of(context).pop();
                 }
               },
@@ -264,12 +250,11 @@ class AgregarCategoriaWidget extends StatefulWidget {
 }
 
 class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
-
   final TextEditingController controlador = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(50.0),
       child: Column(
         children: [
           TextField(
@@ -279,14 +264,17 @@ class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
             ),
           ),
           const SizedBox(width: 10),
-          ElevatedButton(onPressed: () {
-            final nuevaCategoria = controlador.text.trim();
-            if(nuevaCategoria.isNotEmpty) {
-              context.read<AppBloc>().add(AgregarCategoria(categoriaAAgregar: nuevaCategoria));
-              controlador.clear();
-            }
-          }, 
-          child: const Text('Agregar'),
+          ElevatedButton(
+            onPressed: () {
+              final nuevaCategoria = controlador.text.trim();
+              if (nuevaCategoria.isNotEmpty) {
+                context
+                    .read<AppBloc>()
+                    .add(AgregarCategoria(categoriaAAgregar: nuevaCategoria));
+                controlador.clear();
+              }
+            },
+            child: const Text('Agregar'),
           ),
         ],
       ),
@@ -294,138 +282,59 @@ class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
   }
 }
 
-/* Pantalla de vehiculos */
-
-class PantallaVehiculos extends StatelessWidget {
-  const PantallaVehiculos({super.key});
+class _AgregarCategoriaWidgetStateTest extends State<AgregarCategoriaWidget> {
+  final TextEditingController controlador = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Vehículos'),
-      ),
-      body: BlocBuilder<AppBloc, AppEstado>(
-        builder: (context, state) {
-          if (state is Operacional) {
-            return Column(
-              children: [
-                const Text('Vehículos', style: TextStyle(fontSize: 20)),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: state.listaVehiculos.length,
-                    itemBuilder: (context, index) {
-                      final vehiculo = state.listaVehiculos[index];
-                      return ListTile(
-                        title: Text(vehiculo.matricula),
-                        onTap: () {
-                          // Navegar a la página de detalles del vehículo
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetalleVehiculoSeleccionado(vehiculo: vehiculo),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Mostrar el formulario como un modal
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) => AlertDialog(
-                        title: Text('Agregar Vehículo'),
-                        content: FormularioVehiculo(),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context); // Cerrar el AlertDialog
-                            },
-                            child: Text('Cancelar'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              // Lógica para guardar el vehículo
-                              // Puedes llamar a tu Bloc para manejar la lógica de agregar el vehículo
-                              // Luego, cierra el AlertDialog
-                              Navigator.pop(context);
-                            },
-                            child: Text('Guardar'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  child: Text('Agregar Vehículo'),
-                ),
-              ],
-            );
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
+    return ElevatedButton(
+      onPressed: () {
+        _mostrarDialogo(context);
+      },
+      child: const Text('Agregar'),
+    );
+  }
+
+  Future<void> _mostrarDialogo(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Agregar Categoría'),
+          content: TextField(
+            controller: controlador,
+            decoration: const InputDecoration(
+              hintText: 'Nueva categoría',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final nuevaCategoria = controlador.text.trim();
+                if (nuevaCategoria.isNotEmpty) {
+                  context
+                  .read<AppBloc>()
+                  .add(AgregarCategoria(categoriaAAgregar: nuevaCategoria));
+                  controlador.clear();
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Agregar'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
-class DetalleVehiculoSeleccionado extends StatelessWidget {
-  final Vehiculo vehiculo;
-  const DetalleVehiculoSeleccionado({super.key, required this.vehiculo});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detalles del Vehículo'),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Matrícula: ${vehiculo.matricula}', style: const TextStyle(fontSize: 20)),
-          // Agrega aquí más información sobre el vehículo según tus necesidades
-        ],
-      ),
-    );
-  }
-}
-
-class FormularioVehiculo extends StatelessWidget {
-  final TextEditingController _marcaController = TextEditingController();
-  final TextEditingController _modeloController = TextEditingController();
-  final TextEditingController _colorController = TextEditingController();
-  final TextEditingController _matriculaController = TextEditingController();
-
-  FormularioVehiculo({super.key});
-  
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextFormField(
-          controller: _marcaController,
-          decoration: const InputDecoration(labelText: 'Marca'),
-        ),
-        TextFormField(
-          controller: _modeloController,
-          decoration: const InputDecoration(labelText: 'Modelo'),
-        ),
-        TextFormField(
-          controller: _colorController,
-          decoration: const InputDecoration(labelText: 'Color'),
-        ),
-        TextFormField(
-          controller: _matriculaController,
-          decoration: const InputDecoration(labelText: 'Matrícula'),
-        ),
-      ],
-    );
-  }
-}
 /* Pantalla de categoria seleccionada */
 
 class VehiculosEnCategoria extends StatelessWidget {
@@ -441,28 +350,204 @@ class VehiculosEnCategoria extends StatelessWidget {
       ),
       body: BlocBuilder<AppBloc, AppEstado>(
         builder: (context, state) {
-          if(state is Operacional){
+          if (state is Operacional) {
             final vehiculosEnCategoria = state.listaVehiculos
-            .where((vehiculo) => vehiculo.categoria == categoria)
-            .toList();
+                .where((vehiculo) => vehiculo.categoria == categoria)
+                .toList();
 
-          return ListView.builder(
-            itemCount: vehiculosEnCategoria.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(vehiculosEnCategoria[index].marca),
-                subtitle: Text(vehiculosEnCategoria[index].matricula),
-              );
-            },
-          );
-         }
-         else{
-          return const Center(
-            child: Text('Error al cargar los detalles de la categoria'),
-          );
-         }
+            return ListView.builder(
+              itemCount: vehiculosEnCategoria.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(vehiculosEnCategoria[index].marca),
+                  subtitle: Text(vehiculosEnCategoria[index].matricula),
+                );
+              },
+            );
+          } else {
+            return const Center(
+              child: Text('Error al cargar los detalles de la categoria'),
+            );
+          }
         },
       ),
     );
   }
 }
+
+/* PANTALLA DE VEHICULOS */
+
+class PantallaVehiculos extends StatelessWidget {
+
+  const PantallaVehiculos({super.key});
+
+  @override
+   Widget build(BuildContext context) {
+    List<Vehiculo> vehiculos = [];
+    var estado = context.watch<AppBloc>().state;
+    print(estado);
+    if(estado is Operacional) vehiculos = (estado).listaVehiculos;
+    if(estado is Inicial) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if(vehiculos.isEmpty){
+      return const Center(
+        child: Text('Aun no hay vehiculos compa'),
+      );
+    }
+    return BlocBuilder<AppBloc, AppEstado>(
+      
+      builder: (context, state) {
+        if (state is Operacional) {
+          return Column(
+            children: [
+              const Text('Vehículos', style: TextStyle(fontSize: 20)),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: state.listaVehiculos.length,
+                  itemBuilder: (context, index) {
+                    final vehiculo = state.listaVehiculos[index];
+                    return ListTile(
+                      title: Text(vehiculo.matricula),
+                      onTap: () {
+                        // Navegar a la página de detalles del vehículo
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetalleVehiculoSeleccionado(
+                                vehiculo: vehiculo),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+}
+
+class BotonAgregarVehiculo extends StatelessWidget {
+  final TextEditingController _marcaController = TextEditingController();
+  final TextEditingController _modeloController = TextEditingController();
+  final TextEditingController _colorController = TextEditingController();
+  final TextEditingController _matriculaController = TextEditingController();
+  
+  BotonAgregarVehiculo({super.key});
+
+  @override
+   Widget build(BuildContext context) {
+    var estado = context.watch<AppBloc>().state;
+    return ElevatedButton(
+      onPressed: () {
+        // Mostrar el formulario como un modal
+        showDialog(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            
+            title: const Text('Agregar Vehículo'),
+            content: FormularioVehiculo(
+              marcaController: _marcaController,
+              modeloController: _modeloController,
+              colorController: _colorController,
+              matriculaController: _matriculaController,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Cerrar el AlertDialog
+                },
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  String marca = _marcaController.text;
+                  int modelo = int.tryParse(_modeloController.text) ?? 0;
+                  String color = _colorController.text;
+                  String matricula = _matriculaController.text;
+
+                  context.read<AppBloc>().add(AgregarVehiculo(
+                              marca: marca,
+                              modelo: modelo,
+                              color: color,
+                              matricula: matricula,
+                              ));
+
+
+                  // Cierra el AlertDialog
+                  Navigator.pop(context);
+                },
+                child: const Text('Guardar'),
+              ),
+            ],
+          ),
+        );
+      },
+      child: const Text('Agregar Vehículo'),
+    );
+  }
+}
+
+class FormularioVehiculo extends StatelessWidget {
+  final TextEditingController marcaController;
+  final TextEditingController modeloController;
+  final TextEditingController colorController;
+  final TextEditingController matriculaController;
+  
+  const FormularioVehiculo({super.key, required this.marcaController, required this.modeloController, required this.colorController, required this.matriculaController});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        TextFormField(
+          controller: marcaController,
+          decoration: const InputDecoration(labelText: 'Marca'),
+        ),
+        TextFormField(
+          controller: modeloController,
+          decoration: const InputDecoration(labelText: 'Modelo'),
+        ),
+        TextFormField(
+          controller: colorController,
+          decoration: const InputDecoration(labelText: 'Color'),
+        ),
+        TextFormField(
+          controller: matriculaController,
+          decoration: const InputDecoration(labelText: 'Matrícula'),
+        ),
+      ],
+    );
+  }
+}
+
+
+class DetalleVehiculoSeleccionado extends StatelessWidget {
+  final Vehiculo vehiculo;
+  const DetalleVehiculoSeleccionado({super.key, required this.vehiculo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Detalles del Vehículo'),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Matrícula: ${vehiculo.matricula}',
+              style: const TextStyle(fontSize: 20)),
+          // Agrega aquí más información sobre el vehículo según tus necesidades
+        ],
+      ),
+    );
+  }
+}
+

@@ -34,9 +34,7 @@ class RepositorioBD {
           marca TEXT NOT NULL,
           modelo TEXT NOT NULL,
           color TEXT NOT NULL,
-          matricula TEXT NOT NULL,
-          categoria TEXT NOT NULL,
-          FOREIGN KEY (categoria) REFERENCES categorias(categoria)
+          matricula TEXT NOT NULL
         );
       ''');
 
@@ -117,9 +115,14 @@ class ActualizarCategoria extends AppEvento{
 //Vehiculos
 
 class AgregarVehiculo extends AppEvento{
-  final Vehiculo vehiculoAAgregar;
+  final String marca;
+  final int modelo;
+  final String color;
+  final String matricula;
 
-  AgregarVehiculo({required this.vehiculoAAgregar});
+  AgregarVehiculo({required this.marca, required this.modelo, required this.color, required this.matricula});
+
+  
 }
 
 class EliminarVehiculo extends AppEvento{
@@ -166,6 +169,18 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     _listaCategorias = resultadoConsulta.map((e) => e['categoria'] as String).toList();
   }
 
+  Future<void> todosLosVehiculos() async{
+    await repo.inicializar();
+    var resultadoConsulta = await db.rawQuery("SELECT * FROM vehiculos");
+    _listaVehiculos = resultadoConsulta.map((e) => Vehiculo.fromMap(e)).toList();
+  }
+
+  Future<void> todosLosGastos() async{
+    await repo.inicializar();
+    var resultadoConsulta = await db.rawQuery("SELECT * FROM gastos");
+
+  }
+
   void agregarCategoria(categoriaAAgregar) async{
     await db.rawInsert('INSERT INTO categorias (categoria) VALUES(?)', [categoriaAAgregar]);  
     todasLasCategorias();
@@ -178,8 +193,11 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
 
   }
   
-  void agregarVehiculo(vehiculoAAgregar) {
-    _listaVehiculos = _listaVehiculos.toList()..add(vehiculoAAgregar);
+  void agregarVehiculo(String marca, int modelo, String color, String matricula) async{
+    await db.rawInsert(''''"INSEERT INTO vehiculos (marca, modelo, color, matricula) VALUES (?, ?, ?, ?) ''', [
+      marca, modelo, color, matricula
+    ]);
+    todosLosVehiculos();
   }
   void eliminarVehiculo(vehiculoAEliminar) {
     _listaVehiculos = _listaVehiculos.toList()..remove(vehiculoAEliminar);
@@ -206,7 +224,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async{
       await todasLasCategorias();
-      _listaVehiculos = _listaVehiculos..addAll(vehiculos);
+      await todosLosVehiculos();
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
 
@@ -228,11 +246,11 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     });
 
     on<AgregarVehiculo>((event, emit){
-      agregarVehiculo(event.vehiculoAAgregar);
+      // agregarVehiculo(event.vehiculoAAgregar);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
     on<EliminarVehiculo>((event, emit){
-      agregarVehiculo(event.vehiculoAEliminar);
+      // agregarVehiculo(event.vehiculoAEliminar);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
     on<ActualizarVehiculo>((event, emit){
@@ -253,7 +271,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
 }
 
 // final List<String> categorias = ['Encerado', 'Aceite', 'Aspirada'];
-final List<Vehiculo> vehiculos = [
-  Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado',gastos: []),
+// final List<Vehiculo> vehiculos = [
+//   Vehiculo(marca: 'Nissan', modelo: 2012, color: 'Azul', matricula: 'V2JS',categoria: 'Encerado',gastos: []),
 
-];
+// ];
