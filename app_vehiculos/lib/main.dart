@@ -62,8 +62,11 @@ class _BottomNavigationBarExampleState
 
   final List<Widget> _pages = [
     Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        const Text('Vehículos', style: TextStyle(fontSize: 20)),
         const PantallaVehiculos(),
+        
         const SizedBox(height: 20),
         BotonAgregarVehiculo(),
   
@@ -141,15 +144,16 @@ class ListaCategorias extends StatelessWidget {
           itemCount: categorias.length,
           itemBuilder: (context, index) {
             return GestureDetector(
-              onTap: () {
+             /* onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        VehiculosEnCategoria(categoria: categorias[index]),
+                        
                   ),
                 );
               },
+              */
               child: TileCategoria(categoria: categorias[index]),
             );
           },
@@ -336,7 +340,7 @@ class _AgregarCategoriaWidgetStateTest extends State<AgregarCategoriaWidget> {
 
 
 /* Pantalla de categoria seleccionada */
-
+/*
 class VehiculosEnCategoria extends StatelessWidget {
   final String categoria;
 
@@ -351,7 +355,7 @@ class VehiculosEnCategoria extends StatelessWidget {
       body: BlocBuilder<AppBloc, AppEstado>(
         builder: (context, state) {
           if (state is Operacional) {
-            final vehiculosEnCategoria = state.listaVehiculos
+            final vehiculosEnCategoria = state.listaCategorias
                 .where((vehiculo) => vehiculo.categoria == categoria)
                 .toList();
 
@@ -373,8 +377,7 @@ class VehiculosEnCategoria extends StatelessWidget {
       ),
     );
   }
-}
-
+*/
 /* PANTALLA DE VEHICULOS */
 
 class PantallaVehiculos extends StatelessWidget {
@@ -400,32 +403,32 @@ class PantallaVehiculos extends StatelessWidget {
       
       builder: (context, state) {
         if (state is Operacional) {
-          return Column(
-            children: [
-              const Text('Vehículos', style: TextStyle(fontSize: 20)),
+          return 
               Expanded(
-                child: ListView.builder(
-                  itemCount: state.listaVehiculos.length,
-                  itemBuilder: (context, index) {
-                    final vehiculo = state.listaVehiculos[index];
-                    return ListTile(
-                      title: Text(vehiculo.matricula),
-                      onTap: () {
-                        // Navegar a la página de detalles del vehículo
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DetalleVehiculoSeleccionado(
-                                vehiculo: vehiculo),
-                          ),
-                        );
-                      },
-                    );
-                  },
+                child: SizedBox(
+                  width:200,
+                  height: 200,
+                  child: ListView.builder(
+                    itemCount: state.listaVehiculos.length,
+                    itemBuilder: (context, index) {
+                      final vehiculo = state.listaVehiculos[index];
+                      return ListTile(
+                        title: Text(vehiculo.matricula),
+                        onTap: () {
+                          // Navegar a la página de detalles del vehículo
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetalleVehiculoSeleccionado(
+                                  vehiculo: vehiculo),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
-          );
+              );
         } else {
           return const Center(child: CircularProgressIndicator());
         }
@@ -444,7 +447,17 @@ class BotonAgregarVehiculo extends StatelessWidget {
 
   @override
    Widget build(BuildContext context) {
-    var estado = context.watch<AppBloc>().state;
+    void agregarVehiculo(String marca, int modelo, String color, String matricula) {
+    context.read<AppBloc>().add(AgregarVehiculo(
+                marca: marca,
+                modelo: modelo,
+                color: color,
+                matricula: matricula,
+                ));
+                
+  }
+   
+   var estado = context.watch<AppBloc>().state;
     return ElevatedButton(
       onPressed: () {
         // Mostrar el formulario como un modal
@@ -473,12 +486,7 @@ class BotonAgregarVehiculo extends StatelessWidget {
                   String color = _colorController.text;
                   String matricula = _matriculaController.text;
 
-                  context.read<AppBloc>().add(AgregarVehiculo(
-                              marca: marca,
-                              modelo: modelo,
-                              color: color,
-                              matricula: matricula,
-                              ));
+                  agregarVehiculo(marca, modelo, color, matricula);
 
 
                   // Cierra el AlertDialog
@@ -493,6 +501,8 @@ class BotonAgregarVehiculo extends StatelessWidget {
       child: const Text('Agregar Vehículo'),
     );
   }
+
+  
 }
 
 class FormularioVehiculo extends StatelessWidget {
@@ -527,7 +537,6 @@ class FormularioVehiculo extends StatelessWidget {
     );
   }
 }
-
 
 class DetalleVehiculoSeleccionado extends StatelessWidget {
   final Vehiculo vehiculo;

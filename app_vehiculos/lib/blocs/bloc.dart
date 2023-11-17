@@ -32,7 +32,7 @@ class RepositorioBD {
         CREATE TABLE vehiculos (
           id INTEGER PRIMARY KEY,
           marca TEXT NOT NULL,
-          modelo TEXT NOT NULL,
+          modelo INTEGER NOT NULL,
           color TEXT NOT NULL,
           matricula TEXT NOT NULL
         );
@@ -82,7 +82,7 @@ class Operacional extends AppEstado{
   Operacional({required this.listaCategorias, required this.listaVehiculos});
   
   @override
-  List<Object?> get props => [listaCategorias];
+  List<Object?> get props => [listaCategorias, listaVehiculos];
 }
 
 /* -------------- EVENTOS  ----------------*/
@@ -193,11 +193,11 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
 
   }
   
-  void agregarVehiculo(String marca, int modelo, String color, String matricula) async{
-    await db.rawInsert(''''"INSEERT INTO vehiculos (marca, modelo, color, matricula) VALUES (?, ?, ?, ?) ''', [
+  Future<void> agregarVehiculo(String marca, int modelo, String color, String matricula) async{
+    await db.rawInsert('''INSERT INTO vehiculos (marca, modelo, color, matricula) VALUES (?, ?, ?, ?) ''', [
       marca, modelo, color, matricula
     ]);
-    todosLosVehiculos();
+    await todosLosVehiculos();
   }
   void eliminarVehiculo(vehiculoAEliminar) {
     _listaVehiculos = _listaVehiculos.toList()..remove(vehiculoAEliminar);
@@ -245,8 +245,8 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
 
-    on<AgregarVehiculo>((event, emit){
-      // agregarVehiculo(event.vehiculoAAgregar);
+    on<AgregarVehiculo>((event, emit) async{
+      await agregarVehiculo(event.marca, event.modelo, event.color, event.matricula);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
     on<EliminarVehiculo>((event, emit){
