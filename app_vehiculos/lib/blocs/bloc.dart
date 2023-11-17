@@ -42,11 +42,14 @@ class RepositorioBD {
         CREATE TABLE gastos (
           id INTEGER PRIMARY KEY,
           vehiculo_id INTEGER,
+          categoria_id INTEGER,
           descripcion TEXT,
           lugar TEXT,
           cantidad REAL,
           fecha TEXT,
-          FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id)
+          FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id),
+          FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
+
         );
       ''');
     }
@@ -126,9 +129,9 @@ class AgregarVehiculo extends AppEvento{
 }
 
 class EliminarVehiculo extends AppEvento{
-  final Vehiculo vehiculoAEliminar;
+  final String matricula;
 
-  EliminarVehiculo({required this.vehiculoAEliminar});
+  EliminarVehiculo({required this.matricula});
 }
 
 class ActualizarVehiculo extends AppEvento{
@@ -199,8 +202,8 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     ]);
     await todosLosVehiculos();
   }
-  void eliminarVehiculo(vehiculoAEliminar) {
-    _listaVehiculos = _listaVehiculos.toList()..remove(vehiculoAEliminar);
+  Future<void> eliminarVehiculo(matricula) async {
+    await db.rawDelete("DELETE FROM vehiculos WHERE matricula = ?", [matricula]);
   }
   void actualizarVehiculo(vehiculoAnterior, vehiculoActualizado){
     final index = _listaVehiculos.indexOf(vehiculoAnterior);
@@ -249,8 +252,9 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       await agregarVehiculo(event.marca, event.modelo, event.color, event.matricula);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
-    on<EliminarVehiculo>((event, emit){
-      // agregarVehiculo(event.vehiculoAEliminar);
+    on<EliminarVehiculo>((event, emit) async {
+      await eliminarVehiculo(event.matricula);
+      await todosLosVehiculos();
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
     on<ActualizarVehiculo>((event, emit){

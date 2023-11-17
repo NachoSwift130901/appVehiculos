@@ -386,6 +386,11 @@ class PantallaVehiculos extends StatelessWidget {
 
   @override
    Widget build(BuildContext context) {
+    void eliminarVehiculo(Vehiculo vehiculo) {
+    context.read<AppBloc>().add(
+                EliminarVehiculo(matricula: vehiculo.matricula));
+                
+  }
     List<Vehiculo> vehiculos = [];
     var estado = context.watch<AppBloc>().state;
     print(estado);
@@ -393,6 +398,7 @@ class PantallaVehiculos extends StatelessWidget {
     if(estado is Inicial) {
       return const Center(child: CircularProgressIndicator());
     }
+    
 
     if(vehiculos.isEmpty){
       return const Center(
@@ -414,14 +420,43 @@ class PantallaVehiculos extends StatelessWidget {
                       final vehiculo = state.listaVehiculos[index];
                       return ListTile(
                         title: Text(vehiculo.matricula),
+                        subtitle: Text(vehiculo.marca),
                         onTap: () {
                           // Navegar a la página de detalles del vehículo
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => DetalleVehiculoSeleccionado(
-                                  vehiculo: vehiculo),
-                            ),
+                        MaterialPageRoute(
+                          builder: (BuildContext context) {
+                            return Scaffold(
+                              appBar: AppBar(
+                                title: Text('Vehiculo: ${vehiculo.matricula}'),
+                              ),
+                                body: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Marca: ${vehiculo.marca}',
+                                      style: const TextStyle(fontSize: 20)),
+                                  Text('Modelo: ${vehiculo.modelo}',
+                                      style: const TextStyle(fontSize: 20)),
+                                  Text('Color: ${vehiculo.color}',
+                                      style: const TextStyle(fontSize: 20)),
+                                  Text('Matricula: ${vehiculo.matricula}',
+                                      style: const TextStyle(fontSize: 20)),
+                                  // Agrega aquí más información sobre el vehículo según tus necesidades
+                                ],
+                              ),
+                                floatingActionButton: FloatingActionButton(
+                                  onPressed: () {
+                                    eliminarVehiculo(vehiculo);
+                                    Navigator.pop(context);
+                                  },
+                                  tooltip: 'Borrar Vehiculo',
+                                  child: const Icon(Icons.delete),
+                                  ),
+                            )
+                            ;
+                          },
+                        ),
                           );
                         },
                       );
@@ -456,8 +491,6 @@ class BotonAgregarVehiculo extends StatelessWidget {
                 ));
                 
   }
-   
-   var estado = context.watch<AppBloc>().state;
     return ElevatedButton(
       onPressed: () {
         // Mostrar el formulario como un modal
@@ -534,28 +567,6 @@ class FormularioVehiculo extends StatelessWidget {
           decoration: const InputDecoration(labelText: 'Matrícula'),
         ),
       ],
-    );
-  }
-}
-
-class DetalleVehiculoSeleccionado extends StatelessWidget {
-  final Vehiculo vehiculo;
-  const DetalleVehiculoSeleccionado({super.key, required this.vehiculo});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detalles del Vehículo'),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Matrícula: ${vehiculo.matricula}',
-              style: const TextStyle(fontSize: 20)),
-          // Agrega aquí más información sobre el vehículo según tus necesidades
-        ],
-      ),
     );
   }
 }
