@@ -1,10 +1,12 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:app_vehiculos/modelos/gastos.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/bloc.dart';
 import 'modelos/vehiculo.dart';
+import 'modelos/categoria.dart';
 
 void main() async {
   runApp(const AplicacionInyectada());
@@ -122,7 +124,7 @@ class ListaCategorias extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<String> categorias = [];
+    List<Categoria> categorias = [];
     var estado = context.watch<AppBloc>().state;
     print(estado);
     // if(estado is Inicial) return const Text('Oh no');
@@ -164,12 +166,15 @@ class ListaCategorias extends StatelessWidget {
 }
 
 class TileCategoria extends StatelessWidget {
-  final String categoria;
+  final Categoria categoria;
 
   const TileCategoria({Key? key, required this.categoria}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    void _editarCategoria(old, nueva){
+      context.read<AppBloc>().add(ActualizarCategoria(oldCategoria: old , newCategoria: nueva));
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
@@ -179,7 +184,7 @@ class TileCategoria extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                categoria,
+                categoria.nombre,
                 style: const TextStyle(
                     fontSize: 18.0, fontWeight: FontWeight.bold),
               ),
@@ -187,13 +192,49 @@ class TileCategoria extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit),
-                    onPressed: () => _mostrarDialogoEditar(context, categoria),
+                    onPressed: () {
+                      final controlador = TextEditingController(text: categoria.nombre);
+
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Editar Categoría'),
+                            content: TextFormField(
+                              controller: controlador,
+                              decoration: const InputDecoration(
+                                hintText: 'Nueva categoría',
+                              ),
+                            ),
+                            actions: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  final nuevaCategoria = controlador.text.trim();
+                                  if (nuevaCategoria.isNotEmpty) {
+                                    _editarCategoria(categoria.nombre, nuevaCategoria);
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                                child: const Text('Guardar'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Cancelar'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () {
                       context.read<AppBloc>().add(
-                          EliminarCategoria(categoriaAEliminar: categoria));
+                          EliminarCategoria(categoriaAEliminar: categoria.nombre));
+                      
                     },
                   ),
                 ],
@@ -203,45 +244,6 @@ class TileCategoria extends StatelessWidget {
           const Divider(),
         ],
       ),
-    );
-  }
-
-  void _mostrarDialogoEditar(BuildContext context, String categoriaVieja) {
-    final controlador = TextEditingController(text: categoriaVieja);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Editar Categoría'),
-          content: TextFormField(
-            controller: controlador,
-            decoration: const InputDecoration(
-              hintText: 'Nueva categoría',
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                final nuevaCategoria = controlador.text.trim();
-                if (nuevaCategoria.isNotEmpty) {
-                  context.read<AppBloc>().add(ActualizarCategoria(
-                      oldCategoria: categoriaVieja,
-                      newCategoria: nuevaCategoria));
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Guardar'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancelar'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
@@ -282,58 +284,6 @@ class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _AgregarCategoriaWidgetStateTest extends State<AgregarCategoriaWidget> {
-  final TextEditingController controlador = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        _mostrarDialogo(context);
-      },
-      child: const Text('Agregar'),
-    );
-  }
-
-  Future<void> _mostrarDialogo(BuildContext context) async {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Agregar Categoría'),
-          content: TextField(
-            controller: controlador,
-            decoration: const InputDecoration(
-              hintText: 'Nueva categoría',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final nuevaCategoria = controlador.text.trim();
-                if (nuevaCategoria.isNotEmpty) {
-                  context
-                  .read<AppBloc>()
-                  .add(AgregarCategoria(categoriaAAgregar: nuevaCategoria));
-                  controlador.clear();
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Agregar'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
