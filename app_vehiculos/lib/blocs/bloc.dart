@@ -47,7 +47,7 @@ class RepositorioBD {
           descripcion TEXT,
           lugar TEXT,
           cantidad REAL,
-          fecha DATE,
+          fecha TEXT,
           FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id),
           FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
 
@@ -154,13 +154,9 @@ class ActualizarVehiculo extends AppEvento{
 //Gastos
 
 class AgregarGasto extends AppEvento{
-  final Vehiculo vehiculo;
-  final Gasto gastoAAgregar;
+  final Gasto gasto;
 
-  AgregarGasto({required this.vehiculo, required this.gastoAAgregar});
-
-  
-
+  AgregarGasto({required this.gasto});
 }
 
 class EliminarGasto extends AppEvento{
@@ -181,7 +177,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
 
   Future<void> todasLasCategorias() async {
     await repo.inicializar();
-    var resultadoConsulta = await db.rawQuery("SELECT categoria FROM categorias");
+    var resultadoConsulta = await db.rawQuery("SELECT * FROM categorias");
     _listaCategorias = resultadoConsulta.map((e) => Categoria.fromMap(e)).toList();
   }
   Future<void> todosLosVehiculos() async{
@@ -205,7 +201,6 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     await db.rawDelete('DELETE FROM categorias where categoria = ?', [categoriaAEliminar]); 
   }
   Future<void> actualizarCategoria(oldCategoria, newCategoria) async {
-    print('$oldCategoria, $newCategoria');
     await db.rawUpdate('UPDATE categorias SET categoria = ? WHERE categoria = ?', [newCategoria, oldCategoria]);
 
   }
@@ -224,12 +219,11 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
                         [matricula, modelo, color, marca, matriculaVieja]);
   }
 
-  void agregarGasto(descripcion, lugar, double cantidad, fecha, categoria) async{
-    // await db.rawInsert('''INSERT INTO gastos (descripcion, lugar, cantidad, fecha, categoria  )''')
-  
-
-  // vehiculoEnLista.gastos.add(gastoAAgregar);
-    
+  Future<void>agregarGasto(Gasto gasto) async{
+    String fechaFormateada = gasto.fecha.toString();
+    print(fechaFormateada);
+    await db.rawInsert('''INSERT INTO gastos (descripcion, lugar, cantidad, fecha, categoria_id, vehiculo_id) VALUES (?, ?, ?, ?, ?, ?)''',
+                       [gasto.descripcion, gasto.lugar, gasto.cantidad, fechaFormateada, gasto.categoria_id, gasto.vehiculo_id]);
   }
   void eliminarGasto(placaVehiculo, gastoAEliminar){
     final vehiculoEnLista = _listaVehiculos.firstWhere((v) => v.matricula == placaVehiculo);
@@ -240,7 +234,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async{
       await todasLasCategorias();
-      await todasLasCategorias();
+      await todosLosGastos();
       await todosLosVehiculos();
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
@@ -279,12 +273,10 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
 
-    on<AgregarGasto>((event, emit){
+    on<AgregarGasto>((event, emit) async {
+      await agregarGasto(event.gasto);
+      await todosLosGastos();
 
-
-
-
-      
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
     on<EliminarGasto>((event, emit){

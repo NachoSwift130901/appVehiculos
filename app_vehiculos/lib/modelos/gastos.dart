@@ -6,9 +6,9 @@ class Gasto with EquatableMixin{
   final String descripcion;
   final String lugar;
   final double cantidad;
-  final DateTime fecha;
-  final String categoria;
-  String? vehiculo_id;
+  final String fecha;
+  final int categoria_id;
+  final int vehiculo_id;
 
   
   
@@ -19,17 +19,17 @@ class Gasto with EquatableMixin{
       cantidad: map['cantidad'],
       fecha: map['fecha'],
       vehiculo_id: map['vehiculo_id'],
-      categoria: map['categoria'],
+      categoria_id: map['categoria_id'],
 
     );
   }
 
-  Gasto({required this.descripcion, required this.lugar, required this.cantidad, required this.fecha, required this.categoria, this.vehiculo_id});
+  Gasto({required this.descripcion, required this.lugar, required this.cantidad, required this.fecha, required this.categoria_id, required this.vehiculo_id});
 
 
 
 
   @override
-  List<Object?> get props => [descripcion, lugar, cantidad, fecha, vehiculo_id, categoria];
+  List<Object?> get props => [descripcion, lugar, cantidad, fecha, vehiculo_id, categoria_id];
 
 } 

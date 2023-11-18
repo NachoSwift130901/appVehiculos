@@ -8,7 +8,12 @@ class Categoria with EquatableMixin{
   int? categoria_id;
 
   factory Categoria.fromMap(Map<String, dynamic> map){
-    return Categoria(nombre: map['categoria']);
+    return Categoria(
+      categoria_id: map['id'],
+      nombre: map['categoria'],
+
+      
+      );
   }
 
   Categoria({required this.nombre, this.categoria_id});
@@ -16,6 +21,6 @@ class Categoria with EquatableMixin{
   
   
   @override
-  List<Object?> get props => [nombre];
+  List<Object?> get props => [categoria_id, nombre];
   
 }

@@ -81,7 +81,13 @@ class _BottomNavigationBarExampleState
         AgregarCategoriaWidget()
       ],
     ),
-    const Text('Contenido de la página de gastos'),
+     Column(
+      children: [
+        const PantallaGastos(),
+        const SizedBox(height: 20),
+        BotonAgregarGasto(),
+      ],
+    ),
   ];
 
   @override
@@ -619,3 +625,215 @@ class FormularioVehiculo extends StatelessWidget {
   }
 }
 
+/* PANTALLA DE GASTOS */
+
+class PantallaGastos extends StatelessWidget {
+
+  const PantallaGastos({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    
+    List<Gasto> gastos = [];
+    var estado = context.watch<AppBloc>().state;
+
+    if(estado is Operacional) gastos = (estado).listaGastos;
+    if(estado is Inicial){
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if(gastos.isEmpty){
+      return const Center(
+        child: Text('Aun no hay categorias'),
+      );
+    }
+    
+    return BlocBuilder<AppBloc, AppEstado>(
+      builder: (context, state) {
+        if(state is Operacional){
+          return Expanded(
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: ListView.builder(
+                itemCount: state.listaGastos.length,
+                itemBuilder: (context, index) {
+                  final gasto = state.listaGastos[index];
+                  return ListTile(
+                    title: Text(gasto.descripcion),
+                    subtitle: Text(gasto.fecha.toString()),
+                    onTap: () {
+                      Navigator.push(context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context){
+                          return Scaffold(
+                              appBar: AppBar(
+                                title:  Text('Gasto: ${gasto.lugar}' ),
+                              ),
+                              body: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text('Descripcion: ${gasto.descripcion}', style: const TextStyle(fontSize: 20)),
+                                  Text('Lugar: ${gasto.lugar}', style: const TextStyle(fontSize: 20)),
+                                  Text('Cantidad: ${gasto.cantidad}', style: const TextStyle(fontSize: 20)),
+                                  Text('Fecha: ${gasto.fecha}', style: const TextStyle(fontSize: 20)),
+                                ],
+                              ),
+                              floatingActionButton: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  FloatingActionButton(onPressed: () {
+                                    //TODO poner para que se elimine la categoria
+                                  },
+                                  tooltip: 'Borrar Gasto',
+                                  child: const Icon(Icons.delete),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  FloatingActionButton(onPressed: () {
+                                    //TODO editar gastos
+                                  })
+                                  
+                                ],
+                              ),
+                            );
+                          }
+                        )
+                      );
+                    },
+                  );
+                },
+              ),
+            )
+          );
+          
+        }else{
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+}
+
+class BotonAgregarGasto extends StatelessWidget {
+  final TextEditingController categoriaController = TextEditingController();
+  final TextEditingController vehiculoController = TextEditingController();
+  final TextEditingController descripcionController = TextEditingController();
+  final TextEditingController lugarController = TextEditingController();
+  final TextEditingController cantidadController = TextEditingController();
+  final TextEditingController fechaController = TextEditingController();
+
+ 
+  BotonAgregarGasto({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+
+    void agregarGasto(String descripcion, String lugar, double cantidad, String fecha, int categoriaId, int vehiculoId){
+      Gasto nuevoGasto = Gasto(descripcion: descripcion, lugar: lugar, cantidad: cantidad, fecha: fecha, categoria_id: categoriaId, vehiculo_id: vehiculoId);
+      context.read<AppBloc>().add(AgregarGasto(gasto: nuevoGasto));
+    }
+
+    return ElevatedButton(
+      onPressed: () {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Agregar Gasto'),
+          content: FormularioGasto(
+            categoriaController: categoriaController,
+            vehiculoController: vehiculoController,
+            descripcionController: descripcionController,
+            lugarController: lugarController,
+            cantidadController: cantidadController,
+            fechaController: fechaController
+            ),
+            actions: [
+              TextButton(onPressed: () async {
+                DateTime? selectedDate = await showDatePicker(
+                  context: context, initialDate: DateTime.now(), 
+                  firstDate: DateTime(1950), 
+                  lastDate: DateTime(2101)
+                  );
+                  if(selectedDate !=null){
+                    fechaController.text = selectedDate.toLocal().toString();
+                  }
+
+              }, child: const Text('Seleccionar fecha')
+              ),
+              TextButton(onPressed: () {
+                Navigator.pop(context);
+              }, 
+              child: const Text('Cancelar')
+              ),
+              TextButton(onPressed: () {
+                int categoriaId = int.parse(categoriaController.text);
+                int vehiculoId = int.parse(vehiculoController.text);
+                String descripcion = descripcionController.text;
+                String lugar = lugarController.text;
+                double cantidad = double.parse(cantidadController.text);
+                String fecha = DateTime.parse(fechaController.text).toString();
+
+                agregarGasto(descripcion, lugar, cantidad, fecha, categoriaId, vehiculoId);
+
+                categoriaController.clear();
+                vehiculoController.clear();
+                descripcionController.clear();
+                lugarController.clear();
+                cantidadController.clear();
+                fechaController.clear();
+
+                Navigator.pop(context);
+
+              },
+               child: const Text('Guardar'))
+            ],
+          )
+       );
+    },
+     child: const Text('Agregar Gasto'));
+  }
+}
+
+class FormularioGasto extends StatelessWidget {
+  final TextEditingController categoriaController;
+  final TextEditingController vehiculoController;
+  final TextEditingController descripcionController;
+  final TextEditingController lugarController;
+  final TextEditingController cantidadController;
+  final TextEditingController fechaController;
+
+
+  const FormularioGasto({super.key, required this.categoriaController, required this.vehiculoController, required this.descripcionController, required this.lugarController, required this.cantidadController, required this.fechaController});
+
+ 
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        TextFormField(
+          controller: categoriaController,
+          decoration: const InputDecoration(labelText: 'categoria'),
+        ),
+        TextFormField(
+          controller: vehiculoController,
+          decoration: const InputDecoration(labelText: 'vehiculo'),
+        ),
+        TextFormField(
+          controller: descripcionController,
+          decoration: const InputDecoration(labelText: 'descripcion'),
+        ),
+        TextFormField(
+          controller: lugarController,
+          decoration: const InputDecoration(labelText: 'lugar'),
+        ),
+        TextFormField(
+          controller: cantidadController,
+          decoration: const InputDecoration(labelText: 'cantidad'),
+        ),
+        
+      ],
+    );
+  }
+}
