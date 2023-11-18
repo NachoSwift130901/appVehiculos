@@ -99,15 +99,15 @@ class _BottomNavigationBarExampleState
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'carros',
+            label: 'Carros',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'categorias',
+            label: 'Categorias',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'gastos',
+            label: 'Gastos',
           ),
         ],
       ),
@@ -386,11 +386,24 @@ class PantallaVehiculos extends StatelessWidget {
 
   @override
    Widget build(BuildContext context) {
+
     void eliminarVehiculo(Vehiculo vehiculo) {
     context.read<AppBloc>().add(
                 EliminarVehiculo(matricula: vehiculo.matricula));
                 
   }
+    void actualizarVehiculo(matricula, marca, modelo, color, matriculaId) {
+      context.read<AppBloc>().add(ActualizarVehiculo(matricula, marca, modelo, color, matriculaId));
+    }
+
+    void mostrarAdvertencia(String mensaje){
+  
+        final snackBar = SnackBar(
+        content: Text(mensaje),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    
     List<Vehiculo> vehiculos = [];
     var estado = context.watch<AppBloc>().state;
     print(estado);
@@ -424,9 +437,12 @@ class PantallaVehiculos extends StatelessWidget {
                         onTap: () {
                           // Navegar a la página de detalles del vehículo
                           Navigator.push(
-                            context,
-                        MaterialPageRoute(
+                          context,
+                          MaterialPageRoute(
                           builder: (BuildContext context) {
+                            void cerrartodo(){
+                              Navigator.pop(context);
+                            }
                             return Scaffold(
                               appBar: AppBar(
                                 title: Text('Vehiculo: ${vehiculo.matricula}'),
@@ -445,15 +461,93 @@ class PantallaVehiculos extends StatelessWidget {
                                   // Agrega aquí más información sobre el vehículo según tus necesidades
                                 ],
                               ),
-                                floatingActionButton: FloatingActionButton(
-                                  onPressed: () {
-                                    eliminarVehiculo(vehiculo);
-                                    Navigator.pop(context);
-                                  },
-                                  tooltip: 'Borrar Vehiculo',
-                                  child: const Icon(Icons.delete),
-                                  ),
+                                floatingActionButton: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    FloatingActionButton(
+                                      onPressed: () {
+                                        eliminarVehiculo(vehiculo);
+                                        Navigator.pop(context);
+                                      },
+                                      tooltip: 'Borrar Vehiculo',
+                                      child: const Icon(Icons.delete),
+                                      ),
+                                    const SizedBox(height: 16),
+                                    FloatingActionButton(
+                                        onPressed: () {
+                                          final controladorMarca = TextEditingController(text: vehiculo.marca);
+                                          final controladorModelo = TextEditingController(text: vehiculo.modelo.toString());
+                                          final controladorColor = TextEditingController(text: vehiculo.color);
+                                          final controladorMatricula = TextEditingController(text: vehiculo.matricula);
+
+                                          showDialog(
+                                            context: context, 
+                                            builder: (context) {
+                                            return AlertDialog(
+                                                title: const Text('Editar vehiculo'),
+                                                content: Column(
+                                                  children: [
+                                              TextFormField(
+                                                controller: controladorMarca,
+                                                decoration: const InputDecoration(labelText: 'Marca'),
+                                              ),
+                                              TextFormField(
+                                                controller: controladorModelo,
+                                                decoration: const InputDecoration(labelText: 'Modelo'),
+                                              ),
+                                              TextFormField(
+                                                controller: controladorColor,
+                                                decoration: const InputDecoration(labelText: 'Color'),
+                                              ),
+                                              TextFormField(
+                                                controller: controladorMatricula,
+                                                decoration: const InputDecoration(labelText: 'Matricula'),
+                                              ),
+                                                  ],
+                                                ),
+                                                actions: [
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                    final nuevaMatricula = controladorMatricula.text.trim();
+                                                    final nuevaMarca = controladorMarca.text.trim();
+                                                    final nuevoModelo = controladorModelo.text.trim();
+                                                    final nuevoColor = controladorColor.text.trim();
+
+                                                    final matriculaVieja = vehiculo.matricula;
+
+                                                    actualizarVehiculo(nuevaMatricula, nuevaMarca, nuevoModelo, nuevoColor, matriculaVieja);
+                                                    
+                                                    mostrarAdvertencia("Vehiculo actualizado correctamente");
+                                                    cerrartodo();
+                                                  }, 
+                                                  child: const Text('Guardar')),
+                                                  TextButton(onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: const Text('Cancelar'))
+                                                ],
+                                                
+                                              );
+                                              
+                                            }
+                                            );
+                                          if (controladorMarca.text.isEmpty || controladorModelo.text.isEmpty || controladorColor.text.isEmpty || controladorMatricula.text.isEmpty) {
+                                        mostrarAdvertencia("Todos los campos son obligatorios");
+                                        return; // Sale de la función para evitar más procesamiento
+                                          }
+                                          
+
+    
+                                      },
+                                      tooltip: 'Editar Vehiculo',
+                                      child: const Icon(Icons.edit),
+                                    )
+                                  ],
+                                ),
+                                
                             )
+
                             ;
                           },
                         ),
@@ -520,6 +614,10 @@ class BotonAgregarVehiculo extends StatelessWidget {
                   String matricula = _matriculaController.text;
 
                   agregarVehiculo(marca, modelo, color, matricula);
+                  _marcaController.clear();
+                  _colorController.clear();
+                  _matriculaController.clear();
+                  _modeloController.clear();
 
 
                   // Cierra el AlertDialog

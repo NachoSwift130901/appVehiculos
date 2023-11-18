@@ -46,7 +46,7 @@ class RepositorioBD {
           descripcion TEXT,
           lugar TEXT,
           cantidad REAL,
-          fecha TEXT,
+          fecha DATE,
           FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id),
           FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
 
@@ -135,19 +135,29 @@ class EliminarVehiculo extends AppEvento{
 }
 
 class ActualizarVehiculo extends AppEvento{
-  final Vehiculo vehiculoAnterior;
-  final Vehiculo vehiculoActualizado;
+  final String matricula;
+  final String marca;
+  final String modelo;
+  final String color;
+  final String matriculaId;
+  
 
-  ActualizarVehiculo({required this.vehiculoAnterior, required this.vehiculoActualizado});
+  ActualizarVehiculo(this.matricula, this.marca, this.modelo, this.color, this.matriculaId);
+
+  
+
+  
 }
 
 //Gastos
 
 class AgregarGasto extends AppEvento{
-  final String placaVehiculo;
+  final Vehiculo vehiculo;
   final Gasto gastoAAgregar;
 
-  AgregarGasto(this.placaVehiculo, this.gastoAAgregar);
+  AgregarGasto({required this.vehiculo, required this.gastoAAgregar});
+
+  
 
 }
 
@@ -205,11 +215,10 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   Future<void> eliminarVehiculo(matricula) async {
     await db.rawDelete("DELETE FROM vehiculos WHERE matricula = ?", [matricula]);
   }
-  void actualizarVehiculo(vehiculoAnterior, vehiculoActualizado){
-    final index = _listaVehiculos.indexOf(vehiculoAnterior);
-
-    _listaVehiculos = _listaVehiculos.toList()..remove(vehiculoAnterior);
-    _listaVehiculos.insert(index, vehiculoActualizado);
+  
+  Future<void> actualizarVehiculo(matricula, marca, int modelo, color, matriculaVieja) async {
+    await db.rawUpdate("UPDATE vehiculos SET matricula = ?, modelo = ?, color = ?, marca = ? WHERE matricula = ?",
+                        [matricula, modelo, color, marca, matriculaVieja]);
   }
 
   void agregarGasto(placaVehiculo, gastoAAgregar){
@@ -257,8 +266,11 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       await todosLosVehiculos();
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
-    on<ActualizarVehiculo>((event, emit){
-      actualizarVehiculo(event.vehiculoAnterior, event.vehiculoActualizado);
+    on<ActualizarVehiculo>((event, emit) async {
+      
+      await actualizarVehiculo(event.matricula, event.marca, int.parse(event.modelo), event.color, event.matriculaId);
+      await todosLosVehiculos();
+      
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos));
     });
 

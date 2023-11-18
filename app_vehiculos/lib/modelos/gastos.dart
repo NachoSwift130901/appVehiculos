@@ -1,14 +1,16 @@
 import 'package:equatable/equatable.dart';
 
 class Gasto with EquatableMixin{
-  String descripcion;
-  String lugar;
-  double cantidad;
-  DateTime fecha;
+  final String descripcion;
+  final String lugar;
+  final double cantidad;
+  final DateTime fecha;
+  final String vehiculoId;
+  final String categoria;
 
-  Gasto({required this.descripcion, required this.lugar, required this.cantidad, required this.fecha});
+  Gasto(this.vehiculoId, this.categoria, {required this.descripcion, required this.lugar, required this.cantidad, required this.fecha});
   
   @override
-  List<Object?> get props => [descripcion, lugar, cantidad, fecha];
+  List<Object?> get props => [descripcion, lugar, cantidad, fecha, vehiculoId, categoria];
 
 } 
