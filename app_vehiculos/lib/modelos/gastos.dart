@@ -3,6 +3,7 @@
 import 'package:equatable/equatable.dart';
 
 class Gasto with EquatableMixin{
+  int? gastoId;
   final String descripcion;
   final String lugar;
   final double cantidad;
@@ -14,6 +15,7 @@ class Gasto with EquatableMixin{
   
   factory Gasto.fromMap(Map<String, dynamic> map){
     return Gasto(
+      gastoId: map['id'],
       descripcion: map['descripcion'],
       lugar: map['lugar'],
       cantidad: map['cantidad'],
@@ -24,12 +26,12 @@ class Gasto with EquatableMixin{
     );
   }
 
-  Gasto({required this.descripcion, required this.lugar, required this.cantidad, required this.fecha, required this.categoria_id, required this.vehiculo_id});
+  Gasto({this.gastoId,required this.descripcion, required this.lugar, required this.cantidad, required this.fecha, required this.categoria_id, required this.vehiculo_id});
 
 
 
 
   @override
-  List<Object?> get props => [descripcion, lugar, cantidad, fecha, vehiculo_id, categoria_id];
+  List<Object?> get props => [gastoId,descripcion, lugar, cantidad, fecha, vehiculo_id, categoria_id];
 
 } 

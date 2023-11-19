@@ -633,6 +633,9 @@ class PantallaGastos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void eliminarGasto(gastoId){
+      context.read<AppBloc>().add(EliminarGasto(gastoId));
+    }
     
     List<Gasto> gastos = [];
     var estado = context.watch<AppBloc>().state;
@@ -644,7 +647,7 @@ class PantallaGastos extends StatelessWidget {
 
     if(gastos.isEmpty){
       return const Center(
-        child: Text('Aun no hay categorias'),
+        child: Text('Aun no hay gastos'),
       );
     }
     
@@ -671,8 +674,10 @@ class PantallaGastos extends StatelessWidget {
                                 title:  Text('Gasto: ${gasto.lugar}' ),
                               ),
                               body: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  Text('Categoria: ${gasto.categoria_id}', style: const TextStyle(fontSize: 20)),
+                                  Text('Vehiculo: ${gasto.vehiculo_id}',style: const TextStyle(fontSize: 20)),
                                   Text('Descripcion: ${gasto.descripcion}', style: const TextStyle(fontSize: 20)),
                                   Text('Lugar: ${gasto.lugar}', style: const TextStyle(fontSize: 20)),
                                   Text('Cantidad: ${gasto.cantidad}', style: const TextStyle(fontSize: 20)),
@@ -684,14 +689,14 @@ class PantallaGastos extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   FloatingActionButton(onPressed: () {
-                                    //TODO poner para que se elimine la categoria
+                                    eliminarGasto(gasto.gastoId);
                                   },
                                   tooltip: 'Borrar Gasto',
                                   child: const Icon(Icons.delete),
                                   ),
                                   const SizedBox(height: 16),
                                   FloatingActionButton(onPressed: () {
-                                    //TODO editar gastos
+                                    
                                   })
                                   
                                 ],
@@ -716,7 +721,9 @@ class PantallaGastos extends StatelessWidget {
 }
 
 class BotonAgregarGasto extends StatelessWidget {
-  final TextEditingController categoriaController = TextEditingController();
+
+  
+  
   final TextEditingController vehiculoController = TextEditingController();
   final TextEditingController descripcionController = TextEditingController();
   final TextEditingController lugarController = TextEditingController();
@@ -732,7 +739,16 @@ class BotonAgregarGasto extends StatelessWidget {
     void agregarGasto(String descripcion, String lugar, double cantidad, String fecha, int categoriaId, int vehiculoId){
       Gasto nuevoGasto = Gasto(descripcion: descripcion, lugar: lugar, cantidad: cantidad, fecha: fecha, categoria_id: categoriaId, vehiculo_id: vehiculoId);
       context.read<AppBloc>().add(AgregarGasto(gasto: nuevoGasto));
+      
     }
+
+    List<Categoria> categorias = [];
+    var estado = context.watch<AppBloc>().state;
+
+    if(estado is Operacional) categorias = (estado).listaCategorias;
+
+    Object categoriaSeleccionada = categorias.isNotEmpty ? categorias[0] : '';
+
 
     return ElevatedButton(
       onPressed: () {
@@ -741,12 +757,18 @@ class BotonAgregarGasto extends StatelessWidget {
         builder: (BuildContext context) => AlertDialog(
           title: const Text('Agregar Gasto'),
           content: FormularioGasto(
-            categoriaController: categoriaController,
             vehiculoController: vehiculoController,
             descripcionController: descripcionController,
             lugarController: lugarController,
             cantidadController: cantidadController,
-            fechaController: fechaController
+            fechaController: fechaController,
+
+            categorias: categorias,
+            categoriaSeleccionada: categoriaSeleccionada,
+
+            
+
+            
             ),
             actions: [
               TextButton(onPressed: () async {
@@ -758,8 +780,8 @@ class BotonAgregarGasto extends StatelessWidget {
                   if(selectedDate !=null){
                     fechaController.text = selectedDate.toLocal().toString();
                   }
-
-              }, child: const Text('Seleccionar fecha')
+              }, 
+              child: const Text('Seleccionar fecha')
               ),
               TextButton(onPressed: () {
                 Navigator.pop(context);
@@ -767,16 +789,22 @@ class BotonAgregarGasto extends StatelessWidget {
               child: const Text('Cancelar')
               ),
               TextButton(onPressed: () {
-                int categoriaId = int.parse(categoriaController.text);
+
+                
                 int vehiculoId = int.parse(vehiculoController.text);
                 String descripcion = descripcionController.text;
                 String lugar = lugarController.text;
                 double cantidad = double.parse(cantidadController.text);
                 String fecha = DateTime.parse(fechaController.text).toString();
+                int categoriaId = 0;
+
+                if(categoriaSeleccionada is Categoria){
+                  categoriaId = categoriaSeleccionada.categoria_id!;
+                }
 
                 agregarGasto(descripcion, lugar, cantidad, fecha, categoriaId, vehiculoId);
 
-                categoriaController.clear();
+                
                 vehiculoController.clear();
                 descripcionController.clear();
                 lugarController.clear();
@@ -796,15 +824,18 @@ class BotonAgregarGasto extends StatelessWidget {
 }
 
 class FormularioGasto extends StatelessWidget {
-  final TextEditingController categoriaController;
+  
   final TextEditingController vehiculoController;
   final TextEditingController descripcionController;
   final TextEditingController lugarController;
   final TextEditingController cantidadController;
   final TextEditingController fechaController;
 
+  final List<Categoria> categorias;
+  Object categoriaSeleccionada;
 
-  const FormularioGasto({super.key, required this.categoriaController, required this.vehiculoController, required this.descripcionController, required this.lugarController, required this.cantidadController, required this.fechaController});
+
+  FormularioGasto({super.key,required this.categorias, required this.categoriaSeleccionada, required this.vehiculoController, required this.descripcionController, required this.lugarController, required this.cantidadController, required this.fechaController});
 
  
 
@@ -812,10 +843,21 @@ class FormularioGasto extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TextFormField(
-          controller: categoriaController,
-          decoration: const InputDecoration(labelText: 'categoria'),
+        DropdownButton<Object>(
+          value: categoriaSeleccionada,
+          onChanged: (value) {
+            if(value != null && value is Categoria){
+              categoriaSeleccionada = value;
+            }
+          },
+          items: categorias.map<DropdownMenuItem<Object>>((Categoria categoria) {
+            return DropdownMenuItem<Object>(
+              value: categoria,
+              child: Text(categoria.nombre),
+            );
+          }).toList(),
         ),
+        
         TextFormField(
           controller: vehiculoController,
           decoration: const InputDecoration(labelText: 'vehiculo'),

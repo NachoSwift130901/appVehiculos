@@ -160,10 +160,9 @@ class AgregarGasto extends AppEvento{
 }
 
 class EliminarGasto extends AppEvento{
-  final String placaVehiculo;
-  final String gastoAEliminar;
+  final int id;
 
-  EliminarGasto(this.placaVehiculo, this.gastoAEliminar);
+  EliminarGasto(this.id);
 }
 /* ----------------------------------------*/
 
@@ -225,10 +224,12 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     await db.rawInsert('''INSERT INTO gastos (descripcion, lugar, cantidad, fecha, categoria_id, vehiculo_id) VALUES (?, ?, ?, ?, ?, ?)''',
                        [gasto.descripcion, gasto.lugar, gasto.cantidad, fechaFormateada, gasto.categoria_id, gasto.vehiculo_id]);
   }
-  void eliminarGasto(placaVehiculo, gastoAEliminar){
-    final vehiculoEnLista = _listaVehiculos.firstWhere((v) => v.matricula == placaVehiculo);
+  Future<void> eliminarGasto(id) async{
+    
+    await db.rawDelete("DELETE FROM gastos WHERE id = ?", [id]);
+    await todosLosGastos();
 
-  // vehiculoEnLista.gastos.remove(gastoAEliminar);
+  
   }
   
   AppBloc() : super(Inicial()) {
@@ -279,8 +280,8 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
 
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
-    on<EliminarGasto>((event, emit){
-      
+    on<EliminarGasto>((event, emit)async{
+      await eliminarGasto(event.id);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
 
