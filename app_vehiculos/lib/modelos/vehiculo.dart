@@ -1,7 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:equatable/equatable.dart';
-import 'package:app_vehiculos/modelos/gastos.dart';
+
 
 class Vehiculo with EquatableMixin {
   int? vehiculo_id;

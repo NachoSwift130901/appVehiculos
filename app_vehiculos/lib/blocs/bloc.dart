@@ -220,7 +220,6 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
 
   Future<void>agregarGasto(Gasto gasto) async{
     String fechaFormateada = gasto.fecha.toString();
-    print(fechaFormateada);
     await db.rawInsert('''INSERT INTO gastos (descripcion, lugar, cantidad, fecha, categoria_id, vehiculo_id) VALUES (?, ?, ?, ?, ?, ?)''',
                        [gasto.descripcion, gasto.lugar, gasto.cantidad, fechaFormateada, gasto.categoria_id, gasto.vehiculo_id]);
   }

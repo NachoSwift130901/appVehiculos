@@ -1,7 +1,6 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, must_be_immutable
 
 import 'package:app_vehiculos/modelos/gastos.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/bloc.dart';
@@ -178,7 +177,7 @@ class TileCategoria extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void _editarCategoria(old, nueva){
+    void editarCategoria(old, nueva){
       context.read<AppBloc>().add(ActualizarCategoria(oldCategoria: old , newCategoria: nueva));
     }
     return Padding(
@@ -217,7 +216,7 @@ class TileCategoria extends StatelessWidget {
                                 onPressed: () {
                                   final nuevaCategoria = controlador.text.trim();
                                   if (nuevaCategoria.isNotEmpty) {
-                                    _editarCategoria(categoria.nombre, nuevaCategoria);
+                                    editarCategoria(categoria.nombre, nuevaCategoria);
                                     Navigator.of(context).pop();
                                   }
                                 },
@@ -362,7 +361,6 @@ class PantallaVehiculos extends StatelessWidget {
     
     List<Vehiculo> vehiculos = [];
     var estado = context.watch<AppBloc>().state;
-    print(estado);
     if(estado is Operacional) vehiculos = (estado).listaVehiculos;
     if(estado is Inicial) {
       return const Center(child: CircularProgressIndicator());
@@ -662,10 +660,16 @@ class PantallaGastos extends StatelessWidget {
                 itemCount: state.listaGastos.length,
                 itemBuilder: (context, index) {
                   final gasto = state.listaGastos[index];
+                  final categorias = state.listaCategorias;
+                  final vehiculos = state.listaVehiculos;
+
                   return ListTile(
                     title: Text(gasto.descripcion),
                     subtitle: Text(gasto.fecha.toString()),
                     onTap: () {
+                      Categoria categoriaDelGasto = categorias[gasto.categoria_id-1];
+                      Vehiculo vehiculoDelGasto = vehiculos[gasto.vehiculo_id-1];
+
                       Navigator.push(context,
                       MaterialPageRoute(
                         builder: (BuildContext context){
@@ -676,8 +680,8 @@ class PantallaGastos extends StatelessWidget {
                               body: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Categoria: ${gasto.categoria_id}', style: const TextStyle(fontSize: 20)),
-                                  Text('Vehiculo: ${gasto.vehiculo_id}',style: const TextStyle(fontSize: 20)),
+                                  Text('Categoria: ${categoriaDelGasto.nombre}', style: const TextStyle(fontSize: 20)),
+                                  Text('Vehiculo: ${vehiculoDelGasto.marca} ${vehiculoDelGasto.matricula} ',style: const TextStyle(fontSize: 20)),
                                   Text('Descripcion: ${gasto.descripcion}', style: const TextStyle(fontSize: 20)),
                                   Text('Lugar: ${gasto.lugar}', style: const TextStyle(fontSize: 20)),
                                   Text('Cantidad: ${gasto.cantidad}', style: const TextStyle(fontSize: 20)),
@@ -721,14 +725,13 @@ class PantallaGastos extends StatelessWidget {
 }
 
 class BotonAgregarGasto extends StatelessWidget {
-
-  
-  
   final TextEditingController vehiculoController = TextEditingController();
   final TextEditingController descripcionController = TextEditingController();
   final TextEditingController lugarController = TextEditingController();
   final TextEditingController cantidadController = TextEditingController();
   final TextEditingController fechaController = TextEditingController();
+  final TextEditingController idCategoriaSeleccionada = TextEditingController();
+  final TextEditingController idVehiculoSeleccionado = TextEditingController();
 
  
   BotonAgregarGasto({super.key});
@@ -743,11 +746,17 @@ class BotonAgregarGasto extends StatelessWidget {
     }
 
     List<Categoria> categorias = [];
+    List<Vehiculo> vehiculos = [];
     var estado = context.watch<AppBloc>().state;
 
-    if(estado is Operacional) categorias = (estado).listaCategorias;
+    if(estado is Operacional) {
+      categorias = (estado).listaCategorias;
+      vehiculos = (estado.listaVehiculos);
 
-    Object categoriaSeleccionada = categorias.isNotEmpty ? categorias[0] : '';
+    }
+
+    final Categoria categoriaSeleccionada = categorias[0];
+    final Vehiculo vehiculoSeleccionado = vehiculos[0];
 
 
     return ElevatedButton(
@@ -757,18 +766,16 @@ class BotonAgregarGasto extends StatelessWidget {
         builder: (BuildContext context) => AlertDialog(
           title: const Text('Agregar Gasto'),
           content: FormularioGasto(
-            vehiculoController: vehiculoController,
+            vehiculoSeleccionado: vehiculoSeleccionado,
             descripcionController: descripcionController,
             lugarController: lugarController,
             cantidadController: cantidadController,
             fechaController: fechaController,
-
             categorias: categorias,
+            vehiculos: vehiculos,
             categoriaSeleccionada: categoriaSeleccionada,
-
-            
-
-            
+            idCategoriaSeleccionada: idCategoriaSeleccionada,
+            idVehiculoSeleccionado: idVehiculoSeleccionado,
             ),
             actions: [
               TextButton(onPressed: () async {
@@ -789,20 +796,17 @@ class BotonAgregarGasto extends StatelessWidget {
               child: const Text('Cancelar')
               ),
               TextButton(onPressed: () {
-
                 
-                int vehiculoId = int.parse(vehiculoController.text);
+                
+
+                int categoriaId = int.parse(idCategoriaSeleccionada.text);
+                int vehiculoId = int.parse(idVehiculoSeleccionado.text);
                 String descripcion = descripcionController.text;
                 String lugar = lugarController.text;
                 double cantidad = double.parse(cantidadController.text);
                 String fecha = DateTime.parse(fechaController.text).toString();
-                int categoriaId = 0;
-
-                if(categoriaSeleccionada is Categoria){
-                  categoriaId = categoriaSeleccionada.categoria_id!;
-                }
-
-                agregarGasto(descripcion, lugar, cantidad, fecha, categoriaId, vehiculoId);
+          
+                agregarGasto(descripcion, lugar, cantidad, fecha, categoriaId , vehiculoId);
 
                 
                 vehiculoController.clear();
@@ -823,58 +827,96 @@ class BotonAgregarGasto extends StatelessWidget {
   }
 }
 
-class FormularioGasto extends StatelessWidget {
+class FormularioGasto extends StatefulWidget {
   
-  final TextEditingController vehiculoController;
   final TextEditingController descripcionController;
   final TextEditingController lugarController;
   final TextEditingController cantidadController;
   final TextEditingController fechaController;
-
   final List<Categoria> categorias;
-  Object categoriaSeleccionada;
+  final List<Vehiculo> vehiculos;
+  final TextEditingController idCategoriaSeleccionada;
+  final TextEditingController idVehiculoSeleccionado;
+
+  Vehiculo? vehiculoSeleccionado;
+  Object? categoriaSeleccionada;
+
+   FormularioGasto({
+    Key? key,
+    required this.categorias,
+    required this.vehiculos,
+    required this.vehiculoSeleccionado,
+    required this.descripcionController,
+    required this.lugarController,
+    required this.cantidadController,
+    required this.fechaController,
+    required this.categoriaSeleccionada,
+    required this.idCategoriaSeleccionada,
+    required this.idVehiculoSeleccionado,
+  }) : super(key: key);
+
+  @override
+  _FormularioGastoState createState() => _FormularioGastoState();
+}
+
+class _FormularioGastoState extends State<FormularioGasto> {
 
 
-  FormularioGasto({super.key,required this.categorias, required this.categoriaSeleccionada, required this.vehiculoController, required this.descripcionController, required this.lugarController, required this.cantidadController, required this.fechaController});
+  void _updateCategoriaSeleccionada(Object? value){
+    setState(() {
+     widget.categoriaSeleccionada = value;
+     widget.idCategoriaSeleccionada.text = (value as Categoria).categoria_id.toString();
+    });
+  }
 
- 
+  void _updateVehiculoSeleccionado(Vehiculo? value){
+    setState(() {
+      widget.vehiculoSeleccionado = value;
+      widget.idVehiculoSeleccionado.text = (value as Vehiculo).vehiculo_id.toString();
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         DropdownButton<Object>(
-          value: categoriaSeleccionada,
+          value: widget.categoriaSeleccionada,
           onChanged: (value) {
-            if(value != null && value is Categoria){
-              categoriaSeleccionada = value;
-            }
+            _updateCategoriaSeleccionada(value);
           },
-          items: categorias.map<DropdownMenuItem<Object>>((Categoria categoria) {
+          items: widget.categorias.map<DropdownMenuItem<Object>>((Categoria categoria) {
             return DropdownMenuItem<Object>(
               value: categoria,
               child: Text(categoria.nombre),
             );
           }).toList(),
         ),
-        
-        TextFormField(
-          controller: vehiculoController,
-          decoration: const InputDecoration(labelText: 'vehiculo'),
+        DropdownButton<Vehiculo>(
+          value: widget.vehiculoSeleccionado,
+          onChanged: (value) {
+            _updateVehiculoSeleccionado(value);
+          },
+          items: widget.vehiculos.map<DropdownMenuItem<Vehiculo>>((Vehiculo vehiculo) {
+            return DropdownMenuItem<Vehiculo>(
+              value: vehiculo,
+              child: Text('${vehiculo.marca} ${vehiculo.matricula}'),
+            );
+          }).toList(),
         ),
         TextFormField(
-          controller: descripcionController,
-          decoration: const InputDecoration(labelText: 'descripcion'),
+          controller: widget.descripcionController,
+          decoration: const InputDecoration(labelText: 'Descripcion'),
         ),
         TextFormField(
-          controller: lugarController,
-          decoration: const InputDecoration(labelText: 'lugar'),
+          controller: widget.lugarController,
+          decoration: const InputDecoration(labelText: 'Lugar'),
         ),
         TextFormField(
-          controller: cantidadController,
-          decoration: const InputDecoration(labelText: 'cantidad'),
+          controller: widget.cantidadController,
+          decoration: const InputDecoration(labelText: 'Cantidad'),
         ),
-        
       ],
     );
   }

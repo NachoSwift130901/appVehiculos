@@ -8,7 +8,7 @@ void main() {
     'Se inicializan las categorias',
     build: () => AppBloc(),
     act: (bloc) => bloc.add(Inicializado()),
-    expect: () => <AppEstado>[Operacional(listaCategorias: [], listaVehiculos: [])],
+    expect: () => <AppEstado>[Operacional(listaCategorias: [], listaVehiculos: [], listaGastos: [])],
   );
 
   blocTest<AppBloc, AppEstado>(
@@ -22,11 +22,13 @@ void main() {
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
         listaVehiculos: [],
+        listaGastos: [],
 
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada','Repintada'], 
         listaVehiculos: [],
+        listaGastos: [],
       ),
     ],
   );
@@ -44,14 +46,17 @@ void main() {
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
         listaVehiculos: [],
+        listaGastos: [],
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada','Repintada'], 
         listaVehiculos: [],
+        listaGastos: [],
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aspirada','Repintada'], 
         listaVehiculos: [],
+        listaGastos: [],
       ),
     ],
   );
@@ -69,15 +74,18 @@ void main() {
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
         listaVehiculos: [],
+        listaGastos: [],
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada','Repintada'], 
         listaVehiculos: [],
+        listaGastos: [],
 
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aspirada','Repintada'], 
         listaVehiculos: [],
+        listaGastos: [],
       ),
     ],
   );
@@ -96,18 +104,22 @@ void main() {
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada'], 
         listaVehiculos: [],
+        listaGastos: [],
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aceite', 'Aspirada','Repintada'], 
         listaVehiculos: [],
+        listaGastos: [],
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Aspirada','Repintada'], 
         listaVehiculos: [],
+        listaGastos: [],
       ),
       Operacional(
         listaCategorias: ['Encerado', 'Limpieza','Repintada'], 
         listaVehiculos: [],
+        listaGastos: [],
       ),
     ],
   );
@@ -117,7 +129,7 @@ void main() {
     build: () => AppBloc(),
     act: (bloc) => [
       bloc.add(Inicializado()),
-      bloc.add(AgregarVehiculo(vehiculoAAgregar: Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada', gastos: []))),
+      bloc.add(AgregarVehiculo(vehiculoAAgregar: Vehiculo(marca: 'Tesla', modelo: 2012, color: 'Blanco', matricula: 'LOI23', categoria: 'Aspirada', gastos: [],))),
 
     ],
     expect: () => [
