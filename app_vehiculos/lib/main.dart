@@ -82,13 +82,8 @@ class _BottomNavigationBarExampleState
         AgregarCategoriaWidget()
       ],
     ),
-     Column(
-      children: [
-        const PantallaGastos(),
-        const SizedBox(height: 20),
-        BotonAgregarGasto(),
-      ],
-    ),
+     const PantallaGastos(),
+     
   ];
 
   @override
@@ -653,120 +648,133 @@ class PantallaGastos extends StatelessWidget {
         child: Text('Aun no hay gastos'),
       );
     }
+  
     
-    return Expanded(
-      child: BlocBuilder<AppBloc, AppEstado>(
-        builder: (context, state) {
-          if(state is Operacional){
-            
-            
-            return ListView.builder(
-              itemCount: state.listaGastos.length,
-              itemBuilder: (context, index) {
-                final gasto = state.listaGastos[index];
-                final categorias = state.listaCategorias;
-                final vehiculos = state.listaVehiculos;
-    
-            
-                return ListTile(
-                  title: Text(gasto.descripcion),
-                  subtitle: Text(gasto.fecha.substring(0,10)),
-                  onTap: () {
-                    Categoria categoriaDelGasto = categorias[gasto.categoria_id-1];
-                    Vehiculo vehiculoDelGasto = vehiculos[gasto.vehiculo_id-1];
-                    Navigator.push(context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context){
-                        return Scaffold(
-                            appBar: AppBar(
-                              title:  Text('Gasto: ${gasto.lugar}' ),
-                            ),
-                            body: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Categoria: ${categoriaDelGasto.nombre}', style: const TextStyle(fontSize: 20)),
-                                Text('Vehiculo: ${vehiculoDelGasto.marca} ${vehiculoDelGasto.matricula} ',style: const TextStyle(fontSize: 20)),
-                                Text('Descripcion: ${gasto.descripcion}', style: const TextStyle(fontSize: 20)),
-                                Text('Lugar: ${gasto.lugar}', style: const TextStyle(fontSize: 20)),
-                                Text('Cantidad: ${gasto.cantidad}', style: const TextStyle(fontSize: 20)),
-                                Text('Fecha: ${gasto.fecha.substring(0,10)}', style: const TextStyle(fontSize: 20)),
-                              ],
-                            ),
-                            floatingActionButton: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                FloatingActionButton(onPressed: () {
-                                  eliminarGasto(gasto.gastoId);
-                                },
-                                tooltip: 'Borrar Gasto',
-                                child: const Icon(Icons.delete),
-                                ),
-                                const SizedBox(height: 16),
-                                FloatingActionButton(onPressed: () {
-    
-                                  final controladorVehiculoId = TextEditingController(text: gasto.vehiculo_id.toString()); 
-                                  final controladorCategoriaId = TextEditingController(text: gasto.categoria_id.toString());
-                                  final controladorDescripcion = TextEditingController(text: gasto.descripcion);
-                                  final controladorLugar = TextEditingController(text: gasto.lugar);
-                                  final controladorGasto = TextEditingController(text: gasto.cantidad.toString());
-                                  final controladorFecha = TextEditingController(text: gasto.fecha);
-    
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: const Text('Editar gasto'),
-                                        content: Column(
-                                          children: [
-                                            //TODO agregar widget de editar
-                                            TextFormField(
-                                              controller: controladorCategoriaId,
-                                              decoration: const InputDecoration(labelText: 'Categoria'),
-                                            ),
-                                            TextFormField(
-                                              controller: controladorDescripcion,
-                                              decoration: const InputDecoration(labelText: 'Descripcion'),
-                                            ),
-                                            TextFormField(
-                                              controller: controladorLugar,
-                                              decoration: const InputDecoration(labelText: 'Lugar'),
-                                            ),
-                                            TextFormField(
-                                              controller: controladorGasto,
-                                              decoration: const InputDecoration(labelText: 'Gasto'),
-                                            ),
-                                            TextFormField(
-                                              controller: controladorFecha,
-                                              decoration: const InputDecoration(labelText: 'Fecha'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    });
-                                    
-    
-    
-                                  
-                                  
-                                })
-                                
-                              ],
-                            ),
+    return Column(
+      children: [
+        const Text("HOLA"),
+        Expanded(
+
+          child: SizedBox(
+            //width: 500,
+            height: 200,
+            child: BlocBuilder<AppBloc, AppEstado>(
+              builder: (context, state) {
+                if(state is Operacional){
+                  
+                  return ListView.builder(
+                    itemCount: state.listaGastos.length,
+                    itemBuilder: (context, index) {
+                      final gasto = state.listaGastos[index];
+                      final categorias = state.listaCategorias;
+                      final vehiculos = state.listaVehiculos;
+              
+                  
+                      return ListTile(
+                        title: Text(gasto.descripcion),
+                        subtitle: Text(gasto.fecha.substring(0,10)),
+                        onTap: () {
+                          Categoria categoriaDelGasto = categorias[gasto.categoria_id-1];
+                          Vehiculo vehiculoDelGasto = vehiculos[gasto.vehiculo_id-1];
+                          Navigator.push(context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context){
+                              return Scaffold(
+                                  appBar: AppBar(
+                                    title:  Text('Gasto: ${gasto.lugar}' ),
+                                  ),
+                                  body: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Categoria: ${categoriaDelGasto.nombre}', style: const TextStyle(fontSize: 20)),
+                                      Text('Vehiculo: ${vehiculoDelGasto.marca} ${vehiculoDelGasto.matricula} ',style: const TextStyle(fontSize: 20)),
+                                      Text('Descripcion: ${gasto.descripcion}', style: const TextStyle(fontSize: 20)),
+                                      Text('Lugar: ${gasto.lugar}', style: const TextStyle(fontSize: 20)),
+                                      Text('Cantidad: ${gasto.cantidad}', style: const TextStyle(fontSize: 20)),
+                                      Text('Fecha: ${gasto.fecha.substring(0,10)}', style: const TextStyle(fontSize: 20)),
+                                    ],
+                                  ),
+                                  floatingActionButton: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      FloatingActionButton(onPressed: () {
+                                        eliminarGasto(gasto.gastoId);
+                                      },
+                                      tooltip: 'Borrar Gasto',
+                                      child: const Icon(Icons.delete),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      FloatingActionButton(onPressed: () {
+              
+                                        final controladorVehiculoId = TextEditingController(text: gasto.vehiculo_id.toString()); 
+                                        final controladorCategoriaId = TextEditingController(text: gasto.categoria_id.toString());
+                                        final controladorDescripcion = TextEditingController(text: gasto.descripcion);
+                                        final controladorLugar = TextEditingController(text: gasto.lugar);
+                                        final controladorGasto = TextEditingController(text: gasto.cantidad.toString());
+                                        final controladorFecha = TextEditingController(text: gasto.fecha);
+              
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: const Text('Editar gasto'),
+                                              content: Column(
+                                                children: [
+                                                  //TODO agregar widget de editar
+                                                  TextFormField(
+                                                    controller: controladorCategoriaId,
+                                                    decoration: const InputDecoration(labelText: 'Categoria'),
+                                                  ),
+                                                  TextFormField(
+                                                    controller: controladorDescripcion,
+                                                    decoration: const InputDecoration(labelText: 'Descripcion'),
+                                                  ),
+                                                  TextFormField(
+                                                    controller: controladorLugar,
+                                                    decoration: const InputDecoration(labelText: 'Lugar'),
+                                                  ),
+                                                  TextFormField(
+                                                    controller: controladorGasto,
+                                                    decoration: const InputDecoration(labelText: 'Gasto'),
+                                                  ),
+                                                  TextFormField(
+                                                    controller: controladorFecha,
+                                                    decoration: const InputDecoration(labelText: 'Fecha'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          });
+                                          
+              
+              
+                                        
+                                        
+                                      })
+                                      
+                                    ],
+                                  ),
+                                );
+                              }
+                            )
                           );
-                        }
-                      )
-                    );
-                  },
-                );
+                        },
+                      );
+                    },
+                  );
+                  
+                }else{
+                  return const Center(child: CircularProgressIndicator());
+                }
               },
-            );
-            
-          }else{
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        BotonAgregarGasto(),
+      ],
+      
     );
   }
 }
