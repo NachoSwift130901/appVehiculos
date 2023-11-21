@@ -6,6 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/bloc.dart';
 import 'modelos/vehiculo.dart';
 import 'modelos/categoria.dart';
+import 'package:intl/intl.dart';
+
 
 void main() async {
   runApp(const AplicacionInyectada());
@@ -634,6 +636,9 @@ class PantallaGastos extends StatelessWidget {
     void eliminarGasto(gastoId){
       context.read<AppBloc>().add(EliminarGasto(gastoId));
     }
+    void editarGasto(Gasto gastoViejo, Gasto gastoNuevo){
+      context.read<AppBloc>().add(EditarGasto(gastoViejo: gastoViejo, gastoNuevo: gastoNuevo));
+    }
     
     List<Gasto> gastos = [];
     var estado = context.watch<AppBloc>().state;
@@ -649,80 +654,123 @@ class PantallaGastos extends StatelessWidget {
       );
     }
     
-    return BlocBuilder<AppBloc, AppEstado>(
-      builder: (context, state) {
-        if(state is Operacional){
-          return Expanded(
-            child: SizedBox(
-              width: 200,
-              height: 200,
-              child: ListView.builder(
-                itemCount: state.listaGastos.length,
-                itemBuilder: (context, index) {
-                  final gasto = state.listaGastos[index];
-                  final categorias = state.listaCategorias;
-                  final vehiculos = state.listaVehiculos;
-
-                  return ListTile(
-                    title: Text(gasto.descripcion),
-                    subtitle: Text(gasto.fecha.toString()),
-                    onTap: () {
-                      Categoria categoriaDelGasto = categorias[gasto.categoria_id-1];
-                      Vehiculo vehiculoDelGasto = vehiculos[gasto.vehiculo_id-1];
-
-                      Navigator.push(context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context){
-                          return Scaffold(
-                              appBar: AppBar(
-                                title:  Text('Gasto: ${gasto.lugar}' ),
-                              ),
-                              body: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Categoria: ${categoriaDelGasto.nombre}', style: const TextStyle(fontSize: 20)),
-                                  Text('Vehiculo: ${vehiculoDelGasto.marca} ${vehiculoDelGasto.matricula} ',style: const TextStyle(fontSize: 20)),
-                                  Text('Descripcion: ${gasto.descripcion}', style: const TextStyle(fontSize: 20)),
-                                  Text('Lugar: ${gasto.lugar}', style: const TextStyle(fontSize: 20)),
-                                  Text('Cantidad: ${gasto.cantidad}', style: const TextStyle(fontSize: 20)),
-                                  Text('Fecha: ${gasto.fecha}', style: const TextStyle(fontSize: 20)),
-                                ],
-                              ),
-                              floatingActionButton: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  FloatingActionButton(onPressed: () {
-                                    eliminarGasto(gasto.gastoId);
-                                  },
-                                  tooltip: 'Borrar Gasto',
-                                  child: const Icon(Icons.delete),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  FloatingActionButton(onPressed: () {
+    return Expanded(
+      child: BlocBuilder<AppBloc, AppEstado>(
+        builder: (context, state) {
+          if(state is Operacional){
+            
+            
+            return ListView.builder(
+              itemCount: state.listaGastos.length,
+              itemBuilder: (context, index) {
+                final gasto = state.listaGastos[index];
+                final categorias = state.listaCategorias;
+                final vehiculos = state.listaVehiculos;
+    
+            
+                return ListTile(
+                  title: Text(gasto.descripcion),
+                  subtitle: Text(gasto.fecha.substring(0,10)),
+                  onTap: () {
+                    Categoria categoriaDelGasto = categorias[gasto.categoria_id-1];
+                    Vehiculo vehiculoDelGasto = vehiculos[gasto.vehiculo_id-1];
+                    Navigator.push(context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context){
+                        return Scaffold(
+                            appBar: AppBar(
+                              title:  Text('Gasto: ${gasto.lugar}' ),
+                            ),
+                            body: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Categoria: ${categoriaDelGasto.nombre}', style: const TextStyle(fontSize: 20)),
+                                Text('Vehiculo: ${vehiculoDelGasto.marca} ${vehiculoDelGasto.matricula} ',style: const TextStyle(fontSize: 20)),
+                                Text('Descripcion: ${gasto.descripcion}', style: const TextStyle(fontSize: 20)),
+                                Text('Lugar: ${gasto.lugar}', style: const TextStyle(fontSize: 20)),
+                                Text('Cantidad: ${gasto.cantidad}', style: const TextStyle(fontSize: 20)),
+                                Text('Fecha: ${gasto.fecha.substring(0,10)}', style: const TextStyle(fontSize: 20)),
+                              ],
+                            ),
+                            floatingActionButton: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                FloatingActionButton(onPressed: () {
+                                  eliminarGasto(gasto.gastoId);
+                                },
+                                tooltip: 'Borrar Gasto',
+                                child: const Icon(Icons.delete),
+                                ),
+                                const SizedBox(height: 16),
+                                FloatingActionButton(onPressed: () {
+    
+                                  final controladorVehiculoId = TextEditingController(text: gasto.vehiculo_id.toString()); 
+                                  final controladorCategoriaId = TextEditingController(text: gasto.categoria_id.toString());
+                                  final controladorDescripcion = TextEditingController(text: gasto.descripcion);
+                                  final controladorLugar = TextEditingController(text: gasto.lugar);
+                                  final controladorGasto = TextEditingController(text: gasto.cantidad.toString());
+                                  final controladorFecha = TextEditingController(text: gasto.fecha);
+    
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: const Text('Editar gasto'),
+                                        content: Column(
+                                          children: [
+                                            //TODO agregar widget de editar
+                                            TextFormField(
+                                              controller: controladorCategoriaId,
+                                              decoration: const InputDecoration(labelText: 'Categoria'),
+                                            ),
+                                            TextFormField(
+                                              controller: controladorDescripcion,
+                                              decoration: const InputDecoration(labelText: 'Descripcion'),
+                                            ),
+                                            TextFormField(
+                                              controller: controladorLugar,
+                                              decoration: const InputDecoration(labelText: 'Lugar'),
+                                            ),
+                                            TextFormField(
+                                              controller: controladorGasto,
+                                              decoration: const InputDecoration(labelText: 'Gasto'),
+                                            ),
+                                            TextFormField(
+                                              controller: controladorFecha,
+                                              decoration: const InputDecoration(labelText: 'Fecha'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    });
                                     
-                                  })
+    
+    
                                   
-                                ],
-                              ),
-                            );
-                          }
-                        )
-                      );
-                    },
-                  );
-                },
-              ),
-            )
-          );
-          
-        }else{
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+                                  
+                                })
+                                
+                              ],
+                            ),
+                          );
+                        }
+                      )
+                    );
+                  },
+                );
+              },
+            );
+            
+          }else{
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
     );
   }
 }
+
 
 class BotonAgregarGasto extends StatelessWidget {
   final TextEditingController vehiculoController = TextEditingController();
@@ -757,6 +805,7 @@ class BotonAgregarGasto extends StatelessWidget {
 
     final Categoria categoriaSeleccionada = categorias[0];
     final Vehiculo vehiculoSeleccionado = vehiculos[0];
+    
 
 
     return ElevatedButton(
@@ -778,18 +827,6 @@ class BotonAgregarGasto extends StatelessWidget {
             idVehiculoSeleccionado: idVehiculoSeleccionado,
             ),
             actions: [
-              TextButton(onPressed: () async {
-                DateTime? selectedDate = await showDatePicker(
-                  context: context, initialDate: DateTime.now(), 
-                  firstDate: DateTime(1950), 
-                  lastDate: DateTime(2101)
-                  );
-                  if(selectedDate !=null){
-                    fechaController.text = selectedDate.toLocal().toString();
-                  }
-              }, 
-              child: const Text('Seleccionar fecha')
-              ),
               TextButton(onPressed: () {
                 Navigator.pop(context);
               }, 
@@ -917,6 +954,26 @@ class _FormularioGastoState extends State<FormularioGasto> {
           controller: widget.cantidadController,
           decoration: const InputDecoration(labelText: 'Cantidad'),
         ),
+        TextFormField(
+          controller: widget.fechaController,
+          decoration: const InputDecoration(
+            icon: Icon(Icons.calendar_today),
+            labelText: 'Fecha'),
+            readOnly: true,
+            onTap: () async {
+              
+              DateTime? selectedDate = await showDatePicker(
+                  context: context, initialDate: DateTime.now(), 
+                  firstDate: DateTime(1950), 
+                  lastDate: DateTime(2101)
+                  );
+                  if(selectedDate !=null){
+                    String formattedDate =  DateFormat('yyyy-MM-dd').format(selectedDate);
+                    widget.fechaController.text = formattedDate;
+                  }
+              }, 
+        ),
+        
       ],
     );
   }

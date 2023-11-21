@@ -164,6 +164,12 @@ class EliminarGasto extends AppEvento{
 
   EliminarGasto(this.id);
 }
+class EditarGasto extends AppEvento{
+  final Gasto gastoViejo;
+  final Gasto gastoNuevo;
+
+  EditarGasto({required this.gastoViejo, required this.gastoNuevo});
+}
 /* ----------------------------------------*/
 
 class AppBloc extends Bloc<AppEvento, AppEstado> {
@@ -223,14 +229,20 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     await db.rawInsert('''INSERT INTO gastos (descripcion, lugar, cantidad, fecha, categoria_id, vehiculo_id) VALUES (?, ?, ?, ?, ?, ?)''',
                        [gasto.descripcion, gasto.lugar, gasto.cantidad, fechaFormateada, gasto.categoria_id, gasto.vehiculo_id]);
   }
-  Future<void> eliminarGasto(id) async{
+  Future<void>eliminarGasto(id) async{
     
     await db.rawDelete("DELETE FROM gastos WHERE id = ?", [id]);
     await todosLosGastos();
 
   
   }
-  
+  Future<void>editarGasto(Gasto gastoViejo, Gasto gastoNuevo) async{
+    await db.rawUpdate("UPDATE gastos SET vehiculo_id = ?, categoria_id = ?, descripcion = ?, lugar = ?, cantidad = ?, fecha = ? WHERE id = ?" ,
+                      [gastoNuevo.vehiculo_id, gastoNuevo.categoria_id, gastoNuevo.descripcion, gastoNuevo.lugar, gastoNuevo.cantidad, gastoNuevo.fecha, gastoViejo.gastoId]);
+
+    
+  }
+
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async{
       await todasLasCategorias();
