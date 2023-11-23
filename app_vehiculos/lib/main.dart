@@ -53,6 +53,7 @@ class MainApp extends StatelessWidget {
 
 class BottomNavigationBarExample extends StatefulWidget {
   const BottomNavigationBarExample({Key? key}) : super(key: key);
+  
 
   @override
   _BottomNavigationBarExampleState createState() =>
@@ -61,6 +62,9 @@ class BottomNavigationBarExample extends StatefulWidget {
 
 class _BottomNavigationBarExampleState
     extends State<BottomNavigationBarExample> {
+
+      
+    
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
@@ -88,6 +92,15 @@ class _BottomNavigationBarExampleState
 
   @override
   Widget build(BuildContext context) {
+    var estado = context.watch<AppBloc>().state;
+
+    List<Categoria> categorias = [];
+    List<Vehiculo> vehiculos = [];
+    if(estado is Operacional){
+    categorias = (estado).listaCategorias;
+    vehiculos = (estado).listaVehiculos;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('BottomNavigationBar Example'),
@@ -96,9 +109,11 @@ class _BottomNavigationBarExampleState
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          if (_canNavigate(index, categorias, vehiculos)) {
+            setState(() {
+              _currentIndex = index;
+            });
+          }
         },
         items: const [
           BottomNavigationBarItem(
@@ -116,6 +131,13 @@ class _BottomNavigationBarExampleState
         ],
       ),
     );
+  }
+  bool _canNavigate(int index, List<Categoria> categorias, List<Vehiculo> vehiculos) {
+    // Verifica las condiciones antes de permitir la navegación
+    if (index == 2) {
+      return categorias.isNotEmpty && vehiculos.isNotEmpty;
+    }
+    return true;
   }
 }
 
