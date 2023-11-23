@@ -622,9 +622,24 @@ class FormularioVehiculo extends StatelessWidget {
 
 /* PANTALLA DE GASTOS */
 
-class PantallaGastos extends StatelessWidget {
+class PantallaGastos extends StatefulWidget {
 
   const PantallaGastos({super.key});
+
+  @override
+  State<PantallaGastos> createState() => _PantallaGastosState();
+}
+
+class _PantallaGastosState extends State<PantallaGastos> {
+  double cantidadGastada = 0.00;
+
+  TextEditingController controladorFechaInicial = TextEditingController();
+  TextEditingController controladorFechaFinal = TextEditingController();
+  TextEditingController controladorCategoriaSeleccionada= TextEditingController();
+  TextEditingController controladorVehiculo = TextEditingController();
+  TextEditingController controladorLugar= TextEditingController();
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -636,25 +651,103 @@ class PantallaGastos extends StatelessWidget {
     }
     
     List<Gasto> gastos = [];
+    List<Categoria> categorias = [];
+
+    
+    
     var estado = context.watch<AppBloc>().state;
 
-    if(estado is Operacional) gastos = (estado).listaGastos;
+    if(estado is Operacional) {
+      gastos = (estado).listaGastos;
+      categorias = (estado).listaCategorias;
+    }
+    Categoria categoriaSeleccionada = categorias[0];
     if(estado is Inicial){
       return const Center(child: CircularProgressIndicator());
     }
 
     if(gastos.isEmpty){
-      return const Center(
-        child: Text('Aun no hay gastos'),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+            const Text('Aun no hay gastos'),
+            BotonAgregarGasto(),          
+        ],
       );
     }
-  
+
+    void updateCategoriaSeleccionada(value){
+    setState(() {
+     categoriaSeleccionada = value;
+     controladorCategoriaSeleccionada.text = (value as Categoria).categoria_id.toString();
+    });
+  }
     
     return Column(
       children: [
-        const Text("HOLA"),
-        Expanded(
+          TextFormField(
+            onTap: () async {
+              DateTime? fechaSeleccionada = await showDatePicker(context: context,
+               initialDate: DateTime.now(),
+                firstDate: DateTime(2000),
+                 lastDate: DateTime(2100)
+                 );
+                 setState(() {
+                   if(fechaSeleccionada !=null){
+                    String formattedDate =  DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
+                    controladorFechaInicial.text = formattedDate;
+                  }
+                 });
+            },
+            controller: controladorFechaInicial,
+            decoration: const InputDecoration(labelText: 'Fecha Inicial'),
+            readOnly: true,
+          ),
+          TextFormField(
+            onTap: () async {
+              DateTime? fechaSeleccionada = await showDatePicker(context: context,
+               initialDate: DateTime.now(),
+                firstDate: DateTime(2000),
+                 lastDate: DateTime(2100)
+                 );
+                 setState(() {
+                   if(fechaSeleccionada !=null){
+                    String formattedDate =  DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
+                    controladorFechaFinal.text = formattedDate;
+                  }
+                 });
+            },
+            controller: controladorFechaFinal,
+            decoration: const InputDecoration(labelText: 'Fecha Final'),
+          ),
+          DropdownButton<Categoria>(
+          value: categoriaSeleccionada,
+          onChanged: (value) {
+            updateCategoriaSeleccionada(value);
+          },
+          items: categorias.map<DropdownMenuItem<Categoria>>((categoria) {
+            return DropdownMenuItem<Categoria>(
+              value: categoria,
+              child: Text(categoria.nombre),
+            );
+          }).toList(),
+        ),
 
+
+          TextFormField(
+            controller: controladorVehiculo,
+            decoration: const InputDecoration(labelText: 'Vehículo'),
+          ),
+          TextFormField(
+            controller: controladorLugar,
+            decoration: const InputDecoration(labelText: 'Lugar'),
+          ),
+        
+
+
+
+
+        Expanded(
           child: SizedBox(
             //width: 500,
             height: 200,
@@ -772,6 +865,8 @@ class PantallaGastos extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
+        Text('Valor: $cantidadGastada'),
+        
         BotonAgregarGasto(),
       ],
       
@@ -986,3 +1081,4 @@ class _FormularioGastoState extends State<FormularioGasto> {
     );
   }
 }
+
