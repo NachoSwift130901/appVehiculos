@@ -102,11 +102,15 @@ class _BottomNavigationBarExampleState
     }
 
     return Scaffold(
+      
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 57, 127, 136),
         title: const Text('BottomNavigationBar Example'),
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color.fromARGB(255, 57, 127, 136),
+        selectedItemColor: Colors.white,
         currentIndex: _currentIndex,
         onTap: (index) {
           if (_canNavigate(index, categorias, vehiculos)) {
@@ -117,15 +121,15 @@ class _BottomNavigationBarExampleState
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.car_repair),
             label: 'Carros',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.category_rounded),
             label: 'Categorias',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
+            icon: Icon(Icons.attach_money_rounded),
             label: 'Gastos',
           ),
         ],
@@ -464,6 +468,7 @@ class PantallaVehiculos extends StatelessWidget {
                                               TextFormField(
                                                 controller: controladorMarca,
                                                 decoration: const InputDecoration(labelText: 'Marca'),
+                                                
                                               ),
                                               TextFormField(
                                                 controller: controladorModelo,
@@ -619,25 +624,32 @@ class FormularioVehiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextFormField(
-          controller: marcaController,
-          decoration: const InputDecoration(labelText: 'Marca'),
-        ),
-        TextFormField(
-          controller: modeloController,
-          decoration: const InputDecoration(labelText: 'Modelo'),
-        ),
-        TextFormField(
-          controller: colorController,
-          decoration: const InputDecoration(labelText: 'Color'),
-        ),
-        TextFormField(
-          controller: matriculaController,
-          decoration: const InputDecoration(labelText: 'Matrícula'),
-        ),
-      ],
+    return Theme(
+      data: ThemeData(
+        primaryColor: const Color.fromARGB(255, 57, 127, 136),
+        
+        
+      ),
+      child: Column(
+        children: [
+          TextFormField(
+            controller: marcaController,
+            decoration: const InputDecoration(labelText: 'Marca', icon: Icon(Icons.branding_watermark_outlined), iconColor: Color.fromARGB(255, 57, 127, 136),),
+          ),
+          TextFormField(
+            controller: modeloController,
+            decoration: const InputDecoration(labelText: 'Modelo', icon: Icon(Icons.numbers_outlined)),
+          ),
+          TextFormField(
+            controller: colorController,
+            decoration: const InputDecoration(labelText: 'Color', icon: Icon(Icons.palette)),
+          ),
+          TextFormField(
+            controller: matriculaController,
+            decoration: const InputDecoration(labelText: 'Matrícula', icon: Icon(Icons.drive_eta)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -658,7 +670,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
   TextEditingController controladorFechaInicial = TextEditingController();
   TextEditingController controladorFechaFinal = TextEditingController();
   TextEditingController controladorCategoriaSeleccionada= TextEditingController();
-  TextEditingController controladorVehiculo = TextEditingController();
+  TextEditingController controladorVehiculoSeleccionado = TextEditingController();
   TextEditingController controladorLugar= TextEditingController();
 
   
@@ -674,6 +686,15 @@ class _PantallaGastosState extends State<PantallaGastos> {
     
     List<Gasto> gastos = [];
     List<Categoria> categorias = [];
+    List<Vehiculo> vehiculos = [];
+
+    double calcularTotalGastado(List<Gasto> gastos) {
+      double total = 0.0;
+      for (var gasto in gastos) {
+        total += gasto.cantidad;
+      }
+      return total;
+    }
 
     
     
@@ -682,8 +703,15 @@ class _PantallaGastosState extends State<PantallaGastos> {
     if(estado is Operacional) {
       gastos = (estado).listaGastos;
       categorias = (estado).listaCategorias;
+      vehiculos = (estado).listaVehiculos;
+      
     }
+    double cantidadGastada = calcularTotalGastado(gastos);
+
     Categoria categoriaSeleccionada = categorias[0];
+    Vehiculo vehiculoSeleccionado = vehiculos[0];
+    Gasto gastoSeleccionado = gastos[0];
+
     if(estado is Inicial){
       return const Center(child: CircularProgressIndicator());
     }
@@ -704,7 +732,18 @@ class _PantallaGastosState extends State<PantallaGastos> {
      controladorCategoriaSeleccionada.text = (value as Categoria).categoria_id.toString();
     });
   }
-    
+    void updateVehiculoSeleccionado(value){
+    setState(() {
+      vehiculoSeleccionado = value;
+      controladorVehiculoSeleccionado.text = (value as Vehiculo).color.toString();
+    });
+  }
+    void updateLugarSeleccionado(value){
+      setState(() {
+        gastoSeleccionado = value;
+        controladorLugar.text = (value as Gasto).lugar.toString();
+      });
+    }
     return Column(
       children: [
           TextFormField(
@@ -718,6 +757,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
                    if(fechaSeleccionada !=null){
                     String formattedDate =  DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
                     controladorFechaInicial.text = formattedDate;
+                    print(controladorFechaInicial);
                   }
                  });
             },
@@ -736,6 +776,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
                    if(fechaSeleccionada !=null){
                     String formattedDate =  DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
                     controladorFechaFinal.text = formattedDate;
+                    print(controladorFechaFinal);
                   }
                  });
             },
@@ -746,6 +787,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
           value: categoriaSeleccionada,
           onChanged: (value) {
             updateCategoriaSeleccionada(value);
+            print(categoriaSeleccionada);
           },
           items: categorias.map<DropdownMenuItem<Categoria>>((categoria) {
             return DropdownMenuItem<Categoria>(
@@ -754,21 +796,38 @@ class _PantallaGastosState extends State<PantallaGastos> {
             );
           }).toList(),
         ),
-
-
-          TextFormField(
-            controller: controladorVehiculo,
-            decoration: const InputDecoration(labelText: 'Vehículo'),
+          DropdownButton<Vehiculo>(
+            value: vehiculoSeleccionado,
+            onChanged: (value) {
+              updateVehiculoSeleccionado(value);
+              print(vehiculoSeleccionado);
+            },
+            items: vehiculos.map<DropdownMenuItem<Vehiculo>>((vehiculo) {
+              return DropdownMenuItem<Vehiculo>(
+                value: vehiculo,
+                child: Text('${vehiculo.marca} ${vehiculo.matricula}'),
+              );
+            }).toList(),
           ),
-          TextFormField(
-            controller: controladorLugar,
-            decoration: const InputDecoration(labelText: 'Lugar'),
+          DropdownButton<Gasto>(
+            value: gastoSeleccionado,
+            onChanged: (value) {
+              
+              print(gastoSeleccionado);
+            },
+            items: gastos.map<DropdownMenuItem<Gasto>>((gasto) {
+              return DropdownMenuItem<Gasto>(
+                value: gasto,
+                child: Text(gasto.lugar),
+              );
+            }).toList(),
           ),
-        
-
-
-
-
+          
+          TextFormField(
+              controller: controladorLugar,
+              decoration: const InputDecoration(labelText: 'Lugar'),
+            ),
+          
         Expanded(
           child: SizedBox(
             //width: 500,
@@ -787,7 +846,14 @@ class _PantallaGastosState extends State<PantallaGastos> {
                   
                       return ListTile(
                         title: Text(gasto.descripcion),
-                        subtitle: Text(gasto.fecha.substring(0,10)),
+                        subtitle: Column(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(gasto.fecha.substring(0,10)),
+                            Text(gasto.cantidad.toStringAsFixed(2)),
+                          ],
+                        ),
+                        
                         onTap: () {
                           Categoria categoriaDelGasto = categorias[gasto.categoria_id-1];
                           Vehiculo vehiculoDelGasto = vehiculos[gasto.vehiculo_id-1];
@@ -887,7 +953,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
           ),
         ),
         const SizedBox(height: 20),
-        Text('Valor: $cantidadGastada'),
+        Text('Valor: ${cantidadGastada.toStringAsFixed(2)}'),
         
         BotonAgregarGasto(),
       ],
@@ -1028,6 +1094,7 @@ class _FormularioGastoState extends State<FormularioGasto> {
     setState(() {
      widget.categoriaSeleccionada = value;
      widget.idCategoriaSeleccionada.text = (value as Categoria).categoria_id.toString();
+     
     });
   }
 
