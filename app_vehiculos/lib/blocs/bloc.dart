@@ -1,15 +1,14 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 // ignore_for_file: depend_on_referenced_packages, prefer_final_fields
 
-import 'package:app_vehiculos/modelos/gastos.dart';
-import 'package:app_vehiculos/modelos/vehiculo.dart';
-import 'package:app_vehiculos/modelos/categoria.dart';
-import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
-
-
+import 'package:app_vehiculos/modelos/categoria.dart';
+import 'package:app_vehiculos/modelos/gastos.dart';
+import 'package:app_vehiculos/modelos/vehiculo.dart';
 
 late Database db;
 class RepositorioBD {
@@ -164,12 +163,26 @@ class EliminarGasto extends AppEvento{
 
   EliminarGasto(this.id);
 }
+
 class EditarGasto extends AppEvento{
   final Gasto gastoViejo;
   final Gasto gastoNuevo;
 
   EditarGasto({required this.gastoViejo, required this.gastoNuevo});
 }
+
+class FiltrarGasto extends AppEvento {
+  int categoriaId;
+  int vehiculoId;
+
+  FiltrarGasto({
+    int? categoriaId,
+    int? vehiculoId,
+  })  : categoriaId = categoriaId ?? 0, // Aquí usamos el operador ?? para asignar 0 si categoriaId es nulo
+        vehiculoId = vehiculoId ?? 0;   // Aquí usamos el operador ?? para asignar 0 si vehiculoId es nulo
+}
+
+
 /* ----------------------------------------*/
 
 class AppBloc extends Bloc<AppEvento, AppEstado> {
@@ -243,6 +256,10 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     
   }
 
+  Future<void>filtrarGasto(int categoriaId, int vehiculoId) async {
+    var resultadoConsulta = await db.rawQuery('SELECT * FROM gastos where categoria_id = ?', [categoriaId]);
+    _listaGastos = resultadoConsulta.map((e) => Gasto.fromMap(e)).toList();
+  }
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async{
       await todasLasCategorias();
@@ -293,6 +310,15 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     });
     on<EliminarGasto>((event, emit)async{
       await eliminarGasto(event.id);
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+    });
+    on<EditarGasto>((event, emit)async{
+      
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+    });
+
+    on<FiltrarGasto>((event, emit)async{
+      await filtrarGasto(event.categoriaId, event.vehiculoId);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
 

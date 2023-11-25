@@ -74,6 +74,7 @@ class _BottomNavigationBarExampleState
     const PantallaVehiculos(),
     
     
+    
     const Column(
       children: [
         ListaCategorias(),
@@ -386,8 +387,16 @@ class PantallaVehiculos extends StatelessWidget {
     
 
     if(vehiculos.isEmpty){
-      return const Center(
-        child: Text('Aun no hay vehiculos compa'),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Aún no hay vehículos...'),
+            const SizedBox(height: 16.0),
+            BotonAgregarVehiculo()
+            
+          ],
+        ),
       );
     }
     return Center(
@@ -733,6 +742,8 @@ class _PantallaGastosState extends State<PantallaGastos> {
     List<Categoria> categorias = [];
     List<Vehiculo> vehiculos = [];
 
+    
+
     double calcularTotalGastado(List<Gasto> gastos) {
       double total = 0.0;
       for (var gasto in gastos) {
@@ -740,6 +751,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
       }
       return total;
     }
+    final Categoria todasLasCategorias = Categoria(nombre: 'all', categoria_id: 99999);
 
     
     
@@ -760,16 +772,8 @@ class _PantallaGastosState extends State<PantallaGastos> {
     if(estado is Inicial){
       return const Center(child: CircularProgressIndicator());
     }
-
-    if(gastos.isEmpty){
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-            const Text('Aun no hay gastos'),
-            BotonAgregarGasto(),          
-        ],
-      );
-    }
+    
+    
     Gasto gastoSeleccionado = gastos[0];
 
     void updateCategoriaSeleccionada(value){
@@ -790,6 +794,9 @@ class _PantallaGastosState extends State<PantallaGastos> {
         controladorLugar.text = (value as Gasto).lugar.toString();
       });
     }
+    
+    
+    
     return Column(
       children: [
           TextFormField(
@@ -829,24 +836,33 @@ class _PantallaGastosState extends State<PantallaGastos> {
             controller: controladorFechaFinal,
             decoration: const InputDecoration(labelText: 'Fecha Final'),
           ),
-          DropdownButton<Categoria>(
+          DropdownButtonFormField<Categoria>(
+            decoration: const InputDecoration(labelText: 'Categoria'),
           value: categoriaSeleccionada,
           onChanged: (value) {
+            context.read<AppBloc>().add(FiltrarGasto(categoriaId: (value as Categoria).categoria_id));
             updateCategoriaSeleccionada(value);
-            print(categoriaSeleccionada);
           },
-          items: categorias.map<DropdownMenuItem<Categoria>>((categoria) {
+          items: [
+             DropdownMenuItem(
+              value: todasLasCategorias,
+              child: const Text('Todas las categorias'),
+            ),
+            ...categorias.map<DropdownMenuItem<Categoria>>((categoria) {
             return DropdownMenuItem<Categoria>(
               value: categoria,
               child: Text(categoria.nombre),
             );
           }).toList(),
+      ]
         ),
-          DropdownButton<Vehiculo>(
+          DropdownButtonFormField<Vehiculo>(
+            decoration: const InputDecoration(labelText: 'Vehiculo'),
             value: vehiculoSeleccionado,
             onChanged: (value) {
+              context.read<AppBloc>().add(FiltrarGasto(vehiculoId: (value as Vehiculo).vehiculo_id));
               updateVehiculoSeleccionado(value);
-              print(vehiculoSeleccionado);
+              
             },
             items: vehiculos.map<DropdownMenuItem<Vehiculo>>((vehiculo) {
               return DropdownMenuItem<Vehiculo>(
@@ -855,7 +871,8 @@ class _PantallaGastosState extends State<PantallaGastos> {
               );
             }).toList(),
           ),
-          DropdownButton<Gasto>(
+          DropdownButtonFormField<Gasto>(
+            decoration: const InputDecoration(labelText: 'Lugar'),
             value: gastoSeleccionado,
             onChanged: (value) {
               
@@ -869,11 +886,6 @@ class _PantallaGastosState extends State<PantallaGastos> {
             }).toList(),
           ),
           
-          TextFormField(
-              controller: controladorLugar,
-              decoration: const InputDecoration(labelText: 'Lugar'),
-            ),
-          
         Expanded(
           child: SizedBox(
             //width: 500,
@@ -882,7 +894,8 @@ class _PantallaGastosState extends State<PantallaGastos> {
               builder: (context, state) {
                 if(state is Operacional){
                   
-                  return ListView.builder(
+                  return 
+                  ListView.builder(
                     itemCount: state.listaGastos.length,
                     itemBuilder: (context, index) {
                       final gasto = state.listaGastos[index];
@@ -1008,17 +1021,30 @@ class _PantallaGastosState extends State<PantallaGastos> {
   }
 }
 
+class ListaGastosFiltrada extends StatefulWidget {
+  const ListaGastosFiltrada({super.key});
+
+  @override
+  State<ListaGastosFiltrada> createState() => _ListaGastosFiltradaState();
+}
+
+class _ListaGastosFiltradaState extends State<ListaGastosFiltrada> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
 
 class BotonAgregarGasto extends StatelessWidget {
   final TextEditingController vehiculoController = TextEditingController();
   final TextEditingController descripcionController = TextEditingController();
   final TextEditingController lugarController = TextEditingController();
   final TextEditingController cantidadController = TextEditingController();
-  final TextEditingController fechaController = TextEditingController();
-  final TextEditingController idCategoriaSeleccionada = TextEditingController();
-  final TextEditingController idVehiculoSeleccionado = TextEditingController();
+  final TextEditingController fechaController = TextEditingController(text: DateFormat('yyyy-MM-dd').format(DateTime.now()));
+  final TextEditingController idCategoriaSeleccionada = TextEditingController(text: '1');
+  final TextEditingController idVehiculoSeleccionado = TextEditingController(text: '1');
 
- 
+  
   BotonAgregarGasto({super.key});
 
   @override
@@ -1027,7 +1053,6 @@ class BotonAgregarGasto extends StatelessWidget {
     void agregarGasto(String descripcion, String lugar, double cantidad, String fecha, int categoriaId, int vehiculoId){
       Gasto nuevoGasto = Gasto(descripcion: descripcion, lugar: lugar, cantidad: cantidad, fecha: fecha, categoria_id: categoriaId, vehiculo_id: vehiculoId);
       context.read<AppBloc>().add(AgregarGasto(gasto: nuevoGasto));
-      
     }
 
     List<Categoria> categorias = [];
@@ -1156,7 +1181,19 @@ class _FormularioGastoState extends State<FormularioGasto> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        DropdownButton<Object>(
+        DropdownButtonFormField<Object>(
+          decoration: const InputDecoration(
+            labelText: 'Categoria', 
+            icon: Icon(Icons.category_rounded),
+            iconColor: Color.fromARGB(255, 57, 127, 136),
+            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            )
+            ),
           value: widget.categoriaSeleccionada,
           onChanged: (value) {
             _updateCategoriaSeleccionada(value);
@@ -1168,7 +1205,19 @@ class _FormularioGastoState extends State<FormularioGasto> {
             );
           }).toList(),
         ),
-        DropdownButton<Vehiculo>(
+        DropdownButtonFormField<Vehiculo>(
+          decoration: const InputDecoration(
+            labelText: 'Vehiculo', 
+            icon: Icon(Icons.car_repair_rounded),
+            iconColor: Color.fromARGB(255, 57, 127, 136),
+            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            )
+            ),
           value: widget.vehiculoSeleccionado,
           onChanged: (value) {
             _updateVehiculoSeleccionado(value);
@@ -1182,34 +1231,98 @@ class _FormularioGastoState extends State<FormularioGasto> {
         ),
         TextFormField(
           controller: widget.descripcionController,
-          decoration: const InputDecoration(labelText: 'Descripcion'),
+          decoration: const InputDecoration(
+            labelText: 'Descripcion',
+            icon: Icon(Icons.description_rounded),
+            iconColor: Color.fromARGB(255, 57, 127, 136),
+            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            )
+            ),
+            inputFormatters: [LengthLimitingTextInputFormatter(40)],
         ),
         TextFormField(
           controller: widget.lugarController,
-          decoration: const InputDecoration(labelText: 'Lugar'),
+          decoration: const InputDecoration(
+            labelText: 'Lugar',
+            icon: Icon(Icons.place),
+            iconColor: Color.fromARGB(255, 57, 127, 136),
+            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            )
+            ),
+            keyboardType: TextInputType.number,
+            inputFormatters: [LengthLimitingTextInputFormatter(8)]
         ),
         TextFormField(
           controller: widget.cantidadController,
-          decoration: const InputDecoration(labelText: 'Cantidad'),
+          decoration: const InputDecoration(
+            labelText: 'Cantidad',
+            icon: Icon(Icons.attach_money_outlined),
+            iconColor: Color.fromARGB(255, 57, 127, 136),
+            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            )
+            ),
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(8),
+              ],
         ),
         TextFormField(
           controller: widget.fechaController,
           decoration: const InputDecoration(
             icon: Icon(Icons.calendar_today),
-            labelText: 'Fecha'),
+            labelText: 'Fecha',
+            iconColor: Color.fromARGB(255, 57, 127, 136),
+            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            )
+            ),
+            
             readOnly: true,
             onTap: () async {
               
               DateTime? selectedDate = await showDatePicker(
-                  context: context, initialDate: DateTime.now(), 
-                  firstDate: DateTime(1950), 
-                  lastDate: DateTime(2101)
-                  );
-                  if(selectedDate !=null){
-                    String formattedDate =  DateFormat('yyyy-MM-dd').format(selectedDate);
-                    widget.fechaController.text = formattedDate;
-                  }
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1950),
+              lastDate: DateTime(2101),
+              builder: (BuildContext context, Widget? child) {
+                return Theme(
+                  data: ThemeData.light().copyWith(
+                    primaryColor: const Color.fromARGB(255, 57, 127, 136), // Cambia el color principal
+                    colorScheme: const ColorScheme.light(primary: Color.fromARGB(255, 57, 127, 136)),
+                    buttonTheme: const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+                  ),
+                  child: child!,
+                );
+              },
+            );
+
+if (selectedDate != null) {
+  String formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+  widget.fechaController.text = formattedDate;
+}
               }, 
+              keyboardType: TextInputType.datetime,
         ),
         
       ],

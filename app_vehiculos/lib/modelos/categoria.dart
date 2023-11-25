@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 class Categoria with EquatableMixin{
   
   final String nombre;
-  int? categoria_id;
+  int categoria_id;
 
   factory Categoria.fromMap(Map<String, dynamic> map){
     return Categoria(
@@ -16,7 +16,7 @@ class Categoria with EquatableMixin{
       );
   }
 
-  Categoria({required this.nombre, this.categoria_id});
+  Categoria({required this.nombre, required this.categoria_id});
 
   
   
