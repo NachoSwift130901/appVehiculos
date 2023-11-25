@@ -187,7 +187,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   }
   Future<void> todosLosVehiculos() async{
     await repo.inicializar();
-    var resultadoConsulta = await db.rawQuery("SELECT * FROM vehiculos");
+    var resultadoConsulta = await db.rawQuery("SELECT * FROM vehiculos ORDER BY marca ASC");
     _listaVehiculos = resultadoConsulta.map((e) => Vehiculo.fromMap(e)).toList();
   }
   Future<void> todosLosGastos() async{

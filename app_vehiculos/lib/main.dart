@@ -2,6 +2,7 @@
 
 import 'package:app_vehiculos/modelos/gastos.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/bloc.dart';
 import 'modelos/vehiculo.dart';
@@ -61,24 +62,16 @@ class BottomNavigationBarExample extends StatefulWidget {
 }
 
 class _BottomNavigationBarExampleState
-    extends State<BottomNavigationBarExample> {
+  extends State<BottomNavigationBarExample> {
 
       
     
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text('Vehículos', style: TextStyle(fontSize: 20)),
-        const PantallaVehiculos(),
-        
-        const SizedBox(height: 20),
-        BotonAgregarVehiculo(),
-  
-      ],
-    ),
+    const PantallaVehiculos(),
+    
+    
     const Column(
       children: [
         ListaCategorias(),
@@ -86,7 +79,7 @@ class _BottomNavigationBarExampleState
         AgregarCategoriaWidget()
       ],
     ),
-     const PantallaGastos(),
+    const PantallaGastos(),
      
   ];
 
@@ -395,151 +388,155 @@ class PantallaVehiculos extends StatelessWidget {
         child: Text('Aun no hay vehiculos compa'),
       );
     }
-    return BlocBuilder<AppBloc, AppEstado>(
-      
-      builder: (context, state) {
-        if (state is Operacional) {
-          return 
-              Expanded(
-                child: SizedBox(
-                  width:200,
-                  height: 200,
-                  child: ListView.builder(
-                    itemCount: state.listaVehiculos.length,
-                    itemBuilder: (context, index) {
-                      final vehiculo = state.listaVehiculos[index];
-                      return ListTile(
-                        title: Text(vehiculo.matricula),
-                        subtitle: Text(vehiculo.marca),
-                        onTap: () {
-                          // Navegar a la página de detalles del vehículo
-                          Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                          builder: (BuildContext context) {
-                            void cerrartodo(){
-                              Navigator.pop(context);
-                            }
-                            return Scaffold(
-                              appBar: AppBar(
-                                title: Text('Vehiculo: ${vehiculo.matricula}'),
-                              ),
-                                body: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Marca: ${vehiculo.marca}',
-                                      style: const TextStyle(fontSize: 20)),
-                                  Text('Modelo: ${vehiculo.modelo}',
-                                      style: const TextStyle(fontSize: 20)),
-                                  Text('Color: ${vehiculo.color}',
-                                      style: const TextStyle(fontSize: 20)),
-                                  Text('Matricula: ${vehiculo.matricula}',
-                                      style: const TextStyle(fontSize: 20)),
-                                  // Agrega aquí más información sobre el vehículo según tus necesidades
-                                ],
-                              ),
-                                floatingActionButton: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    FloatingActionButton(
-                                      onPressed: () {
-                                        eliminarVehiculo(vehiculo);
-                                        Navigator.pop(context);
-                                      },
-                                      tooltip: 'Borrar Vehiculo',
-                                      child: const Icon(Icons.delete),
-                                      ),
-                                    const SizedBox(height: 16),
-                                    FloatingActionButton(
-                                        onPressed: () {
-                                          final controladorMarca = TextEditingController(text: vehiculo.marca);
-                                          final controladorModelo = TextEditingController(text: vehiculo.modelo.toString());
-                                          final controladorColor = TextEditingController(text: vehiculo.color);
-                                          final controladorMatricula = TextEditingController(text: vehiculo.matricula);
-
-                                          showDialog(
-                                            context: context, 
-                                            builder: (context) {
-                                            return AlertDialog(
-                                                title: const Text('Editar vehiculo'),
-                                                content: Column(
-                                                  children: [
-                                              TextFormField(
-                                                controller: controladorMarca,
-                                                decoration: const InputDecoration(labelText: 'Marca'),
-                                                
-                                              ),
-                                              TextFormField(
-                                                controller: controladorModelo,
-                                                decoration: const InputDecoration(labelText: 'Modelo'),
-                                              ),
-                                              TextFormField(
-                                                controller: controladorColor,
-                                                decoration: const InputDecoration(labelText: 'Color'),
-                                              ),
-                                              TextFormField(
-                                                controller: controladorMatricula,
-                                                decoration: const InputDecoration(labelText: 'Matricula'),
-                                              ),
-                                                  ],
-                                                ),
-                                                actions: [
-                                                  ElevatedButton(
-                                                    onPressed: () {
-                                                    final nuevaMatricula = controladorMatricula.text.trim();
-                                                    final nuevaMarca = controladorMarca.text.trim();
-                                                    final nuevoModelo = controladorModelo.text.trim();
-                                                    final nuevoColor = controladorColor.text.trim();
-
-                                                    final matriculaVieja = vehiculo.matricula;
-
-                                                    actualizarVehiculo(nuevaMatricula, nuevaMarca, nuevoModelo, nuevoColor, matriculaVieja);
-                                                    
-                                                    mostrarAdvertencia("Vehiculo actualizado correctamente");
-                                                    cerrartodo();
-                                                  }, 
-                                                  child: const Text('Guardar')),
-                                                  TextButton(onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: const Text('Cancelar'))
-                                                ],
-                                                
-                                              );
-                                              
-                                            }
-                                            );
-                                          if (controladorMarca.text.isEmpty || controladorModelo.text.isEmpty || controladorColor.text.isEmpty || controladorMatricula.text.isEmpty) {
-                                        mostrarAdvertencia("Todos los campos son obligatorios");
-                                        return; // Sale de la función para evitar más procesamiento
-                                          }
-                                          
-
+    return Center(
+      child: Column(
+        children: [
+          BlocBuilder<AppBloc, AppEstado>(
+            
+            builder: (context, state) {
+              if (state is Operacional) {
+                return 
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: state.listaVehiculos.length,
+                        itemBuilder: (context, index) {
+                          final vehiculo = state.listaVehiculos[index];
+                          return ListTile(
+                            title: Text(vehiculo.marca),
+                            subtitle: Text(vehiculo.matricula),
+                            onTap: () {
+                              // Navegar a la página de detalles del vehículo
+                              Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                void cerrartodo(){
+                                  Navigator.pop(context);
+                                }
+                                return Scaffold(
+                                  appBar: AppBar(
+                                    title: Text('Vehiculo: ${vehiculo.matricula}'),
+                                  ),
+                                    body: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Marca: ${vehiculo.marca}',
+                                          style: const TextStyle(fontSize: 20)),
+                                      Text('Modelo: ${vehiculo.modelo}',
+                                          style: const TextStyle(fontSize: 20)),
+                                      Text('Color: ${vehiculo.color}',
+                                          style: const TextStyle(fontSize: 20)),
+                                      Text('Matricula: ${vehiculo.matricula}',
+                                          style: const TextStyle(fontSize: 20)),
+                                      // Agrega aquí más información sobre el vehículo según tus necesidades
+                                    ],
+                                  ),
+                                    floatingActionButton: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        FloatingActionButton(
+                                          onPressed: () {
+                                            eliminarVehiculo(vehiculo);
+                                            Navigator.pop(context);
+                                          },
+                                          tooltip: 'Borrar Vehiculo',
+                                          child: const Icon(Icons.delete),
+                                          ),
+                                        const SizedBox(height: 16),
+                                        FloatingActionButton(
+                                            onPressed: () {
+                                              final controladorMarca = TextEditingController(text: vehiculo.marca);
+                                              final controladorModelo = TextEditingController(text: vehiculo.modelo.toString());
+                                              final controladorColor = TextEditingController(text: vehiculo.color);
+                                              final controladorMatricula = TextEditingController(text: vehiculo.matricula);
     
-                                      },
-                                      tooltip: 'Editar Vehiculo',
-                                      child: const Icon(Icons.edit),
-                                    )
-                                  ],
-                                ),
-                                
-                            )
-
-                            ;
-                          },
-                        ),
+                                              showDialog(
+                                                context: context, 
+                                                builder: (context) {
+                                                return AlertDialog(
+                                                    title: const Text('Editar vehiculo'),
+                                                    content: Column(
+                                                      children: [
+                                                  TextFormField(
+                                                    controller: controladorMarca,
+                                                    decoration: const InputDecoration(labelText: 'Marca'),
+                                                    
+                                                  ),
+                                                  TextFormField(
+                                                    controller: controladorModelo,
+                                                    decoration: const InputDecoration(labelText: 'Modelo'),
+                                                  ),
+                                                  TextFormField(
+                                                    controller: controladorColor,
+                                                    decoration: const InputDecoration(labelText: 'Color'),
+                                                  ),
+                                                  TextFormField(
+                                                    controller: controladorMatricula,
+                                                    decoration: const InputDecoration(labelText: 'Matricula'),
+                                                  ),
+                                                      ],
+                                                    ),
+                                                    actions: [
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                        final nuevaMatricula = controladorMatricula.text.trim();
+                                                        final nuevaMarca = controladorMarca.text.trim();
+                                                        final nuevoModelo = controladorModelo.text.trim();
+                                                        final nuevoColor = controladorColor.text.trim();
+    
+                                                        final matriculaVieja = vehiculo.matricula;
+    
+                                                        actualizarVehiculo(nuevaMatricula, nuevaMarca, nuevoModelo, nuevoColor, matriculaVieja);
+                                                        
+                                                        mostrarAdvertencia("Vehiculo actualizado correctamente");
+                                                        cerrartodo();
+                                                      }, 
+                                                      child: const Text('Guardar')),
+                                                      TextButton(onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: const Text('Cancelar'))
+                                                    ],
+                                                    
+                                                  );
+                                                  
+                                                }
+                                                );
+                                              if (controladorMarca.text.isEmpty || controladorModelo.text.isEmpty || controladorColor.text.isEmpty || controladorMatricula.text.isEmpty) {
+                                            mostrarAdvertencia("Todos los campos son obligatorios");
+                                            return; // Sale de la función para evitar más procesamiento
+                                              }
+                                              
+    
+          
+                                          },
+                                          tooltip: 'Editar Vehiculo',
+                                          child: const Icon(Icons.edit),
+                                        )
+                                      ],
+                                    ),
+                                    
+                                )
+    
+                                ;
+                              },
+                            ),
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                  ),
-                ),
-              );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+                      ),
+                    );
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+          const SizedBox(height: 20),
+          BotonAgregarVehiculo()
+        ],
+      ),
     );
   }
 }
@@ -563,51 +560,58 @@ class BotonAgregarVehiculo extends StatelessWidget {
                 ));
                 
   }
-    return ElevatedButton(
-      onPressed: () {
-        // Mostrar el formulario como un modal
-        showDialog(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-            
-            title: const Text('Agregar Vehículo'),
-            content: FormularioVehiculo(
-              marcaController: _marcaController,
-              modeloController: _modeloController,
-              colorController: _colorController,
-              matriculaController: _matriculaController,
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: ElevatedButton.icon(
+        
+        onPressed: () {
+          // Mostrar el formulario como un modal
+          showDialog(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+              
+              title: const Text('Agregar Vehículo'),
+              content: FormularioVehiculo(
+                marcaController: _marcaController,
+                modeloController: _modeloController,
+                colorController: _colorController,
+                matriculaController: _matriculaController,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Cerrar el AlertDialog
+                  },
+                  child: const Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    String marca = _marcaController.text;
+                    int modelo = int.tryParse(_modeloController.text) ?? 0;
+                    String color = _colorController.text;
+                    String matricula = _matriculaController.text;
+    
+                    agregarVehiculo(marca.toUpperCase(), modelo, color.toUpperCase(), matricula.toUpperCase());
+                    _marcaController.clear();
+                    _colorController.clear();
+                    _matriculaController.clear();
+                    _modeloController.clear();
+    
+    
+                    // Cierra el AlertDialog
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Guardar'),
+                ),
+              ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Cerrar el AlertDialog
-                },
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  String marca = _marcaController.text;
-                  int modelo = int.tryParse(_modeloController.text) ?? 0;
-                  String color = _colorController.text;
-                  String matricula = _matriculaController.text;
-
-                  agregarVehiculo(marca, modelo, color, matricula);
-                  _marcaController.clear();
-                  _colorController.clear();
-                  _matriculaController.clear();
-                  _modeloController.clear();
-
-
-                  // Cierra el AlertDialog
-                  Navigator.pop(context);
-                },
-                child: const Text('Guardar'),
-              ),
-            ],
-          ),
-        );
-      },
-      child: const Text('Agregar Vehículo'),
+          );
+        },
+        style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 57, 127, 136)),
+        label: const Text('Agregar Vehículo'),
+        icon: const Icon(Icons.add),
+        
+      ),
     );
   }
 
@@ -635,18 +639,27 @@ class FormularioVehiculo extends StatelessWidget {
           TextFormField(
             controller: marcaController,
             decoration: const InputDecoration(labelText: 'Marca', icon: Icon(Icons.branding_watermark_outlined), iconColor: Color.fromARGB(255, 57, 127, 136),),
+            inputFormatters: [LengthLimitingTextInputFormatter(15)],
           ),
           TextFormField(
             controller: modeloController,
             decoration: const InputDecoration(labelText: 'Modelo', icon: Icon(Icons.numbers_outlined)),
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(4),
+            
+            ],
           ),
           TextFormField(
             controller: colorController,
             decoration: const InputDecoration(labelText: 'Color', icon: Icon(Icons.palette)),
+            inputFormatters: [LengthLimitingTextInputFormatter(15)],
           ),
           TextFormField(
             controller: matriculaController,
             decoration: const InputDecoration(labelText: 'Matrícula', icon: Icon(Icons.drive_eta)),
+            inputFormatters: [LengthLimitingTextInputFormatter(8)],
           ),
         ],
       ),
@@ -710,7 +723,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
 
     Categoria categoriaSeleccionada = categorias[0];
     Vehiculo vehiculoSeleccionado = vehiculos[0];
-    Gasto gastoSeleccionado = gastos[0];
+    
 
     if(estado is Inicial){
       return const Center(child: CircularProgressIndicator());
@@ -725,6 +738,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
         ],
       );
     }
+    Gasto gastoSeleccionado = gastos[0];
 
     void updateCategoriaSeleccionada(value){
     setState(() {
