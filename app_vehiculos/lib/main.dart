@@ -10,6 +10,7 @@ import 'modelos/categoria.dart';
 import 'package:intl/intl.dart';
 
 
+
 void main() async {
   runApp(const AplicacionInyectada());
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,7 @@ class AplicacionInyectada extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  MaterialApp(
+      theme: ThemeData(primaryColor: const Color.fromARGB(255, 57, 127, 136)),
       home: BlocProvider(
         create: (context) => AppBloc()..add(Inicializado()),
         child: const BottomNavigationBarExample(),
@@ -402,6 +404,8 @@ class PantallaVehiculos extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final vehiculo = state.listaVehiculos[index];
                           return ListTile(
+                            leading: const Icon(Icons.drive_eta_rounded),
+                            trailing: const Icon(Icons.drag_handle_rounded),
                             title: Text(vehiculo.marca),
                             subtitle: Text(vehiculo.matricula),
                             onTap: () {
@@ -628,41 +632,69 @@ class FormularioVehiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(
-        primaryColor: const Color.fromARGB(255, 57, 127, 136),
-        
-        
-      ),
-      child: Column(
-        children: [
-          TextFormField(
-            controller: marcaController,
-            decoration: const InputDecoration(labelText: 'Marca', icon: Icon(Icons.branding_watermark_outlined), iconColor: Color.fromARGB(255, 57, 127, 136),),
-            inputFormatters: [LengthLimitingTextInputFormatter(15)],
-          ),
-          TextFormField(
-            controller: modeloController,
-            decoration: const InputDecoration(labelText: 'Modelo', icon: Icon(Icons.numbers_outlined)),
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(4),
-            
-            ],
-          ),
-          TextFormField(
-            controller: colorController,
-            decoration: const InputDecoration(labelText: 'Color', icon: Icon(Icons.palette)),
-            inputFormatters: [LengthLimitingTextInputFormatter(15)],
-          ),
-          TextFormField(
-            controller: matriculaController,
-            decoration: const InputDecoration(labelText: 'Matrícula', icon: Icon(Icons.drive_eta)),
-            inputFormatters: [LengthLimitingTextInputFormatter(8)],
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        TextFormField(
+          controller: marcaController,
+          decoration: const InputDecoration(
+            labelText: 'Marca', 
+            icon: Icon(Icons.branding_watermark_outlined),
+            iconColor: Color.fromARGB(255, 57, 127, 136),
+            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            )
+            ),
+          inputFormatters: [LengthLimitingTextInputFormatter(15)],
+        ),
+        TextFormField(
+          controller: modeloController,
+          decoration: const InputDecoration(labelText: 'Modelo', icon: Icon(Icons.numbers_outlined), iconColor: Color.fromARGB(255, 57, 127, 136),
+            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            )
+            ),
+          keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(4),
+          
+          ],
+        ),
+        TextFormField(
+          controller: colorController,
+          decoration: const InputDecoration(labelText: 'Color', icon: Icon(Icons.palette), iconColor: Color.fromARGB(255, 57, 127, 136),
+            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            )
+            ),
+          inputFormatters: [LengthLimitingTextInputFormatter(15)],
+        ),
+        TextFormField(
+          controller: matriculaController,
+          decoration: const InputDecoration(labelText: 'Matrícula', icon: Icon(Icons.drive_eta), iconColor: Color.fromARGB(255, 57, 127, 136),
+            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            )
+            ),
+          inputFormatters: [LengthLimitingTextInputFormatter(8)],
+        ),
+      ],
     );
   }
 }
