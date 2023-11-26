@@ -46,7 +46,7 @@ class RepositorioBD {
           descripcion TEXT,
           lugar TEXT,
           cantidad REAL,
-          fecha TEXT,
+          fecha DATE,
           FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id),
           FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
 
@@ -172,14 +172,16 @@ class EditarGasto extends AppEvento{
 }
 
 class FiltrarGasto extends AppEvento {
-  int categoriaId;
-  int vehiculoId;
+  final String fechaIncial;
+  final String fechaFinal;
+  final int categoriaId;
+  final int vehiculoId;
+  final String lugar;
 
-  FiltrarGasto({
-    int? categoriaId,
-    int? vehiculoId,
-  })  : categoriaId = categoriaId ?? 0, // Aquí usamos el operador ?? para asignar 0 si categoriaId es nulo
-        vehiculoId = vehiculoId ?? 0;   // Aquí usamos el operador ?? para asignar 0 si vehiculoId es nulo
+  FiltrarGasto(this.fechaIncial, this.fechaFinal, this.categoriaId, this.vehiculoId, this.lugar);
+
+
+  
 }
 
 
@@ -217,9 +219,11 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   }
   Future<void>eliminarCategoria(categoriaAEliminar) async{
     await db.rawDelete('DELETE FROM categorias where categoria = ?', [categoriaAEliminar]); 
+    await db.rawDelete('DELETE FROM gastos WHERE categoria_id IN (SELECT id FROM categorias WHERE categoria = ?)', [categoriaAEliminar]);
   }
   Future<void> actualizarCategoria(oldCategoria, newCategoria) async {
     await db.rawUpdate('UPDATE categorias SET categoria = ? WHERE categoria = ?', [newCategoria, oldCategoria]);
+    
 
   }
   
@@ -231,6 +235,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   }
   Future<void> eliminarVehiculo(matricula) async {
     await db.rawDelete("DELETE FROM vehiculos WHERE matricula = ?", [matricula]);
+    await db.rawDelete("DELETE FROM gastos WHERE vehiculo_id IN (SELECT id FROM vehiculos WHERE vehiculo matricula = ?)", [matricula]);
   }
   Future<void> actualizarVehiculo(matricula, marca, int modelo, color, matriculaVieja) async {
     await db.rawUpdate("UPDATE vehiculos SET matricula = ?, modelo = ?, color = ?, marca = ? WHERE matricula = ?",
@@ -256,8 +261,10 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     
   }
 
-  Future<void>filtrarGasto(int categoriaId, int vehiculoId) async {
-    var resultadoConsulta = await db.rawQuery('SELECT * FROM gastos where categoria_id = ?', [categoriaId]);
+  Future<void>filtrarGasto(fechaInicial, fechaFinal, int categoriaId, int vehiculoId, lugar) async {
+    var resultadoConsulta = await db.rawQuery('SELECT * FROM gastos WHERE fecha BETWEEN ? AND ? AND categoria_id = ? AND vehiculo_id = ? AND lugar = ?',
+    [fechaInicial, fechaFinal, categoriaId, vehiculoId, lugar],);
+    
     _listaGastos = resultadoConsulta.map((e) => Gasto.fromMap(e)).toList();
   }
   AppBloc() : super(Inicial()) {
@@ -318,7 +325,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     });
 
     on<FiltrarGasto>((event, emit)async{
-      await filtrarGasto(event.categoriaId, event.vehiculoId);
+      await filtrarGasto(event.fechaIncial, event.fechaFinal, event.categoriaId, event.vehiculoId, event.lugar);
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
 

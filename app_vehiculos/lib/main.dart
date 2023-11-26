@@ -43,7 +43,7 @@ class MainApp extends StatelessWidget {
         ),
         body: const Column(
           children: [
-            ListaCategorias(),
+            PantallaCategorias(),
             AgregarCategoriaWidget(),
           ],
         ),
@@ -66,24 +66,27 @@ class BottomNavigationBarExample extends StatefulWidget {
 class _BottomNavigationBarExampleState
   extends State<BottomNavigationBarExample> {
 
-      
-    
   int _currentIndex = 0;
+
+  String obtenerTitulo(){
+    switch (_currentIndex){
+      case 0:
+      return 'Vehiculos';
+      case 1:
+      return 'Categorias';
+      case 2:
+      return 'Gastos';
+      default:
+      return 'Unknown';
+    }
+  }
+
+  
 
   final List<Widget> _pages = [
     const PantallaVehiculos(),
-    
-    
-    
-    const Column(
-      children: [
-        ListaCategorias(),
-        SizedBox(height: 20),
-        AgregarCategoriaWidget()
-      ],
-    ),
+    const PantallaCategorias(),
     const PantallaGastos(),
-     
   ];
 
   @override
@@ -101,7 +104,11 @@ class _BottomNavigationBarExampleState
       
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 57, 127, 136),
-        title: const Text('BottomNavigationBar Example'),
+        title: 
+      
+        
+        
+        Text(obtenerTitulo()),
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -139,17 +146,23 @@ class _BottomNavigationBarExampleState
     }
     return true;
   }
+  
 }
+
+
 
 /* PANTALLA DE CATEGORIAS */
 
-class ListaCategorias extends StatelessWidget {
-  const ListaCategorias({super.key});
+class PantallaCategorias extends StatelessWidget {
+  const PantallaCategorias({super.key});
 
   @override
   Widget build(BuildContext context) {
     List<Categoria> categorias = [];
     var estado = context.watch<AppBloc>().state;
+    void editarCategoria(old, nueva){
+      context.read<AppBloc>().add(ActualizarCategoria(oldCategoria: old , newCategoria: nueva));
+    }
     print(estado);
     // if(estado is Inicial) return const Text('Oh no');
     if (estado is Operacional) categorias = (estado).listaCategorias;
@@ -159,118 +172,90 @@ class ListaCategorias extends StatelessWidget {
 
     if (categorias.isEmpty) {
       return const Center(
-        child: Text('Aun no hay categorias'),
+        
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Aun no hay categorias'),
+            
+            AgregarCategoriaWidget(),
+          ],
+        ),
       );
     }
-    return Expanded(
-      child: SizedBox(
-        height: 200,
-        width: 200,
-        child: ListView.builder(
-          itemCount: categorias.length,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-             /* onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        
+
+    return Center(
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: categorias.length,
+              itemBuilder: (context, index) {
+                final categoria = categorias[index];
+                return ListTile(
+                  
+                  title: Text(categoria.nombre),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: IconButton(onPressed: () {
+                          final controlador = TextEditingController(text: categoria.nombre);
+                      
+                          showDialog(context: context, builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Editar Categoria'),
+                              content: TextFormField(
+                                controller: controlador,
+                                decoration: const InputDecoration(
+                                  hintText: 'Nueva Categoria'
+                                ),
+                              ),
+                              actions: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    final nuevaCategoria = controlador.text.trim();
+                                    if (nuevaCategoria.isNotEmpty) {
+                                      editarCategoria(categoria.nombre, nuevaCategoria);
+                                      Navigator.of(context).pop();
+                                    }
+                                }, child: const Text('Guardar'),
+                                ),
+                                TextButton(onPressed: () {
+                                  Navigator.of(context).pop();
+                                }, child: const Text('Cancelar'),)
+                              ],
+                            );
+                          });
+                          
+                          
+                        }, 
+                        icon: const Icon(Icons.edit)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: IconButton(onPressed: () {
+                          context.read<AppBloc>().add(
+                            EliminarCategoria(categoriaAEliminar: categoria.nombre));
+                        }, 
+                        icon: const Icon(Icons.delete)),
+                      )
+                    ],
                   ),
+                  
                 );
               },
-              */
-              child: TileCategoria(categoria: categorias[index]),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class TileCategoria extends StatelessWidget {
-  final Categoria categoria;
-
-  const TileCategoria({Key? key, required this.categoria}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    void editarCategoria(old, nueva){
-      context.read<AppBloc>().add(ActualizarCategoria(oldCategoria: old , newCategoria: nueva));
-    }
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                categoria.nombre,
-                style: const TextStyle(
-                    fontSize: 18.0, fontWeight: FontWeight.bold),
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () {
-                      final controlador = TextEditingController(text: categoria.nombre);
-
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('Editar Categoría'),
-                            content: TextFormField(
-                              controller: controlador,
-                              decoration: const InputDecoration(
-                                hintText: 'Nueva categoría',
-                              ),
-                            ),
-                            actions: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  final nuevaCategoria = controlador.text.trim();
-                                  if (nuevaCategoria.isNotEmpty) {
-                                    editarCategoria(categoria.nombre, nuevaCategoria);
-                                    Navigator.of(context).pop();
-                                  }
-                                },
-                                child: const Text('Guardar'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Cancelar'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      context.read<AppBloc>().add(
-                          EliminarCategoria(categoriaAEliminar: categoria.nombre));
-                      
-                    },
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
-          const Divider(),
+          
+          const AgregarCategoriaWidget(),
         ],
       ),
     );
   }
 }
+
 
 class AgregarCategoriaWidget extends StatefulWidget {
   const AgregarCategoriaWidget({super.key});
@@ -283,75 +268,70 @@ class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
   final TextEditingController controlador = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    void agregarCategoria(nuevaCategoria) {
+    if (nuevaCategoria.isNotEmpty) {
+      context.read<AppBloc>().add(AgregarCategoria(categoriaAAgregar: nuevaCategoria));
+      controlador.clear();
+      Navigator.pop(context);
+    }
+  }
+
     return Padding(
-      padding: const EdgeInsets.all(50.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: controlador,
-            decoration: const InputDecoration(
-              hintText: 'Nueva categoria',
+      padding: const EdgeInsets.all(16.0),
+      child: ElevatedButton.icon(onPressed: () {
+
+        showDialog(
+          context: context, 
+          builder: (BuildContext context) => AlertDialog(
+          title: const Text('Agregar Categoria'),
+          content: TextFormField(
+          controller: controlador,
+          decoration: const InputDecoration(
+          labelText: 'Categoria',
+          icon: Icon(Icons.category_outlined),
+          iconColor: Color.fromARGB(255, 57, 127, 136),
+          labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+          enabledBorder: UnderlineInputBorder(
+         borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
             ),
-          ),
-          const SizedBox(width: 10),
-          ElevatedButton(
-            onPressed: () {
-              final nuevaCategoria = controlador.text.trim();
-              if (nuevaCategoria.isNotEmpty) {
-                context
-                    .read<AppBloc>()
-                    .add(AgregarCategoria(categoriaAAgregar: nuevaCategoria));
-                controlador.clear();
-              }
-            },
-            child: const Text('Agregar'),
-          ),
-        ],
-      ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+            )
+            ),
+          inputFormatters: [LengthLimitingTextInputFormatter(15)],
+            ),
+            actions: [
+              TextButton(onPressed: () {
+                Navigator.pop(context);
+              }, 
+              child: const Text('Cancelar')),
+              TextButton(onPressed: () {
+              final nuevaCategoria = controlador.text.trim().toUpperCase();
+              agregarCategoria(nuevaCategoria);
+              
+              }, 
+              child: const Text('Agregar'))
+            ],
+          )
+          );
+      }, 
+      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 57, 127, 136)),
+        label: const Text('Agregar Categoria'),
+        icon: const Icon(Icons.add),
+      
+      
+      
+      
+      )
+
     );
   }
+
+  
+  
 }
 
 
-/* Pantalla de categoria seleccionada */
-/*
-class VehiculosEnCategoria extends StatelessWidget {
-  final String categoria;
-
-  const VehiculosEnCategoria({super.key, required this.categoria});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(categoria),
-      ),
-      body: BlocBuilder<AppBloc, AppEstado>(
-        builder: (context, state) {
-          if (state is Operacional) {
-            final vehiculosEnCategoria = state.listaCategorias
-                .where((vehiculo) => vehiculo.categoria == categoria)
-                .toList();
-
-            return ListView.builder(
-              itemCount: vehiculosEnCategoria.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(vehiculosEnCategoria[index].marca),
-                  subtitle: Text(vehiculosEnCategoria[index].matricula),
-                );
-              },
-            );
-          } else {
-            return const Center(
-              child: Text('Error al cargar los detalles de la categoria'),
-            );
-          }
-        },
-      ),
-    );
-  }
-*/
 /* PANTALLA DE VEHICULOS */
 
 class PantallaVehiculos extends StatelessWidget {
@@ -721,11 +701,11 @@ class PantallaGastos extends StatefulWidget {
 class _PantallaGastosState extends State<PantallaGastos> {
   double cantidadGastada = 0.00;
 
-  TextEditingController controladorFechaInicial = TextEditingController();
-  TextEditingController controladorFechaFinal = TextEditingController();
-  TextEditingController controladorCategoriaSeleccionada= TextEditingController();
-  TextEditingController controladorVehiculoSeleccionado = TextEditingController();
-  TextEditingController controladorLugar= TextEditingController();
+  TextEditingController controladorFechaInicial = TextEditingController(text: '1950-01-01');
+  TextEditingController controladorFechaFinal = TextEditingController(text: '2024-12-30');
+  TextEditingController controladorCategoriaSeleccionada= TextEditingController(text: 'Todas las categorias');
+  TextEditingController controladorVehiculoSeleccionado = TextEditingController(text: 'Todos los vehiculos');
+  TextEditingController controladorLugar= TextEditingController(text: 'Todos los lugares');
 
   
 
@@ -742,8 +722,6 @@ class _PantallaGastosState extends State<PantallaGastos> {
     List<Categoria> categorias = [];
     List<Vehiculo> vehiculos = [];
 
-    
-
     double calcularTotalGastado(List<Gasto> gastos) {
       double total = 0.0;
       for (var gasto in gastos) {
@@ -753,8 +731,6 @@ class _PantallaGastosState extends State<PantallaGastos> {
     }
     final Categoria todasLasCategorias = Categoria(nombre: 'all', categoria_id: 99999);
 
-    
-    
     var estado = context.watch<AppBloc>().state;
 
     if(estado is Operacional) {
@@ -772,9 +748,20 @@ class _PantallaGastosState extends State<PantallaGastos> {
     if(estado is Inicial){
       return const Center(child: CircularProgressIndicator());
     }
+    if(gastos.isEmpty){
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+            const Text('Aun no hay gastos'),
+            BotonAgregarGasto(),          
+        ],
+      );
+    }
     
     
     Gasto gastoSeleccionado = gastos[0];
+
+
 
     void updateCategoriaSeleccionada(value){
     setState(() {
@@ -797,6 +784,15 @@ class _PantallaGastosState extends State<PantallaGastos> {
     
     
     
+    
+    String fechaInicialFiltro = '2000-01-01';
+    String fechaFinalFiltro = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    int categoriaFiltro = 1;
+    int vehiculoFiltro = 1;
+    String lugarFiltro = 'Juan';
+
+    
+
     return Column(
       children: [
           TextFormField(
@@ -810,7 +806,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
                    if(fechaSeleccionada !=null){
                     String formattedDate =  DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
                     controladorFechaInicial.text = formattedDate;
-                    print(controladorFechaInicial);
+                    
                   }
                  });
             },
@@ -840,7 +836,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
             decoration: const InputDecoration(labelText: 'Categoria'),
           value: categoriaSeleccionada,
           onChanged: (value) {
-            context.read<AppBloc>().add(FiltrarGasto(categoriaId: (value as Categoria).categoria_id));
+            //context.read<AppBloc>().add(FiltrarGasto(categoriaId: (value as Categoria).categoria_id));
             updateCategoriaSeleccionada(value);
           },
           items: [
@@ -860,7 +856,8 @@ class _PantallaGastosState extends State<PantallaGastos> {
             decoration: const InputDecoration(labelText: 'Vehiculo'),
             value: vehiculoSeleccionado,
             onChanged: (value) {
-              context.read<AppBloc>().add(FiltrarGasto(vehiculoId: (value as Vehiculo).vehiculo_id));
+              //context.read<AppBloc>().add(FiltrarGasto(vehiculoId: (value as Vehiculo).vehiculo_id));
+              // vehiculoFiltro = (value as Vehiculo).vehiculo_id;
               updateVehiculoSeleccionado(value);
               
             },
@@ -876,7 +873,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
             value: gastoSeleccionado,
             onChanged: (value) {
               
-              print(gastoSeleccionado);
+        
             },
             items: gastos.map<DropdownMenuItem<Gasto>>((gasto) {
               return DropdownMenuItem<Gasto>(
@@ -886,6 +883,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
             }).toList(),
           ),
           
+
         Expanded(
           child: SizedBox(
             //width: 500,
@@ -916,6 +914,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
                         onTap: () {
                           Categoria categoriaDelGasto = categorias[gasto.categoria_id-1];
                           Vehiculo vehiculoDelGasto = vehiculos[gasto.vehiculo_id-1];
+                          
                           Navigator.push(context,
                           MaterialPageRoute(
                             builder: (BuildContext context){
@@ -1021,19 +1020,6 @@ class _PantallaGastosState extends State<PantallaGastos> {
   }
 }
 
-class ListaGastosFiltrada extends StatefulWidget {
-  const ListaGastosFiltrada({super.key});
-
-  @override
-  State<ListaGastosFiltrada> createState() => _ListaGastosFiltradaState();
-}
-
-class _ListaGastosFiltradaState extends State<ListaGastosFiltrada> {
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-}
 
 class BotonAgregarGasto extends StatelessWidget {
   final TextEditingController vehiculoController = TextEditingController();
@@ -1100,8 +1086,8 @@ class BotonAgregarGasto extends StatelessWidget {
 
                 int categoriaId = int.parse(idCategoriaSeleccionada.text);
                 int vehiculoId = int.parse(idVehiculoSeleccionado.text);
-                String descripcion = descripcionController.text;
-                String lugar = lugarController.text;
+                String descripcion = descripcionController.text.toUpperCase();
+                String lugar = lugarController.text.toUpperCase();
                 double cantidad = double.parse(cantidadController.text);
                 String fecha = DateTime.parse(fechaController.text).toString();
           
@@ -1125,6 +1111,7 @@ class BotonAgregarGasto extends StatelessWidget {
      child: const Text('Agregar Gasto'));
   }
 }
+
 
 class FormularioGasto extends StatefulWidget {
   
@@ -1317,10 +1304,10 @@ class _FormularioGastoState extends State<FormularioGasto> {
               },
             );
 
-if (selectedDate != null) {
-  String formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
-  widget.fechaController.text = formattedDate;
-}
+              if (selectedDate != null) {
+                String formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+                widget.fechaController.text = formattedDate;
+              }
               }, 
               keyboardType: TextInputType.datetime,
         ),
