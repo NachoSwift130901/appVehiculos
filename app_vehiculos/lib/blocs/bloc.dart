@@ -235,7 +235,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   }
   Future<void> eliminarVehiculo(matricula) async {
     await db.rawDelete("DELETE FROM vehiculos WHERE matricula = ?", [matricula]);
-    await db.rawDelete("DELETE FROM gastos WHERE vehiculo_id IN (SELECT id FROM vehiculos WHERE vehiculo matricula = ?)", [matricula]);
+    //await db.rawDelete("DELETE FROM gastos WHERE vehiculo_id IN (SELECT id FROM vehiculos WHERE vehiculo matricula = ?)", [matricula]);
   }
   Future<void> actualizarVehiculo(matricula, marca, int modelo, color, matriculaVieja) async {
     await db.rawUpdate("UPDATE vehiculos SET matricula = ?, modelo = ?, color = ?, marca = ? WHERE matricula = ?",

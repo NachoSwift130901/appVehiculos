@@ -408,19 +408,93 @@ class PantallaVehiculos extends StatelessWidget {
                                 }
                                 return Scaffold(
                                   appBar: AppBar(
+                                    backgroundColor: const Color.fromARGB(255, 57, 127, 136),
                                     title: Text('Vehiculo: ${vehiculo.matricula}'),
                                   ),
                                     body: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                      Text('Marca: ${vehiculo.marca}',
-                                          style: const TextStyle(fontSize: 20)),
-                                      Text('Modelo: ${vehiculo.modelo}',
-                                          style: const TextStyle(fontSize: 20)),
-                                      Text('Color: ${vehiculo.color}',
-                                          style: const TextStyle(fontSize: 20)),
-                                      Text('Matricula: ${vehiculo.matricula}',
-                                          style: const TextStyle(fontSize: 20)),
+                                       Padding(
+                                         padding: const EdgeInsets.all(8.0),
+                                         child: Container(
+                                          decoration: BoxDecoration(
+                                              color: const Color.fromARGB(160, 57, 127, 136), // Cambia el color según tus preferencias
+                                              borderRadius: BorderRadius.circular(10.0), // Ajusta el radio según tus preferencias
+                                            ),
+                                           child: Row(
+                                              children: [
+                                                const Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Icon(Icons.branding_watermark_outlined),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      const Text('Marca:', style: TextStyle(fontSize: 20)),
+                                                      Text(vehiculo.marca, style: const TextStyle(fontSize: 20)),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                         ),
+                                       ),
+                                       Padding(
+                                         padding: const EdgeInsets.all(8.0),
+                                         child: Row(
+                                            children: [
+                                              const Icon(Icons.numbers_outlined),
+                                              Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Text('Modelo:', style: TextStyle(fontSize: 20)),
+                                                    Text('${vehiculo.modelo}', style: const TextStyle(fontSize: 20)),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                       ),
+                                      Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            children: [
+                                              const Icon(Icons.palette),
+                                              Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Text('Color:', style: TextStyle(fontSize: 20)),
+                                                    Text(vehiculo.color, style: const TextStyle(fontSize: 20)),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                       Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            children: [
+                                              const Icon(Icons.drive_eta),
+                                              Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Text('Matricula:', style: TextStyle(fontSize: 20)),
+                                                    Text(vehiculo.matricula, style: const TextStyle(fontSize: 20)),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       // Agrega aquí más información sobre el vehículo según tus necesidades
                                     ],
                                   ),
@@ -431,7 +505,9 @@ class PantallaVehiculos extends StatelessWidget {
                                         FloatingActionButton(
                                           onPressed: () {
                                             eliminarVehiculo(vehiculo);
+                                            
                                             Navigator.pop(context);
+                                            mostrarAdvertencia("Vehiculo eliminado correctamente");
                                           },
                                           tooltip: 'Borrar Vehiculo',
                                           child: const Icon(Icons.delete),
