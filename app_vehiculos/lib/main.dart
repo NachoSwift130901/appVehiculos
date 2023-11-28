@@ -411,6 +411,8 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
                               context,
                               MaterialPageRoute(
                               builder: (BuildContext context) {
+                                key: Key(vehiculo.marca);
+                                
                                 void cerrartodo(){
                                   Navigator.pop(context);
                                 }
@@ -813,7 +815,8 @@ class _PantallaGastosState extends State<PantallaGastos> {
       }
       return total;
     }
-    final Categoria todasLasCategorias = Categoria(nombre: 'all', categoria_id: 99999);
+    final Categoria todasLasCategorias = Categoria(nombre: 'all', categoria_id: 999);
+    final Vehiculo todosLosVehiculos = Vehiculo(marca: "", modelo: 2012, vehiculo_id: 999, color: "azul", matricula: "", );
 
     var estado = context.watch<AppBloc>().state;
 
@@ -825,61 +828,52 @@ class _PantallaGastosState extends State<PantallaGastos> {
     }
     double cantidadGastada = calcularTotalGastado(gastos);
 
-    Categoria categoriaSeleccionada = categorias[0];
-    Vehiculo vehiculoSeleccionado = vehiculos[0];
+    Categoria categoriaSeleccionada = todasLasCategorias;
+    Vehiculo vehiculoSeleccionado = todosLosVehiculos
+    ;
     
 
     if(estado is Inicial){
       return const Center(child: CircularProgressIndicator());
     }
-    if(gastos.isEmpty){
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-            const Text('Aun no hay gastos'),
-            BotonAgregarGasto(),          
-        ],
-      );
-    }
+    
     
     
     Gasto gastoSeleccionado = gastos[0];
 
-
-
+    
     void updateCategoriaSeleccionada(value){
     setState(() {
       
      categoriaSeleccionada = value;
-     
      controladorCategoriaSeleccionada.text = (value as Categoria).categoria_id.toString();
+     context.read<AppBloc>().add(
+      FiltrarGasto(controladorFechaInicial.text, controladorFechaFinal.text, controladorCategoriaSeleccionada.text, controladorVehiculoSeleccionado.text, controladorLugar.text));
+
     });
   }
     void updateVehiculoSeleccionado(value){
     setState(() {
       vehiculoSeleccionado = value;
-      controladorVehiculoSeleccionado.text = (value as Vehiculo).color.toString();
+      controladorVehiculoSeleccionado.text = (value as Vehiculo).vehiculo_id.toString();
+      context.read<AppBloc>().add(
+      FiltrarGasto(controladorFechaInicial.text, controladorFechaFinal.text, controladorCategoriaSeleccionada.text, controladorVehiculoSeleccionado.text, controladorLugar.text));
+
+      
     });
   }
     void updateLugarSeleccionado(value){
       setState(() {
         gastoSeleccionado = value;
         controladorLugar.text = (value as Gasto).lugar.toString();
-        context.read<AppBloc>().add(FiltrarGasto(controladorFechaFinal.text, controladorFechaFinal.text, int.parse(controladorCategoriaSeleccionada.text), int.parse(controladorVehiculoSeleccionado.text), controladorLugar.text));
+        context.read<AppBloc>().add(FiltrarGasto(controladorFechaFinal.text, controladorFechaFinal.text, controladorCategoriaSeleccionada.text, controladorVehiculoSeleccionado.text, controladorLugar.text));
       });
     }
     
     
     
     
-    String fechaInicialFiltro = '2000-01-01';
-    String fechaFinalFiltro = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    int categoriaFiltro = 1;
-    int vehiculoFiltro = 1;
-    String lugarFiltro = 'Juan';
-
-    
-
+   
     return Column(
       children: [
           TextFormField(
@@ -944,17 +938,22 @@ class _PantallaGastosState extends State<PantallaGastos> {
             decoration: const InputDecoration(labelText: 'Vehiculo'),
             value: vehiculoSeleccionado,
             onChanged: (value) {
-              //context.read<AppBloc>().add(FiltrarGasto(vehiculoId: (value as Vehiculo).vehiculo_id));
-              // vehiculoFiltro = (value as Vehiculo).vehiculo_id;
+              
               updateVehiculoSeleccionado(value);
               
             },
-            items: vehiculos.map<DropdownMenuItem<Vehiculo>>((vehiculo) {
+            items: [
+              DropdownMenuItem(
+                value: todosLosVehiculos,
+                child: const Text("Todos los vehiculos"),
+                ),
+              ...vehiculos.map<DropdownMenuItem<Vehiculo>>((vehiculo) {
               return DropdownMenuItem<Vehiculo>(
                 value: vehiculo,
                 child: Text('${vehiculo.marca} ${vehiculo.matricula}'),
               );
             }).toList(),
+            ]
           ),
           DropdownButtonFormField<Gasto>(
             decoration: const InputDecoration(labelText: 'Lugar'),
@@ -979,6 +978,13 @@ class _PantallaGastosState extends State<PantallaGastos> {
             child: BlocBuilder<AppBloc, AppEstado>(
               builder: (context, state) {
                 if(state is Operacional){
+                  print(state.listaGastos.length);
+                  if (state.listaGastos.isEmpty) {
+                    
+                    return const Center(
+                      child: Text('No hay gastos disponibles'),
+                    );
+                  }
                   
                   return 
                   ListView.builder(
@@ -987,6 +993,8 @@ class _PantallaGastosState extends State<PantallaGastos> {
                       final gasto = state.listaGastos[index];
                       final categorias = state.listaCategorias;
                       final vehiculos = state.listaVehiculos;
+
+                      
               
                   
                       return ListTile(
@@ -1108,7 +1116,6 @@ class _PantallaGastosState extends State<PantallaGastos> {
   }
 }
 
-
 class BotonAgregarGasto extends StatelessWidget {
   final TextEditingController vehiculoController = TextEditingController();
   final TextEditingController descripcionController = TextEditingController();
@@ -1199,7 +1206,6 @@ class BotonAgregarGasto extends StatelessWidget {
      child: const Text('Agregar Gasto'));
   }
 }
-
 
 class FormularioGasto extends StatefulWidget {
   

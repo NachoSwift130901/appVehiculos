@@ -66,8 +66,8 @@ class RepositorioBD {
 
 }
 
-const int getIdAllCategorias = 999;
-const int getIdAllVehiculos = 999;
+const String getIdAllCategorias = "Todas las categorias";
+const String getIdAllVehiculos = "Todos los vehiculos";
 
 
 /* -------------- ESTADOS -----------------*/
@@ -173,8 +173,8 @@ class EditarGasto extends AppEvento{
 class FiltrarGasto extends AppEvento {
   final String fechaIncial;
   final String fechaFinal;
-  final int categoriaId;
-  final int vehiculoId;
+  final String categoriaId;
+  final String vehiculoId;
   final String lugar;
 
   FiltrarGasto(this.fechaIncial, this.fechaFinal, this.categoriaId, this.vehiculoId, this.lugar);
@@ -258,15 +258,19 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     
   }
 
-  Future<void> filtrarGasto(fechaInicial, fechaFinal, int categoriaId, int vehiculoId, lugar) async {
+  Future<void> filtrarGasto(fechaInicial, fechaFinal,categoriaId,vehiculoId, lugar) async {
     
     String condicionCategoria = (categoriaId == getIdAllCategorias)? '' : 'AND categoria_id = $categoriaId';
+    
     String condicionVehiculo = (vehiculoId == getIdAllVehiculos)? '' : 'AND vehiculo_id = $vehiculoId'; 
-
+    
+    
     var resultadoConsulta = await db.rawQuery('SELECT * FROM gastos WHERE fecha BETWEEN ? AND ? $condicionCategoria $condicionVehiculo AND lugar = ?',
     [fechaInicial, fechaFinal, lugar]);
     
+    
     _listaGastos = resultadoConsulta.map((e) => Gasto.fromMap(e)).toList();
+    print(resultadoConsulta);
   }
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async{
@@ -328,6 +332,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
 
     on<FiltrarGasto>((event, emit)async{
       await filtrarGasto(event.fechaIncial, event.fechaFinal, event.categoriaId, event.vehiculoId, event.lugar);
+      
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
 
