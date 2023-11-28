@@ -26,6 +26,6 @@ class Vehiculo with EquatableMixin {
 
   
   @override
-  List<Object?> get props => [vehiculo_id,marca, modelo, color, matricula];
+  List<Object?> get props => [vehiculo_id, marca, modelo, color, matricula];
   
 }

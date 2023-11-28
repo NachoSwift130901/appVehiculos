@@ -11,9 +11,10 @@ import 'package:intl/intl.dart';
 
 
 
-void main() async {
-  runApp(const AplicacionInyectada());
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  runApp(const AplicacionInyectada());
+  
 }
 
 class AplicacionInyectada extends StatelessWidget {
@@ -256,7 +257,6 @@ class PantallaCategorias extends StatelessWidget {
   }
 }
 
-
 class AgregarCategoriaWidget extends StatefulWidget {
   const AgregarCategoriaWidget({super.key});
 
@@ -334,10 +334,15 @@ class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
 
 /* PANTALLA DE VEHICULOS */
 
-class PantallaVehiculos extends StatelessWidget {
+class PantallaVehiculos extends StatefulWidget {
 
   const PantallaVehiculos({super.key});
 
+  @override
+  State<PantallaVehiculos> createState() => _PantallaVehiculosState();
+}
+
+class _PantallaVehiculosState extends State<PantallaVehiculos> {
   @override
    Widget build(BuildContext context) {
 
@@ -348,6 +353,9 @@ class PantallaVehiculos extends StatelessWidget {
   }
     void actualizarVehiculo(matricula, marca, modelo, color, matriculaId) {
       context.read<AppBloc>().add(ActualizarVehiculo(matricula, marca, modelo, color, matriculaId));
+      setState(() {
+        
+      });
     }
 
     void mostrarAdvertencia(String mensaje){
@@ -382,16 +390,19 @@ class PantallaVehiculos extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          BlocBuilder<AppBloc, AppEstado>(
-            
+          BlocBuilder<AppBloc, AppEstado>(   
+          
             builder: (context, state) {
+              
               if (state is Operacional) {
                 return 
                     Expanded(
                       child: ListView.builder(
                         itemCount: state.listaVehiculos.length,
                         itemBuilder: (context, index) {
+                          
                           final vehiculo = state.listaVehiculos[index];
+
                           return ListTile(
                             leading: const Icon(Icons.drive_eta_rounded),
                             trailing: const Icon(Icons.drag_handle_rounded),
@@ -459,7 +470,7 @@ class PantallaVehiculos extends StatelessWidget {
                                             ],
                                           ),
                                        ),
-                                      Padding(
+                                       Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Row(
                                             children: [
@@ -841,7 +852,9 @@ class _PantallaGastosState extends State<PantallaGastos> {
 
     void updateCategoriaSeleccionada(value){
     setState(() {
+      
      categoriaSeleccionada = value;
+     
      controladorCategoriaSeleccionada.text = (value as Categoria).categoria_id.toString();
     });
   }
@@ -855,6 +868,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
       setState(() {
         gastoSeleccionado = value;
         controladorLugar.text = (value as Gasto).lugar.toString();
+        context.read<AppBloc>().add(FiltrarGasto(controladorFechaFinal.text, controladorFechaFinal.text, int.parse(controladorCategoriaSeleccionada.text), int.parse(controladorVehiculoSeleccionado.text), controladorLugar.text));
       });
     }
     
@@ -880,6 +894,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
                  );
                  setState(() {
                    if(fechaSeleccionada !=null){
+                    
                     String formattedDate =  DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
                     controladorFechaInicial.text = formattedDate;
                     
@@ -912,7 +927,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
             decoration: const InputDecoration(labelText: 'Categoria'),
           value: categoriaSeleccionada,
           onChanged: (value) {
-            //context.read<AppBloc>().add(FiltrarGasto(categoriaId: (value as Categoria).categoria_id));
+            
             updateCategoriaSeleccionada(value);
           },
           items: [
@@ -948,7 +963,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
             decoration: const InputDecoration(labelText: 'Lugar'),
             value: gastoSeleccionado,
             onChanged: (value) {
-              
+              updateLugarSeleccionado(value);
         
             },
             items: gastos.map<DropdownMenuItem<Gasto>>((gasto) {

@@ -66,6 +66,8 @@ class RepositorioBD {
 
 }
 
+const int getIdAllCategorias = 999;
+const int getIdAllVehiculos = 999;
 
 
 /* -------------- ESTADOS -----------------*/
@@ -88,6 +90,7 @@ class Operacional extends AppEstado{
   @override
   List<Object?> get props => [listaCategorias, listaVehiculos, listaGastos];
 }
+
 
 /* -------------- EVENTOS  ----------------*/
 
@@ -144,10 +147,6 @@ class ActualizarVehiculo extends AppEvento{
   
 
   ActualizarVehiculo(this.matricula, this.marca, this.modelo, this.color, this.matriculaId);
-
-  
-
-  
 }
 
 //Gastos
@@ -180,8 +179,6 @@ class FiltrarGasto extends AppEvento {
 
   FiltrarGasto(this.fechaIncial, this.fechaFinal, this.categoriaId, this.vehiculoId, this.lugar);
 
-
-  
 }
 
 
@@ -261,9 +258,13 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     
   }
 
-  Future<void>filtrarGasto(fechaInicial, fechaFinal, int categoriaId, int vehiculoId, lugar) async {
-    var resultadoConsulta = await db.rawQuery('SELECT * FROM gastos WHERE fecha BETWEEN ? AND ? AND categoria_id = ? AND vehiculo_id = ? AND lugar = ?',
-    [fechaInicial, fechaFinal, categoriaId, vehiculoId, lugar],);
+  Future<void> filtrarGasto(fechaInicial, fechaFinal, int categoriaId, int vehiculoId, lugar) async {
+    
+    String condicionCategoria = (categoriaId == getIdAllCategorias)? '' : 'AND categoria_id = $categoriaId';
+    String condicionVehiculo = (vehiculoId == getIdAllVehiculos)? '' : 'AND vehiculo_id = $vehiculoId'; 
+
+    var resultadoConsulta = await db.rawQuery('SELECT * FROM gastos WHERE fecha BETWEEN ? AND ? $condicionCategoria $condicionVehiculo AND lugar = ?',
+    [fechaInicial, fechaFinal, lugar]);
     
     _listaGastos = resultadoConsulta.map((e) => Gasto.fromMap(e)).toList();
   }
@@ -305,6 +306,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       
       await actualizarVehiculo(event.matricula, event.marca, int.parse(event.modelo), event.color, event.matriculaId);
       await todosLosVehiculos();
+      print(_listaVehiculos);
       
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
     });
