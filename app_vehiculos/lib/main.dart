@@ -353,9 +353,6 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
   }
     void actualizarVehiculo(matricula, marca, modelo, color, matriculaId) {
       context.read<AppBloc>().add(ActualizarVehiculo(matricula, marca, modelo, color, matriculaId));
-      setState(() {
-        
-      });
     }
 
     void mostrarAdvertencia(String mensaje){
