@@ -47,7 +47,7 @@ class RepositorioBD {
           lugar TEXT,
           cantidad REAL,
           fecha DATE,
-          FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id),
+          FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id) ON DELETE CASCADE,
           FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
 
         );
@@ -66,9 +66,6 @@ class RepositorioBD {
 
 }
 
-const String getIdAllCategorias = "Todas las categorias";
-const String getIdAllVehiculos = "Todos los vehiculos";
-
 
 /* -------------- ESTADOS -----------------*/
 
@@ -84,11 +81,12 @@ class Operacional extends AppEstado{
   final List<Categoria> listaCategorias;
   final List<Vehiculo> listaVehiculos;
   final List<Gasto> listaGastos;
+  final List<Gasto> listaGastosFiltrados;
 
-  Operacional({required this.listaCategorias, required this.listaVehiculos, required this.listaGastos});
+  Operacional({required this.listaCategorias, required this.listaVehiculos, required this.listaGastos, required this.listaGastosFiltrados});
   
   @override
-  List<Object?> get props => [listaCategorias, listaVehiculos, listaGastos];
+  List<Object?> get props => [listaCategorias, listaVehiculos, listaGastos, listaGastosFiltrados];
 }
 
 
@@ -133,9 +131,9 @@ class AgregarVehiculo extends AppEvento{
 }
 
 class EliminarVehiculo extends AppEvento{
-  final String matricula;
+  final Vehiculo vehiculo;
 
-  EliminarVehiculo({required this.matricula});
+  EliminarVehiculo({required this.vehiculo});
 }
 
 class ActualizarVehiculo extends AppEvento{
@@ -188,6 +186,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   List<Categoria> _listaCategorias = [];
   List<Vehiculo> _listaVehiculos = [];
   List<Gasto> _listaGastos = [];
+  List<Gasto> _listaGastosFiltrados = [];
 
   RepositorioBD repo = RepositorioBD();
   
@@ -214,7 +213,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     await db.rawInsert('INSERT INTO categorias (categoria) VALUES(?)', [categoriaAAgregar]);  
     todasLasCategorias();
   }
-  Future<void>eliminarCategoria(categoriaAEliminar) async{
+  Future<void> eliminarCategoria(categoriaAEliminar) async{
     await db.rawDelete('DELETE FROM categorias where categoria = ?', [categoriaAEliminar]); 
     await db.rawDelete('DELETE FROM gastos WHERE categoria_id IN (SELECT id FROM categorias WHERE categoria = ?)', [categoriaAEliminar]);
   }
@@ -230,9 +229,10 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     ]);
     await todosLosVehiculos();
   }
-  Future<void> eliminarVehiculo(matricula) async {
-    await db.rawDelete("DELETE FROM vehiculos WHERE matricula = ?", [matricula]);
-    //await db.rawDelete("DELETE FROM gastos WHERE vehiculo_id IN (SELECT id FROM vehiculos WHERE vehiculo matricula = ?)", [matricula]);
+  Future<void> eliminarVehiculo(Vehiculo vehiculo) async {
+    await db.rawDelete("DELETE FROM vehiculos WHERE matricula = ?", [vehiculo.matricula]);
+    await db.rawDelete("DELETE from gastos WHERE vehiculo_id = ?", [vehiculo.vehiculo_id]);
+    
   }
   Future<void> actualizarVehiculo(matricula, marca, int modelo, color, matriculaVieja) async {
     await db.rawUpdate("UPDATE vehiculos SET matricula = ?, modelo = ?, color = ?, marca = ? WHERE matricula = ?",
@@ -259,52 +259,65 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   }
 
   Future<void> filtrarGasto(fechaInicial, fechaFinal,categoriaId,vehiculoId, lugar) async {
-    
-    String condicionCategoria = (categoriaId == getIdAllCategorias)? '' : 'AND categoria_id = $categoriaId';
-    
-    String condicionVehiculo = (vehiculoId == getIdAllVehiculos)? '' : 'AND vehiculo_id = $vehiculoId'; 
+
     
     
-    var resultadoConsulta = await db.rawQuery('SELECT * FROM gastos WHERE fecha BETWEEN ? AND ? $condicionCategoria $condicionVehiculo AND lugar = ?',
-    [fechaInicial, fechaFinal, lugar]);
+    String condicionCategoria = ((categoriaId) == '999' || (categoriaId) == 'Todas las categorias')? '' : 'AND categoria_id = $categoriaId';
+    
+    String condicionVehiculo = ((vehiculoId) == '999' || (vehiculoId) == 'Todos los vehiculos')? '' : 'AND vehiculo_id = $vehiculoId'; 
+
+    String condicionLugar = (lugar == 'Todos los lugares')? '' : 'AND lugar = \'$lugar\'';
+    
+    String test= 'SELECT * FROM gastos WHERE fecha BETWEEN $fechaInicial AND $fechaFinal $condicionCategoria $condicionVehiculo $condicionLugar';
+    print(test);
+    var resultadoConsulta = await db.rawQuery('SELECT * FROM gastos WHERE fecha BETWEEN ? AND ? $condicionCategoria $condicionVehiculo $condicionLugar',
+    [fechaInicial, fechaFinal]);
+
     
     
-    _listaGastos = resultadoConsulta.map((e) => Gasto.fromMap(e)).toList();
-    print(resultadoConsulta);
+    
+    _listaGastosFiltrados = resultadoConsulta.map((e) => Gasto.fromMap(e)).toList();
+    
+  
   }
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async{
       await todasLasCategorias();
       await todosLosGastos();
       await todosLosVehiculos();
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      _listaGastosFiltrados = _listaGastos;
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
 
     on<AgregarCategoria>((event, emit) async{
       agregarCategoria(event.categoriaAAgregar);
       await todasLasCategorias();
       
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
     on<EliminarCategoria>((event, emit) async {
       await eliminarCategoria(event.categoriaAEliminar);
       await todasLasCategorias();
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
     on<ActualizarCategoria>((event, emit) async {
       actualizarCategoria(event.oldCategoria, event.newCategoria);
       await todasLasCategorias();
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
 
     on<AgregarVehiculo>((event, emit) async{
       await agregarVehiculo(event.marca, event.modelo, event.color, event.matricula);
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
     on<EliminarVehiculo>((event, emit) async {
-      await eliminarVehiculo(event.matricula);
+      await eliminarVehiculo(event.vehiculo);
       await todosLosVehiculos();
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      _listaGastosFiltrados = _listaGastos;
+    
+      print(_listaGastosFiltrados);
+
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
     on<ActualizarVehiculo>((event, emit) async {
       
@@ -312,28 +325,30 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       await todosLosVehiculos();
       print(_listaVehiculos);
       
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
 
     on<AgregarGasto>((event, emit) async {
       await agregarGasto(event.gasto);
       await todosLosGastos();
+      _listaGastosFiltrados = _listaGastos;
 
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
     on<EliminarGasto>((event, emit)async{
       await eliminarGasto(event.id);
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      _listaGastosFiltrados = _listaGastos;
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
     on<EditarGasto>((event, emit)async{
       
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
 
     on<FiltrarGasto>((event, emit)async{
       await filtrarGasto(event.fechaIncial, event.fechaFinal, event.categoriaId, event.vehiculoId, event.lugar);
       
-      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos));
+      emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
 
   }

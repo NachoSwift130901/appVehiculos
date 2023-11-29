@@ -348,7 +348,7 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
 
     void eliminarVehiculo(Vehiculo vehiculo) {
     context.read<AppBloc>().add(
-                EliminarVehiculo(matricula: vehiculo.matricula));
+                EliminarVehiculo(vehiculo: vehiculo));
                 
   }
     void actualizarVehiculo(matricula, marca, modelo, color, matriculaId) {
@@ -411,7 +411,7 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
                               context,
                               MaterialPageRoute(
                               builder: (BuildContext context) {
-                                key: Key(vehiculo.marca);
+                                
                                 
                                 void cerrartodo(){
                                   Navigator.pop(context);
@@ -804,9 +804,12 @@ class _PantallaGastosState extends State<PantallaGastos> {
       context.read<AppBloc>().add(EditarGasto(gastoViejo: gastoViejo, gastoNuevo: gastoNuevo));
     }
     
+    
     List<Gasto> gastos = [];
     List<Categoria> categorias = [];
     List<Vehiculo> vehiculos = [];
+    List<Gasto> gastosFiltrados = [];
+    
 
     double calcularTotalGastado(List<Gasto> gastos) {
       double total = 0.0;
@@ -817,6 +820,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
     }
     final Categoria todasLasCategorias = Categoria(nombre: 'all', categoria_id: 999);
     final Vehiculo todosLosVehiculos = Vehiculo(marca: "", modelo: 2012, vehiculo_id: 999, color: "azul", matricula: "", );
+    final Gasto todosLosGastos = Gasto(descripcion: '', lugar: 'Todos los lugares', cantidad: 0, fecha: '1', categoria_id: 1, vehiculo_id: 1);
 
     var estado = context.watch<AppBloc>().state;
 
@@ -824,56 +828,53 @@ class _PantallaGastosState extends State<PantallaGastos> {
       gastos = (estado).listaGastos;
       categorias = (estado).listaCategorias;
       vehiculos = (estado).listaVehiculos;
+      gastosFiltrados = (estado).listaGastosFiltrados;
       
     }
-    double cantidadGastada = calcularTotalGastado(gastos);
+    double cantidadGastada = calcularTotalGastado(gastosFiltrados);
 
     Categoria categoriaSeleccionada = todasLasCategorias;
-    Vehiculo vehiculoSeleccionado = todosLosVehiculos
-    ;
+    Vehiculo vehiculoSeleccionado = todosLosVehiculos;
+    Gasto gastoSeleccionado = todosLosGastos;
     
 
     if(estado is Inicial){
       return const Center(child: CircularProgressIndicator());
     }
-    
-    
-    
-    Gasto gastoSeleccionado = gastos[0];
-
+ 
     
     void updateCategoriaSeleccionada(value){
     setState(() {
       
      categoriaSeleccionada = value;
      controladorCategoriaSeleccionada.text = (value as Categoria).categoria_id.toString();
+     
      context.read<AppBloc>().add(
       FiltrarGasto(controladorFechaInicial.text, controladorFechaFinal.text, controladorCategoriaSeleccionada.text, controladorVehiculoSeleccionado.text, controladorLugar.text));
 
     });
   }
     void updateVehiculoSeleccionado(value){
+    
     setState(() {
       vehiculoSeleccionado = value;
       controladorVehiculoSeleccionado.text = (value as Vehiculo).vehiculo_id.toString();
+      
       context.read<AppBloc>().add(
       FiltrarGasto(controladorFechaInicial.text, controladorFechaFinal.text, controladorCategoriaSeleccionada.text, controladorVehiculoSeleccionado.text, controladorLugar.text));
 
-      
+
     });
   }
-    void updateLugarSeleccionado(value){
+     void updateLugarSeleccionado(value){
       setState(() {
         gastoSeleccionado = value;
         controladorLugar.text = (value as Gasto).lugar.toString();
-        context.read<AppBloc>().add(FiltrarGasto(controladorFechaFinal.text, controladorFechaFinal.text, controladorCategoriaSeleccionada.text, controladorVehiculoSeleccionado.text, controladorLugar.text));
+        context.read<AppBloc>().add(
+          FiltrarGasto(controladorFechaInicial.text, controladorFechaFinal.text, controladorCategoriaSeleccionada.text, controladorVehiculoSeleccionado.text, controladorLugar.text));
       });
     }
     
-    
-    
-    
-   
     return Column(
       children: [
           TextFormField(
@@ -881,13 +882,16 @@ class _PantallaGastosState extends State<PantallaGastos> {
               DateTime? fechaSeleccionada = await showDatePicker(context: context,
                initialDate: DateTime.now(),
                 firstDate: DateTime(2000),
-                 lastDate: DateTime(2100)
+                 lastDate: DateTime.now()
                  );
                  setState(() {
                    if(fechaSeleccionada !=null){
-                    
                     String formattedDate =  DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
                     controladorFechaInicial.text = formattedDate;
+
+                    context.read<AppBloc>().add(
+                    FiltrarGasto(controladorFechaInicial.text, controladorFechaFinal.text, controladorCategoriaSeleccionada.text, controladorVehiculoSeleccionado.text, controladorLugar.text));
+                    
                     
                   }
                  });
@@ -901,13 +905,15 @@ class _PantallaGastosState extends State<PantallaGastos> {
               DateTime? fechaSeleccionada = await showDatePicker(context: context,
                initialDate: DateTime.now(),
                 firstDate: DateTime(2000),
-                 lastDate: DateTime(2100)
+                 lastDate: DateTime.now()
                  );
                  setState(() {
                    if(fechaSeleccionada !=null){
                     String formattedDate =  DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
                     controladorFechaFinal.text = formattedDate;
-                    print(controladorFechaFinal);
+                    context.read<AppBloc>().add(
+                    FiltrarGasto(controladorFechaInicial.text, controladorFechaFinal.text, controladorCategoriaSeleccionada.text, controladorVehiculoSeleccionado.text, controladorLugar.text));
+                    
                   }
                  });
             },
@@ -960,14 +966,19 @@ class _PantallaGastosState extends State<PantallaGastos> {
             value: gastoSeleccionado,
             onChanged: (value) {
               updateLugarSeleccionado(value);
-        
             },
-            items: gastos.map<DropdownMenuItem<Gasto>>((gasto) {
+            items: [
+            DropdownMenuItem(
+            value: todosLosGastos,
+            child: const Text('Todos los lugares'),
+            ),
+            ...gastos.map<DropdownMenuItem<Gasto>>((gasto) {
               return DropdownMenuItem<Gasto>(
                 value: gasto,
                 child: Text(gasto.lugar),
               );
             }).toList(),
+            ]
           ),
           
 
@@ -978,8 +989,8 @@ class _PantallaGastosState extends State<PantallaGastos> {
             child: BlocBuilder<AppBloc, AppEstado>(
               builder: (context, state) {
                 if(state is Operacional){
-                  print(state.listaGastos.length);
-                  if (state.listaGastos.isEmpty) {
+                  
+                  if (state.listaGastosFiltrados.isEmpty) {
                     
                     return const Center(
                       child: Text('No hay gastos disponibles'),
@@ -988,17 +999,26 @@ class _PantallaGastosState extends State<PantallaGastos> {
                   
                   return 
                   ListView.builder(
-                    itemCount: state.listaGastos.length,
+                    itemCount: state.listaGastosFiltrados.length,
                     itemBuilder: (context, index) {
-                      final gasto = state.listaGastos[index];
+                      final gasto = state.listaGastosFiltrados[index];
                       final categorias = state.listaCategorias;
                       final vehiculos = state.listaVehiculos;
-
-                      
-              
                   
+                      
+                    
+                      print(estado);
+                      late int x ;
+                      for (var vehiculo in vehiculos) {
+                        if(vehiculo.vehiculo_id == gasto.vehiculo_id){
+                          x = vehiculos.indexOf(vehiculo);
+                          break;
+                        }
+                      }
+                      print(x);
+                      
                       return ListTile(
-                        title: Text(gasto.descripcion),
+                        title: Text('${vehiculos[x].marca.toString()} ${vehiculos[x].matricula.toString()} '),
                         subtitle: Column(
                            crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1008,8 +1028,11 @@ class _PantallaGastosState extends State<PantallaGastos> {
                         ),
                         
                         onTap: () {
-                          Categoria categoriaDelGasto = categorias[gasto.categoria_id-1];
-                          Vehiculo vehiculoDelGasto = vehiculos[gasto.vehiculo_id-1];
+                          Categoria categoriaDelGasto = categorias[gasto.categoria_id];
+
+                          Vehiculo vehiculoDelGasto = vehiculos[gasto.vehiculo_id];
+                          
+                          
                           
                           Navigator.push(context,
                           MaterialPageRoute(
