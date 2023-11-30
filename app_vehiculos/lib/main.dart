@@ -8,6 +8,7 @@ import 'blocs/bloc.dart';
 import 'modelos/vehiculo.dart';
 import 'modelos/categoria.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_async_autocomplete/flutter_async_autocomplete.dart';
 
 
 
@@ -354,10 +355,9 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
     void actualizarVehiculo(matricula, marca, modelo, color, matriculaId) {
       context.read<AppBloc>().add(ActualizarVehiculo(matricula, marca, modelo, color, matriculaId));
     }
-
     void mostrarAdvertencia(String mensaje){
   
-        final snackBar = SnackBar(
+    final snackBar = SnackBar(
         content: Text(mensaje),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -406,16 +406,154 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
                             title: Text(vehiculo.marca),
                             subtitle: Text(vehiculo.matricula),
                             onTap: () {
+
+                              showDialog(
+                                  context: context, 
+                                  builder: (BuildContext context) => AlertDialog(
+                                  title: Text('Editar vehiculo: ${vehiculo.matricula}'),
+                                  content:
+                                  SingleChildScrollView(
+                                    child: Column(
+                                      
+                                      children: [
+                                    Text(vehiculo.marca, style: const TextStyle(fontSize: 20)),
+                                    Text(vehiculo.modelo.toString(), style: const TextStyle(fontSize: 20)),
+                                    Text(vehiculo.color, style: const TextStyle(fontSize: 20)),
+                                    Text(vehiculo.matricula, style: const TextStyle(fontSize: 20)),
+
+                                    FloatingActionButton(
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context, 
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                content: const Text('¿Estás seguro de que quieres eliminar este vehículo?'),
+                                                actions: [
+                                                   TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context); // Cerrar el diálogo de confirmación
+                                                    },
+                                                    child: const Text('Cancelar'),
+                                                  ),
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                      eliminarVehiculo(vehiculo);
+                                                      Navigator.pop(context); // Cerrar el diálogo de confirmación
+                                                      Navigator.pop(context); // Cerrar la pantalla actual
+                                                      mostrarAdvertencia("Vehiculo eliminado correctamente");
+                                                    },
+                                                    child: const Text('Eliminar'),
+                                                  ),
+                                                ],
+
+                                                );
+
+                                            });
+
+                                          },
+                                          tooltip: 'Borrar Vehiculo',
+                                          child: const Icon(Icons.delete),
+                                          ),
+                                    FloatingActionButton(onPressed: () {
+                                      final controladorMarca = TextEditingController(text: vehiculo.marca);
+                                              final controladorModelo = TextEditingController(text: vehiculo.modelo.toString());
+                                              final controladorColor = TextEditingController(text: vehiculo.color);
+                                              final controladorMatricula = TextEditingController(text: vehiculo.matricula);
+                                              
+    
+                                              Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (BuildContext context) {
+                                                  return Scaffold(
+                                                    appBar: AppBar(
+                                                      title: const Text('Editar vehiculo'),
+                                                    ),
+                                                    body: Column(
+                                                      children: [
+                                                        TextFormField(
+                                                          controller: controladorMarca,
+                                                          decoration: const InputDecoration(labelText: 'Marca'),
+                                                        ),
+                                                        TextFormField(
+                                                          controller: controladorModelo,
+                                                          decoration: const InputDecoration(labelText: 'Modelo'),
+                                                        ),
+                                                        TextFormField(
+                                                          controller: controladorColor,
+                                                          decoration: const InputDecoration(labelText: 'Color'),
+                                                        ),
+                                                        TextFormField(
+                                                          controller: controladorMatricula,
+                                                          decoration: const InputDecoration(labelText: 'Matricula'),
+                                                        ),
+                                                     
+                                                        ElevatedButton(
+                                                        onPressed: () {
+                                                          final nuevaMatricula = controladorMatricula.text.trim();
+                                                          final nuevaMarca = controladorMarca.text.trim();
+                                                          final nuevoModelo = controladorModelo.text.trim();
+                                                          final nuevoColor = controladorColor.text.trim();
+
+                                                          final matriculaVieja = vehiculo.matricula;
+
+                                                          actualizarVehiculo(nuevaMatricula, nuevaMarca, nuevoModelo, nuevoColor, matriculaVieja);
+                                                          setState(() {
+                                                            Navigator.of(context).pop();
+                                                          });
+
+                                                          mostrarAdvertencia("Vehiculo actualizado correctamente");
+                                                          Navigator.pop(context);
+                                                        },
+                                                        child: const Text('Guardar'),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(context);
+                                                        },
+                                                        child: const Text('Cancelar'),
+                                                      ),
+                                                     
+                                                     
+                                                     
+                                                      ],
+
+
+
+                                                      
+                                                    ),
+                                                    
+                                                      
+                                                    
+                                                  );
+                                                },
+                                              ),
+                                            );
+                   
+                                    })
+ 
+                                      ],
+                                    ),
+                                  ),
+
+                                  )
+                                  );
+
                               // Navegar a la página de detalles del vehículo
+                              /*
                               Navigator.push(
                               context,
                               MaterialPageRoute(
                               builder: (BuildContext context) {
                                 
                                 
-                                void cerrartodo(){
-                                  Navigator.pop(context);
-                                }
+                                
+                                  
+
+
+
+                                
+                                // ignore: dead_code
                                 return Scaffold(
                                   appBar: AppBar(
                                     backgroundColor: const Color.fromARGB(255, 57, 127, 136),
@@ -602,7 +740,9 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
                               },
                             ),
                               );
+                            */
                             },
+
                           );
                         },
                       ),
@@ -650,11 +790,17 @@ class BotonAgregarVehiculo extends StatelessWidget {
             builder: (BuildContext context) => AlertDialog(
               
               title: const Text('Agregar Vehículo'),
-              content: FormularioVehiculo(
-                marcaController: _marcaController,
-                modeloController: _modeloController,
-                colorController: _colorController,
-                matriculaController: _matriculaController,
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    FormularioVehiculo(
+                      marcaController: _marcaController,
+                      modeloController: _modeloController,
+                      colorController: _colorController,
+                      matriculaController: _matriculaController,
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(

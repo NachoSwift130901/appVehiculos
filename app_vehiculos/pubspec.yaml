@@ -12,6 +12,7 @@ dependencies:
   equatable: ^2.0.5
   flutter:
     sdk: flutter
+  flutter_async_autocomplete: ^0.1.1
   flutter_bloc: ^8.1.3
   font_awesome_flutter: ^10.6.0
   intl: ^0.18.1
