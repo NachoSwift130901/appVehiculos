@@ -350,6 +350,7 @@ class PantallaVehiculos extends StatefulWidget {
 }
 
 class _PantallaVehiculosState extends State<PantallaVehiculos> {
+  final _formKey = GlobalKey<FormState>();
   
   @override
    Widget build(BuildContext context) {
@@ -369,10 +370,15 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
-    
+     List<String> matriculas = [];
     List<Vehiculo> vehiculos = [];
     var estado = context.watch<AppBloc>().state;
-    if(estado is Operacional) vehiculos = (estado).listaVehiculos;
+    if(estado is Operacional) {
+      vehiculos = (estado).listaVehiculos;
+      for(Vehiculo vehiculo in vehiculos){
+        matriculas.add(vehiculo.matricula);
+      }
+      }
     if(estado is Inicial) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -417,337 +423,342 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
                               showDialog(
                                   context: context, 
                                   builder: (BuildContext context) => AlertDialog(
-                                  title: Text('Editar vehiculo: ${vehiculo.matricula}'),
+                                  title: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text('Vehiculo: ${vehiculo.matricula}'),
+                                    ],
+                                  ),
                                   content:
                                   SingleChildScrollView(
                                     child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       
                                       children: [
-                                    Text(vehiculo.marca, style: const TextStyle(fontSize: 20)),
-                                    Text(vehiculo.modelo.toString(), style: const TextStyle(fontSize: 20)),
-                                    Text(vehiculo.color, style: const TextStyle(fontSize: 20)),
-                                    Text(vehiculo.matricula, style: const TextStyle(fontSize: 20)),
 
-                                    FloatingActionButton(
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context, 
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                content: const Text('¿Estás seguro de que quieres eliminar este vehículo? (Esto tambien eliminará los gastos)'),
-                                                actions: [
-                                                   TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context); // Cerrar el diálogo de confirmación
-                                                    },
-                                                    child: const Text('Cancelar'),
-                                                  ),
-                                                  ElevatedButton(
-                                                    onPressed: () {
-                                                      eliminarVehiculo(vehiculo);
-                                                      Navigator.pop(context); // Cerrar el diálogo de confirmación
-                                                      Navigator.pop(context); // Cerrar la pantalla actual
-                                                      mostrarAdvertencia("Vehiculo eliminado correctamente");
-                                                    },
-                                                    child: const Text('Eliminar'),
-                                                  ),
-                                                ],
-
-                                                );
-
-                                            });
-
-                                          },
-                                          tooltip: 'Borrar Vehiculo',
-                                          child: const Icon(Icons.delete),
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Icon(Icons.branding_watermark_outlined, color: Color.fromARGB(255, 57, 127, 136),),
                                           ),
-                                    FloatingActionButton(onPressed: () {
-                                      final controladorMarca = TextEditingController(text: vehiculo.marca);
-                                              final controladorModelo = TextEditingController(text: vehiculo.modelo.toString());
-                                              final controladorColor = TextEditingController(text: vehiculo.color);
-                                              final controladorMatricula = TextEditingController(text: vehiculo.matricula);
+                                          Text('Marca', style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 57, 127, 136))),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(vehiculo.marca, style: const TextStyle(fontSize: 20)),
+                                    
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Icon(Icons.numbers_outlined, color: Color.fromARGB(255, 57, 127, 136),),
+                                          ),
+                                          Text('Modelo', style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 57, 127, 136),)),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(vehiculo.modelo.toString(), style: const TextStyle(fontSize: 20)),
+
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Icon(Icons.palette, color: Color.fromARGB(255, 57, 127, 136),),
+                                          ),
+                                          Text('Color', style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 57, 127, 136),)),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(vehiculo.color, style: const TextStyle(fontSize: 20)),
+
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Icon(Icons.drive_eta, color: Color.fromARGB(255, 57, 127, 136),),
+                                          ),
+                                          Text('Matricula', style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 57, 127, 136))),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(vehiculo.matricula, style: const TextStyle(fontSize: 20)),
+                                    
+
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: ElevatedButton(onPressed: () {
+                                          final controladorMarca = TextEditingController(text: vehiculo.marca);
+                                                  final controladorModelo = TextEditingController(text: vehiculo.modelo.toString());
+                                                  final controladorColor = TextEditingController(text: vehiculo.color);
+                                                  final controladorMatricula = TextEditingController(text: vehiculo.matricula);
+                                                  
+                                            
+                                                  Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (BuildContext context) {
+                                                      return Scaffold(
+                                                        appBar: AppBar(
+                                                          backgroundColor: const Color.fromARGB(255, 57, 127, 136),
+                                                          title: const Text('Editar vehiculo'),
+                                                        ),
+                                                        body: Form(
+                                                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                          key: _formKey,
+                                                          child: Padding(
+                                                            padding: const EdgeInsets.all(16.0),
+                                                            child: Column(
+                                                              children: [
+                                                                TextFormField(
+                                                                  validator: (value) {
+                                                                    if (value == null || value.isEmpty) {
+                                                                    return 'Por favor, ingresa la marca';
+                                                                  }
+                                                                    RegExp lettersOnlyRegExp = RegExp(r'[^a-zA-Z]');
+                                                                    if (lettersOnlyRegExp.hasMatch(value)) {
+                                                                      return 'Solo letras';
+                                                                    }
+                                                                  return null;
+                                                              },
+                                                                  controller: controladorMarca,
+                                                                  decoration: const InputDecoration(
+                                                                  labelText: 'Marca', 
+                                                                  icon: Icon(Icons.branding_watermark_outlined),
+                                                                  iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                                  labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                                  enabledBorder: UnderlineInputBorder(
+                                                                    borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                                                                  ),
+                                                                  focusedBorder: UnderlineInputBorder(
+                                                                    borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                                                                  )
+                                                                  ),
+                                                                ),
+                                                                TextFormField(
+                                                                  validator: (value) {
+                                                                    if (value == null || value.isEmpty) {
+                                                                        return 'Por favor, ingresa el modelo';
+                                                                      }
+                                                                    RegExp numbersOnlyRegExp = RegExp(r'[^0-9]');
+                                                                    if (numbersOnlyRegExp.hasMatch(value)) {
+                                                                      return 'Solo se permiten números del 0 al 9.';
+                                                                    }  
+                                                                    if(int.parse(value) < 1950 || int.parse(value) > 2025) {
+                                                                      return 'Introduce un modelo valido';
+                                                                    }
+                                                          
+                                                          
+                                                          
+                                                                      return null;
+                                                                  },
+                                                                  controller: controladorModelo,
+                                                                  decoration: const InputDecoration(labelText: 'Modelo', icon: Icon(Icons.numbers_outlined), iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                                  labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                                  enabledBorder: UnderlineInputBorder(
+                                                                    borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                                                                  ),
+                                                                  focusedBorder: UnderlineInputBorder(
+                                                                    borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                                                                  )
+                                                                  ),
+                                                                keyboardType: TextInputType.number,
+                                                                inputFormatters: <TextInputFormatter>[
+                                                                  FilteringTextInputFormatter.digitsOnly,
+                                                                  LengthLimitingTextInputFormatter(4),
+                                                                
+                                                                ],
+                                                              ),
+                                                                TextFormField(
+                                                                  validator: (value) {
+                                                                  if (value == null || value.isEmpty) {
+                                                                      return 'Por favor, ingresa el color';
+                                                                    }
+                                                                  RegExp lettersOnlyRegExp = RegExp(r'[^a-zA-Z]');
+                                                                      if (lettersOnlyRegExp.hasMatch(value)) {
+                                                                        return 'Introduce un color valido';
+                                                                      }
+                                                                  
+                                                          
+                                                          
+                                                          
+                                                                    return null;
+                                                                },
+                                                                  controller: controladorColor,
+                                                                  decoration: const InputDecoration(labelText: 'Color', icon: Icon(Icons.palette), iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                                  labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                                  enabledBorder: UnderlineInputBorder(
+                                                                    borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                                                                  ),
+                                                                  focusedBorder: UnderlineInputBorder(
+                                                                    borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                                                                  )
+                                                                  ),
+                                                                inputFormatters: [LengthLimitingTextInputFormatter(15)],
+                                                              ),
+                                                                TextFormField(
+                                                                  validator: (value) {
+                                                                    if (value == null || value.isEmpty) {
+                                                                        return 'Por favor, ingresa la matricula';
+                                                                      }
+                                                          
+                                                                    RegExp alphanumericRegExp = RegExp(r'^[a-zA-Z0-9]+$');
+                                                                    if (!alphanumericRegExp.hasMatch(value)) {
+                                                                      return 'Solo letras y números!';
+                                                                    }
+                                                                    // Verifica que haya al menos una letra y al menos un número
+                                                                    RegExp letterAndNumberRegExp = RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]+$');
+                                                                    if (!letterAndNumberRegExp.hasMatch(value)) {
+                                                                      return 'Al menos una letra/numero';
+                                                                    }
+                                                                    if(matriculas.contains(value.toUpperCase()) && value.toUpperCase() != vehiculo.matricula){
+                                                                      return 'Matricula existente';
+                                                                    }
+                                                          
+                                                                      return null;
+                                                                  },
+                                                                  controller: controladorMatricula,
+                                                                  decoration: const InputDecoration(labelText: 'Matrícula', icon: Icon(Icons.drive_eta), iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                                  labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                                  enabledBorder: UnderlineInputBorder(
+                                                                    borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                                                                  ),
+                                                                  focusedBorder: UnderlineInputBorder(
+                                                                    borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                                                                  )
+                                                                  ),
+                                                                inputFormatters: [LengthLimitingTextInputFormatter(8)],
+                                                              ),
+                                                             
+                                                                Padding(
+                                                                  padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
+                                                                  child: ElevatedButton(
+                                                                  
+                                                                  onPressed: () {
+                                                                    if(_formKey.currentState!.validate()){
+                                                                    final nuevaMatricula = controladorMatricula.text.trim();
+                                                                    final nuevaMarca = controladorMarca.text.trim();
+                                                                    final nuevoModelo = controladorModelo.text.trim();
+                                                                    final nuevoColor = controladorColor.text.trim();
+                                                                                                    
+                                                                    final matriculaVieja = vehiculo.matricula;
+                                                                                                    
+                                                                    actualizarVehiculo(nuevaMatricula, nuevaMarca, nuevoModelo, nuevoColor, matriculaVieja);
+                                                                    setState(() {
+                                                                      Navigator.of(context).pop();
+                                                                    });
+                                                                                                    
+                                                                    mostrarAdvertencia("Vehiculo actualizado correctamente");
+                                                                    Navigator.pop(context);
+                                                                    }
+                                                                  },
+                                                                  style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 57, 127, 136)),
+                                                                  child: const Text('Guardar'),
+                                                                                                                              ),
+                                                                ),
+                                                              TextButton(
+                                                                
+                                                                onPressed: () {
+                                                                  Navigator.pop(context);
+                                                                },
+                                                                
+                                                                child: const Text('Cancelar', style: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),),
+                                                              ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                );
+                                               }, 
+                                               style: ElevatedButton.styleFrom(
+                                                    backgroundColor: const Color.fromARGB(255, 57, 127, 136), // Puedes cambiar el color según tus preferencias
+                                                  ),
+                                               child: const Row(
+                                                 children: [
+                                                   Icon(Icons.edit),
+                                                   Text('Editar')
+                                                 ],
+                                               ),),
+                                        ),
+                                        Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: ElevatedButton(
                                               
-    
-                                              Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (BuildContext context) {
-                                                  return Scaffold(
-                                                    appBar: AppBar(
-                                                      title: const Text('Editar vehiculo'),
-                                                    ),
-                                                    body: Column(
-                                                      children: [
-                                                        TextFormField(
-                                                          controller: controladorMarca,
-                                                          decoration: const InputDecoration(labelText: 'Marca'),
-                                                        ),
-                                                        TextFormField(
-                                                          controller: controladorModelo,
-                                                          decoration: const InputDecoration(labelText: 'Modelo'),
-                                                        ),
-                                                        TextFormField(
-                                                          controller: controladorColor,
-                                                          decoration: const InputDecoration(labelText: 'Color'),
-                                                        ),
-                                                        TextFormField(
-                                                          controller: controladorMatricula,
-                                                          decoration: const InputDecoration(labelText: 'Matricula'),
-                                                        ),
-                                                     
-                                                        ElevatedButton(
-                                                        onPressed: () {
-                                                          final nuevaMatricula = controladorMatricula.text.trim();
-                                                          final nuevaMarca = controladorMarca.text.trim();
-                                                          final nuevoModelo = controladorModelo.text.trim();
-                                                          final nuevoColor = controladorColor.text.trim();
-
-                                                          final matriculaVieja = vehiculo.matricula;
-
-                                                          actualizarVehiculo(nuevaMatricula, nuevaMarca, nuevoModelo, nuevoColor, matriculaVieja);
-                                                          setState(() {
-                                                            Navigator.of(context).pop();
-                                                          });
-
-                                                          mostrarAdvertencia("Vehiculo actualizado correctamente");
-                                                          Navigator.pop(context);
-                                                        },
-                                                        child: const Text('Guardar'),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(context);
-                                                        },
-                                                        child: const Text('Cancelar'),
-                                                      ),
-                                                     
-                                                     
-                                                     
-                                                      ],
-
-
-
+                                                  onPressed: () {
+                                                    showDialog(
+                                                      context: context, 
+                                                      builder: (BuildContext context) {
+                                                        return AlertDialog(
+                                                        content: const Text('¿Estás seguro de que quieres eliminar este vehículo? (Esto tambien eliminará los gastos)'),
+                                                        actions: [
+                                                           TextButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(context); // Cerrar el diálogo de confirmación
+                                                            },
+                                                            child: const Text('Cancelar', style: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),),
+                                                          ),
+                                                          ElevatedButton(
+                                                            onPressed: () {
+                                                              eliminarVehiculo(vehiculo);
+                                                              Navigator.pop(context); // Cerrar el diálogo de confirmación
+                                                              Navigator.pop(context); // Cerrar la pantalla actual
+                                                              mostrarAdvertencia("Vehiculo eliminado correctamente");
+                                                            },
+                                                            style: ElevatedButton.styleFrom(
+                                                                backgroundColor: const Color.fromARGB(255, 57, 127, 136), // Puedes cambiar el color según tus preferencias
+                                                              ),        
+                                                            child: const Text('Eliminar'),
+                                                          ),
+                                                        ],
+                                          
+                                                        );
+                                          
+                                                    });
+                                          
+                                                  },
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: const Color.fromARGB(255, 57, 127, 136), // Puedes cambiar el color según tus preferencias
+                                                  ),
+                                                  child: const Row(
+                                                    children: [
+                                                      Icon(Icons.delete),
+                                                      Text('Eliminar'),
                                                       
-                                                    ),
-                                                    
-                                                      
-                                                    
-                                                  );
-                                                },
-                                              ),
-                                            );
-                   
-                                    })
- 
+                                                    ],
+                                                  ),
+                                                  ),
+                                          ),
+                                          
+                                        ],
+                                      ),
+                                    ),
+
                                       ],
                                     ),
                                   ),
 
                                   )
                                   );
-
-                              // Navegar a la página de detalles del vehículo
-                              /*
-                              Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                              builder: (BuildContext context) {
-                                
-                                
-                                
-                                  
-
-
-
-                                
-                                // ignore: dead_code
-                                return Scaffold(
-                                  appBar: AppBar(
-                                    backgroundColor: const Color.fromARGB(255, 57, 127, 136),
-                                    title: Text('Vehiculo: ${vehiculo.matricula}'),
-                                  ),
-                                    body: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                       Padding(
-                                         padding: const EdgeInsets.all(8.0),
-                                         child: Container(
-                                          decoration: BoxDecoration(
-                                              color: const Color.fromARGB(160, 57, 127, 136), // Cambia el color según tus preferencias
-                                              borderRadius: BorderRadius.circular(10.0), // Ajusta el radio según tus preferencias
-                                            ),
-                                           child: Row(
-                                              children: [
-                                                const Padding(
-                                                  padding: EdgeInsets.all(8.0),
-                                                  child: Icon(Icons.branding_watermark_outlined),
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      const Text('Marca:', style: TextStyle(fontSize: 20)),
-                                                      Text(vehiculo.marca, style: const TextStyle(fontSize: 20)),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                         ),
-                                       ),
-                                       Padding(
-                                         padding: const EdgeInsets.all(8.0),
-                                         child: Row(
-                                            children: [
-                                              const Icon(Icons.numbers_outlined),
-                                              Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    const Text('Modelo:', style: TextStyle(fontSize: 20)),
-                                                    Text('${vehiculo.modelo}', style: const TextStyle(fontSize: 20)),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                       ),
-                                       Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            children: [
-                                              const Icon(Icons.palette),
-                                              Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    const Text('Color:', style: TextStyle(fontSize: 20)),
-                                                    Text(vehiculo.color, style: const TextStyle(fontSize: 20)),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                       Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            children: [
-                                              const Icon(Icons.drive_eta),
-                                              Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    const Text('Matricula:', style: TextStyle(fontSize: 20)),
-                                                    Text(vehiculo.matricula, style: const TextStyle(fontSize: 20)),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      // Agrega aquí más información sobre el vehículo según tus necesidades
-                                    ],
-                                  ),
-                                    floatingActionButton: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        FloatingActionButton(
-                                          onPressed: () {
-                                            eliminarVehiculo(vehiculo);
-                                            
-                                            Navigator.pop(context);
-                                            mostrarAdvertencia("Vehiculo eliminado correctamente");
-                                          },
-                                          tooltip: 'Borrar Vehiculo',
-                                          child: const Icon(Icons.delete),
-                                          ),
-                                        const SizedBox(height: 16),
-                                        FloatingActionButton(
-                                            onPressed: () {
-                                              final controladorMarca = TextEditingController(text: vehiculo.marca);
-                                              final controladorModelo = TextEditingController(text: vehiculo.modelo.toString());
-                                              final controladorColor = TextEditingController(text: vehiculo.color);
-                                              final controladorMatricula = TextEditingController(text: vehiculo.matricula);
-    
-                                              showDialog(
-                                                context: context, 
-                                                builder: (context) {
-                                                return AlertDialog(
-                                                    title: const Text('Editar vehiculo'),
-                                                    content: Column(
-                                                      children: [
-                                                  TextFormField(
-                                                    controller: controladorMarca,
-                                                    decoration: const InputDecoration(labelText: 'Marca'),
-                                                    
-                                                  ),
-                                                  TextFormField(
-                                                    controller: controladorModelo,
-                                                    decoration: const InputDecoration(labelText: 'Modelo'),
-                                                  ),
-                                                  TextFormField(
-                                                    controller: controladorColor,
-                                                    decoration: const InputDecoration(labelText: 'Color'),
-                                                  ),
-                                                  TextFormField(
-                                                    controller: controladorMatricula,
-                                                    decoration: const InputDecoration(labelText: 'Matricula'),
-                                                  ),
-                                                      ],
-                                                    ),
-                                                    actions: [
-                                                      ElevatedButton(
-                                                        onPressed: () {
-                                                        final nuevaMatricula = controladorMatricula.text.trim();
-                                                        final nuevaMarca = controladorMarca.text.trim();
-                                                        final nuevoModelo = controladorModelo.text.trim();
-                                                        final nuevoColor = controladorColor.text.trim();
-    
-                                                        final matriculaVieja = vehiculo.matricula;
-    
-                                                        actualizarVehiculo(nuevaMatricula, nuevaMarca, nuevoModelo, nuevoColor, matriculaVieja);
-                                                        
-                                                        mostrarAdvertencia("Vehiculo actualizado correctamente");
-                                                        cerrartodo();
-                                                      }, 
-                                                      child: const Text('Guardar')),
-                                                      TextButton(onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child: const Text('Cancelar'))
-                                                    ],
-                                                    
-                                                  );
-                                                  
-                                                }
-                                                );
-                                              if (controladorMarca.text.isEmpty || controladorModelo.text.isEmpty || controladorColor.text.isEmpty || controladorMatricula.text.isEmpty) {
-                                            mostrarAdvertencia("Todos los campos son obligatorios");
-                                            return; // Sale de la función para evitar más procesamiento
-                                              }
-                                              
-    
-          
-                                          },
-                                          tooltip: 'Editar Vehiculo',
-                                          child: const Icon(Icons.edit),
-                                        )
-                                      ],
-                                    ),
-                                    
-                                )
-    
-                                ;
-                              },
-                            ),
-                              );
-                            */
                             },
 
                           );
@@ -779,6 +790,30 @@ class BotonAgregarVehiculo extends StatelessWidget {
 
   @override
    Widget build(BuildContext context) {
+
+    var estado = context.watch<AppBloc>().state;
+
+    List<Vehiculo> vehiculos = [];
+    List<String> matriculas = [];
+
+    if(estado is Operacional) {
+      vehiculos = (estado).listaVehiculos;
+
+      for(Vehiculo vehiculo in vehiculos){
+        matriculas.add(vehiculo.matricula);
+      }
+      
+    }
+
+    
+
+
+    void mostrarAdvertencia(String mensaje){
+    final snackBar = SnackBar(
+        content: Text(mensaje),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
     void agregarVehiculo(String marca, int modelo, String color, String matricula) {
     context.read<AppBloc>().add(AgregarVehiculo(
                 marca: marca,
@@ -899,22 +934,19 @@ class BotonAgregarVehiculo extends StatelessWidget {
                               if (value == null || value.isEmpty) {
                                   return 'Por favor, ingresa la matricula';
                                 }
-          
-                              
+
                               RegExp alphanumericRegExp = RegExp(r'^[a-zA-Z0-9]+$');
                               if (!alphanumericRegExp.hasMatch(value)) {
                                 return 'Solo letras y números!';
                               }
-
                               // Verifica que haya al menos una letra y al menos un número
                               RegExp letterAndNumberRegExp = RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]+$');
                               if (!letterAndNumberRegExp.hasMatch(value)) {
                                 return 'Al menos una letra/numero';
                               }
-                                                                                        
-
-                
-
+                              if(matriculas.contains(value.toUpperCase())){
+                                return 'Matricula existente';
+                              }
 
                                 return null;
                             },
@@ -955,6 +987,7 @@ class BotonAgregarVehiculo extends StatelessWidget {
                                             
                                     // Cierra el AlertDialog
                                     Navigator.pop(context);
+                                    mostrarAdvertencia("Vehiculo agregado correctamente");
                                   
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('Processing Data')),
@@ -1507,6 +1540,7 @@ class BotonAgregarGasto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
 
     void agregarGasto(String descripcion, String lugar, double cantidad, String fecha, int categoriaId, int vehiculoId){
       Gasto nuevoGasto = Gasto(descripcion: descripcion, lugar: lugar, cantidad: cantidad, fecha: fecha, categoria_id: categoriaId, vehiculo_id: vehiculoId);
