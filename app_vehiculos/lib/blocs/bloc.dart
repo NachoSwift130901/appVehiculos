@@ -313,6 +313,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     on<EliminarVehiculo>((event, emit) async {
       await eliminarVehiculo(event.vehiculo);
       await todosLosVehiculos();
+      await todosLosGastos();
       _listaGastosFiltrados = _listaGastos;
     
       print(_listaGastosFiltrados);
