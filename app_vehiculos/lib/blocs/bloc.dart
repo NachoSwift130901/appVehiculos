@@ -224,6 +224,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   }
   
   Future<void> agregarVehiculo(String marca, int modelo, String color, String matricula) async{
+    
     await db.rawInsert('''INSERT INTO vehiculos (marca, modelo, color, matricula) VALUES (?, ?, ?, ?) ''', [
       marca, modelo, color, matricula
     ]);
@@ -243,6 +244,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     String fechaFormateada = gasto.fecha.toString();
     await db.rawInsert('''INSERT INTO gastos (descripcion, lugar, cantidad, fecha, categoria_id, vehiculo_id) VALUES (?, ?, ?, ?, ?, ?)''',
                        [gasto.descripcion, gasto.lugar, gasto.cantidad, fechaFormateada, gasto.categoria_id, gasto.vehiculo_id]);
+    print(gasto.vehiculo_id);
   }
   Future<void>eliminarGasto(id) async{
     

@@ -202,38 +202,45 @@ class PantallaCategorias extends StatelessWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: IconButton(onPressed: () {
-                          final controlador = TextEditingController(text: categoria.nombre);
-                      
-                          showDialog(context: context, builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Editar Categoria'),
-                              content: TextFormField(
-                                controller: controlador,
-                                decoration: const InputDecoration(
-                                  hintText: 'Nueva Categoria'
-                                ),
-                              ),
-                              actions: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    final nuevaCategoria = controlador.text.trim();
-                                    if (nuevaCategoria.isNotEmpty) {
-                                      editarCategoria(categoria.nombre, nuevaCategoria);
-                                      Navigator.of(context).pop();
-                                    }
-                                }, child: const Text('Guardar'),
-                                ),
-                                TextButton(onPressed: () {
-                                  Navigator.of(context).pop();
-                                }, child: const Text('Cancelar'),)
-                              ],
-                            );
-                          });
-                          
-                          
-                        }, 
-                        icon: const Icon(Icons.edit)),
+                        child: IconButton(
+                            onPressed: () {
+                              final controlador =
+                                  TextEditingController(text: categoria.nombre);
+
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text('Editar Categoria'),
+                                      content: TextFormField(
+                                        controller: controlador,
+                                        decoration: const InputDecoration(
+                                            hintText: 'Nueva Categoria'),
+                                      ),
+                                      actions: [
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            final nuevaCategoria =
+                                                controlador.text.trim();
+                                            if (nuevaCategoria.isNotEmpty) {
+                                              editarCategoria(categoria.nombre,
+                                                  nuevaCategoria);
+                                              Navigator.of(context).pop();
+                                            }
+                                          },
+                                          child: const Text('Guardar'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('Cancelar'),
+                                        )
+                                      ],
+                                    );
+                                  });
+                            },
+                            icon: const Icon(Icons.edit)),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -336,7 +343,6 @@ class _AgregarCategoriaWidgetState extends State<AgregarCategoriaWidget> {
 /* PANTALLA DE VEHICULOS */
 
 class PantallaVehiculos extends StatefulWidget {
-
   const PantallaVehiculos({super.key});
 
   @override
@@ -344,6 +350,7 @@ class PantallaVehiculos extends StatefulWidget {
 }
 
 class _PantallaVehiculosState extends State<PantallaVehiculos> {
+  
   @override
    Widget build(BuildContext context) {
 
@@ -427,7 +434,7 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
                                               context: context, 
                                               builder: (BuildContext context) {
                                                 return AlertDialog(
-                                                content: const Text('¿Estás seguro de que quieres eliminar este vehículo?'),
+                                                content: const Text('¿Estás seguro de que quieres eliminar este vehículo? (Esto tambien eliminará los gastos)'),
                                                 actions: [
                                                    TextButton(
                                                     onPressed: () {
@@ -765,6 +772,8 @@ class BotonAgregarVehiculo extends StatelessWidget {
   final TextEditingController _modeloController = TextEditingController();
   final TextEditingController _colorController = TextEditingController();
   final TextEditingController _matriculaController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  
   
   BotonAgregarVehiculo({super.key});
 
@@ -789,46 +798,186 @@ class BotonAgregarVehiculo extends StatelessWidget {
             context: context,
             builder: (BuildContext context) => AlertDialog(
               
-              title: const Text('Agregar Vehículo'),
+              title: const Text('Agregar Vehículo', style: TextStyle(color:  Color.fromARGB(255, 57, 127, 136)),),
               content: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    FormularioVehiculo(
-                      marcaController: _marcaController,
-                      modeloController: _modeloController,
-                      colorController: _colorController,
-                      matriculaController: _matriculaController,
-                    ),
-                  ],
+                child: Form(
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  key: _formKey,
+                  child: Column(
+                      children: <Widget>[
+                          TextFormField(
+                            validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                  return 'Por favor, ingresa la marca';
+                                }
+                                  RegExp lettersOnlyRegExp = RegExp(r'[^a-zA-Z]');
+                                  if (lettersOnlyRegExp.hasMatch(value)) {
+                                    return 'Solo letras';
+                                  }
+
+                                
+                                return null;
+                            } ,
+                            controller: _marcaController,
+                            decoration: const InputDecoration(
+                              labelText: 'Marca', 
+                              icon: Icon(Icons.branding_watermark_outlined),
+                              iconColor: Color.fromARGB(255, 57, 127, 136),
+                              labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                              )
+                              ),
+                            inputFormatters: [LengthLimitingTextInputFormatter(15)],
+                          ),
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                  return 'Por favor, ingresa el modelo';
+                                }
+                              RegExp numbersOnlyRegExp = RegExp(r'[^0-9]');
+                              if (numbersOnlyRegExp.hasMatch(value)) {
+                                return 'Solo se permiten números del 0 al 9.';
+                              }  
+                              if(int.parse(value) < 1950 || int.parse(value) > 2025) {
+                                return 'Introduce un modelo valido';
+                              }
+
+
+
+                                return null;
+                            },
+                            controller: _modeloController,
+                            decoration: const InputDecoration(labelText: 'Modelo', icon: Icon(Icons.numbers_outlined), iconColor: Color.fromARGB(255, 57, 127, 136),
+                              labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                              )
+                              ),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(4),
+                            
+                            ],
+                          ),
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                  return 'Por favor, ingresa el color';
+                                }
+                              RegExp lettersOnlyRegExp = RegExp(r'[^a-zA-Z]');
+                                  if (lettersOnlyRegExp.hasMatch(value)) {
+                                    return 'Introduce un color valido';
+                                  }
+                              
+
+
+
+                                return null;
+                            },
+                            controller: _colorController,
+                            decoration: const InputDecoration(labelText: 'Color', icon: Icon(Icons.palette), iconColor: Color.fromARGB(255, 57, 127, 136),
+                              labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                              )
+                              ),
+                            inputFormatters: [LengthLimitingTextInputFormatter(15)],
+                          ),
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                  return 'Por favor, ingresa la matricula';
+                                }
+          
+                              
+                              RegExp alphanumericRegExp = RegExp(r'^[a-zA-Z0-9]+$');
+                              if (!alphanumericRegExp.hasMatch(value)) {
+                                return 'Solo letras y números!';
+                              }
+
+                              // Verifica que haya al menos una letra y al menos un número
+                              RegExp letterAndNumberRegExp = RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]+$');
+                              if (!letterAndNumberRegExp.hasMatch(value)) {
+                                return 'Al menos una letra/numero';
+                              }
+                                                                                        
+
+                
+
+
+                                return null;
+                            },
+                            controller: _matriculaController,
+                            decoration: const InputDecoration(labelText: 'Matrícula', icon: Icon(Icons.drive_eta), iconColor: Color.fromARGB(255, 57, 127, 136),
+                              labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+                              )
+                              ),
+                            inputFormatters: [LengthLimitingTextInputFormatter(8)],
+                          ),
+                    
+                          Padding(
+                            padding: const EdgeInsets.only(top: 32.0),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 57, 127, 136)),
+                              onPressed: () {
+                                // Validate returns true if the form is valid, or false otherwise.
+                                if (_formKey.currentState!.validate()) {
+                          
+                                    String marca = _marcaController.text;
+                                    int modelo = int.tryParse(_modeloController.text) ?? 0;
+                                    String color = _colorController.text;
+                                    String matricula = _matriculaController.text;
+                                            
+                                    agregarVehiculo(marca.toUpperCase(), modelo, color.toUpperCase(), matricula.toUpperCase());
+                          
+                          
+                                    _marcaController.clear();
+                                    _colorController.clear();
+                                    _matriculaController.clear();
+                                    _modeloController.clear();
+                                            
+                                            
+                                    // Cierra el AlertDialog
+                                    Navigator.pop(context);
+                                  
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Processing Data')),
+                                  );
+                                }
+                              },
+                              child: const Text('Submit'),
+                                    ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            
+                            child: TextButton(
+                              style: TextButton.styleFrom(foregroundColor: const Color.fromARGB(255, 57, 127, 136)),
+                              onPressed: () {
+                              Navigator.pop(context);
+                            }, 
+                            child: const Text('Cancelar')),
+                          )
+                    ],
+                  ),
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Cerrar el AlertDialog
-                  },
-                  child: const Text('Cancelar'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    String marca = _marcaController.text;
-                    int modelo = int.tryParse(_modeloController.text) ?? 0;
-                    String color = _colorController.text;
-                    String matricula = _matriculaController.text;
-    
-                    agregarVehiculo(marca.toUpperCase(), modelo, color.toUpperCase(), matricula.toUpperCase());
-                    _marcaController.clear();
-                    _colorController.clear();
-                    _matriculaController.clear();
-                    _modeloController.clear();
-    
-    
-                    // Cierra el AlertDialog
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Guardar'),
-                ),
-              ],
             ),
           );
         },
@@ -843,82 +992,141 @@ class BotonAgregarVehiculo extends StatelessWidget {
   
 }
 
-class FormularioVehiculo extends StatelessWidget {
+class FormularioVehiculo extends StatefulWidget {
   final TextEditingController marcaController;
   final TextEditingController modeloController;
   final TextEditingController colorController;
   final TextEditingController matriculaController;
-  
+
   const FormularioVehiculo({super.key, required this.marcaController, required this.modeloController, required this.colorController, required this.matriculaController});
 
   @override
+  State<FormularioVehiculo> createState() => _FormularioVehiculoState();
+}
+
+class _FormularioVehiculoState extends State<FormularioVehiculo> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextFormField(
-          controller: marcaController,
-          decoration: const InputDecoration(
-            labelText: 'Marca', 
-            icon: Icon(Icons.branding_watermark_outlined),
-            iconColor: Color.fromARGB(255, 57, 127, 136),
-            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
-            )
-            ),
-          inputFormatters: [LengthLimitingTextInputFormatter(15)],
-        ),
-        TextFormField(
-          controller: modeloController,
-          decoration: const InputDecoration(labelText: 'Modelo', icon: Icon(Icons.numbers_outlined), iconColor: Color.fromARGB(255, 57, 127, 136),
-            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
-            )
-            ),
-          keyboardType: TextInputType.number,
-          inputFormatters: <TextInputFormatter>[
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(4),
-          
-          ],
-        ),
-        TextFormField(
-          controller: colorController,
-          decoration: const InputDecoration(labelText: 'Color', icon: Icon(Icons.palette), iconColor: Color.fromARGB(255, 57, 127, 136),
-            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
-            )
-            ),
-          inputFormatters: [LengthLimitingTextInputFormatter(15)],
-        ),
-        TextFormField(
-          controller: matriculaController,
-          decoration: const InputDecoration(labelText: 'Matrícula', icon: Icon(Icons.drive_eta), iconColor: Color.fromARGB(255, 57, 127, 136),
-            labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
-            )
-            ),
-          inputFormatters: [LengthLimitingTextInputFormatter(8)],
-        ),
-      ],
+    void agregarVehiculo(String marca, int modelo, String color, String matricula) {
+    context.read<AppBloc>().add(AgregarVehiculo(
+                marca: marca,
+                modelo: modelo,
+                color: color,
+                matricula: matricula,
+                ));
+                
+  }
+
+    return Form(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      key: _formKey,
+      child: Column(
+        children: <Widget>[
+          TextFormField(
+            validator: (value) {
+                  if (value == null || value.isEmpty) {
+                  return 'Por favor, ingresa texto.';
+                }
+                
+                return null;
+            } ,
+            controller: widget.marcaController,
+            decoration: const InputDecoration(
+              labelText: 'Marca', 
+              icon: Icon(Icons.branding_watermark_outlined),
+              iconColor: Color.fromARGB(255, 57, 127, 136),
+              labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+              )
+              ),
+            inputFormatters: [LengthLimitingTextInputFormatter(15)],
+          ),
+          TextFormField(
+            controller: widget.modeloController,
+            decoration: const InputDecoration(labelText: 'Modelo', icon: Icon(Icons.numbers_outlined), iconColor: Color.fromARGB(255, 57, 127, 136),
+              labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+              )
+              ),
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(4),
+            
+            ],
+          ),
+          TextFormField(
+            controller: widget.colorController,
+            decoration: const InputDecoration(labelText: 'Color', icon: Icon(Icons.palette), iconColor: Color.fromARGB(255, 57, 127, 136),
+              labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+              )
+              ),
+            inputFormatters: [LengthLimitingTextInputFormatter(15)],
+          ),
+          TextFormField(
+            controller: widget.matriculaController,
+            decoration: const InputDecoration(labelText: 'Matrícula', icon: Icon(Icons.drive_eta), iconColor: Color.fromARGB(255, 57, 127, 136),
+              labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))
+              )
+              ),
+            inputFormatters: [LengthLimitingTextInputFormatter(8)],
+          ),
+  
+          ElevatedButton(
+              onPressed: () {
+                // Validate returns true if the form is valid, or false otherwise.
+                if (_formKey.currentState!.validate()) {
+
+                  String marca = widget.marcaController.text;
+                    int modelo = int.tryParse(widget.modeloController.text) ?? 0;
+                    String color = widget.colorController.text;
+                    String matricula = widget.matriculaController.text;
+    
+                    agregarVehiculo(marca.toUpperCase(), modelo, color.toUpperCase(), matricula.toUpperCase());
+
+
+                    widget.marcaController.clear();
+                    widget.colorController.clear();
+                    widget.matriculaController.clear();
+                    widget.modeloController.clear();
+    
+    
+                    // Cierra el AlertDialog
+                    Navigator.pop(context);
+                  
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Processing Data')),
+                  );
+                }
+              },
+              child: const Text('Submit'),
+          ),
+        ],
+      ),
     );
   }
 }
+
 
 /* PANTALLA DE GASTOS */
 
