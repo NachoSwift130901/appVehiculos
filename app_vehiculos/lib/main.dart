@@ -1460,15 +1460,15 @@ class _PantallaGastosState extends State<PantallaGastos> {
       return total;
     }
 
-    final Categoria todasLasCategorias = Categoria(nombre: 'TODAS LAS CATEGORIAS', categoria_id: 999);
-    final Vehiculo todosLosVehiculos = Vehiculo(
+    Categoria todasLasCategorias = Categoria(nombre: 'TODAS LAS CATEGORIAS', categoria_id: 999);
+    Vehiculo todosLosVehiculos = Vehiculo(
       marca: "",
       modelo: 2012,
       vehiculo_id: 999,
       color: "azul",
       matricula: "TODOS LOS VEHICULOS",
     );
-    final Gasto todosLosGastos = Gasto(
+    Gasto todosLosGastos = Gasto(
         descripcion: '',
         lugar: 'Todos los lugares',
         cantidad: 0,
@@ -1540,7 +1540,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
       List<Categoria> categoriaList = [todasLasCategorias];
       categoriaList.addAll(categorias);
       await Future.delayed(const Duration(microseconds: 500));
-      print(categoriaList);
+      
       return categoriaList.where((element) => element.nombre.toUpperCase().startsWith(search.toUpperCase())).toList();
     }
     Future<List<Vehiculo>> getVehiculo(String search) async{
@@ -1670,9 +1670,11 @@ class _PantallaGastosState extends State<PantallaGastos> {
         
         AsyncAutocomplete<Categoria>(
           controller: controladorCategoriaSeleccionada,
+          onChanged: (value) {
+            updateCategoriaSeleccionada(value);
+          },
           onTapItem: (Categoria categoria) {
             controladorCategoriaSeleccionada.text = categoria.nombre;
-            print('Categoria seleccionada ${categoria.nombre}');
           },
           suggestionBuilder: (data) => ListTile(
             title: Text(categoriaSeleccionada.nombre),
@@ -1723,7 +1725,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
                       final categorias = state.listaCategorias;
                       final vehiculos = state.listaVehiculos;
 
-                      print(estado);
+                      
                       late int x;
                       for (var vehiculo in vehiculos) {
                         if (vehiculo.vehiculo_id == gasto.vehiculo_id) {
@@ -1731,7 +1733,11 @@ class _PantallaGastosState extends State<PantallaGastos> {
                           break;
                         }
                       }
-                      print(x);
+                      
+
+                      
+                      
+                      
 
                       return ListTile(
                         title: Text(
@@ -1744,11 +1750,18 @@ class _PantallaGastosState extends State<PantallaGastos> {
                           ],
                         ),
                         onTap: () {
-                          Categoria categoriaDelGasto =
-                              categorias[gasto.categoria_id];
+                          late int y;
+                          for (var categoria in categorias) {
+                            if (categoria.categoria_id == gasto.categoria_id) {
+                              y = categorias.indexOf(categoria);
+                              break;
+                            }
+                          }
+                          
+                          Categoria categoriaDelGasto = categorias[y];
 
-                          Vehiculo vehiculoDelGasto =
-                              vehiculos[gasto.vehiculo_id];
+
+                          Vehiculo vehiculoDelGasto = vehiculos[x];
 
                           Navigator.push(context, MaterialPageRoute(
                               builder: (BuildContext context) {
