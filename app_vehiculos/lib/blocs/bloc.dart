@@ -295,6 +295,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     
   
   }
+ 
   AppBloc() : super(Inicial()) {
     on<Inicializado>((event, emit) async{
       await todasLasCategorias();
