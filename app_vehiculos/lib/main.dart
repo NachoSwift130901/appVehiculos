@@ -1726,11 +1726,6 @@ class _PantallaGastosState extends State<PantallaGastos> {
                     );
                   }
 
-                  
-                  
-
-                  
-
                   return ListView.builder(
                     itemCount: state.listaGastosFiltrados.length,
                     itemBuilder: (context, index) {
@@ -1782,131 +1777,270 @@ class _PantallaGastosState extends State<PantallaGastos> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text('Categoria: ${categoriaDelGasto.nombre}',
-                                      style: const TextStyle(fontSize: 20)),
-                                  Text(
-                                      'Vehiculo: ${vehiculoDelGasto.marca} ${vehiculoDelGasto.matricula} ',
-                                      style: const TextStyle(fontSize: 20)),
-                                  Text('Descripcion: ${gasto.descripcion}',
-                                      style: const TextStyle(fontSize: 20)),
-                                  Text('Lugar: ${gasto.lugar}',
-                                      style: const TextStyle(fontSize: 20)),
-                                  Text('Cantidad: ${gasto.cantidad}',
-                                      style: const TextStyle(fontSize: 20)),
-                                  Text('Fecha: ${gasto.fecha.substring(0, 10)}',
-                                      style: const TextStyle(fontSize: 20)),
 
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                    ElevatedButton(onPressed: () {
-                                    final controladorVehiculoIdE = TextEditingController(text: gasto.vehiculo_id.toString());
-                                    final controladorCategoriaIdE =TextEditingController(text:gasto.categoria_id.toString());
-                                    final controladorDescripcionE =TextEditingController(text: gasto.descripcion);
-                                    final controladorLugarE =TextEditingController(text: gasto.lugar);
-                                    final controladorGastoE =TextEditingController(text: gasto.cantidad.toString());
-                                    final controladorFechaE =TextEditingController(text: gasto.fecha);
-
-                                    final categoriaSeleccionadaE = categoriaDelGasto;
-                                    final vehiculoSeleccionadoE = vehiculoDelGasto;
-
-
-
-                                    void updateCategoriaSeleccionada(Categoria value) {
-                                    setState(() {
-                                      categoriaDelGasto= value;
-                                      controladorCategoriaIdE.text = value.categoria_id.toString();
-                                    });
-                                  }
-
-                                    void updateVehiculoSeleccionado(Vehiculo value) {
-                                    setState(() {
-                                      vehiculoDelGasto = value;
-                                      controladorVehiculoIdE.text = value.vehiculo_id.toString();    
-                                    });
-                                  }
-
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                          return Scaffold(
-                                            appBar: AppBar(
-                                              backgroundColor: const Color.fromARGB(255,57,127,136),
-                                              title: const Text("Editar gasto"),
-                                            ),
-                                            body: Form(
-                                              autovalidateMode: AutovalidateMode.onUserInteraction,
-                                              key: formKey,
-                                              child: Column(
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
                                                 children: [
+                                                  Padding(
+                                                    padding: EdgeInsets.all(8.0),
+                                                    child: Icon(
+                                                      Icons.category_outlined,
+                                                      color: Color.fromARGB(255, 57, 127, 136),
+                                                    ),
+                                                  ),
+                                                  Text('Categoria',
+                                                      style: TextStyle(fontSize: 20,color: Color.fromARGB(255,57,127,136))),
+                                                ],
+                                              ),
+                                    ),
+                                            Text(categoriaDelGasto.nombre,style: const TextStyle(fontSize: 20)), 
 
-                                                DropdownButtonFormField<Categoria>(
-                                                  decoration: const InputDecoration(
-                                                      labelText: 'Categoria',
-                                                      icon: Icon(Icons.category_rounded),
-                                                      iconColor: Color.fromARGB(255, 57, 127, 136),
-                                                      labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
-                                                      enabledBorder: UnderlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
-                                                      focusedBorder: UnderlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
-                                                  value: categoriaSeleccionadaE,
-                                                  onChanged: (value) {
-                                                    updateCategoriaSeleccionada(value!);
-                                                  },
-                                                  items: categorias.map<DropdownMenuItem<Categoria>>((Categoria categoria) {
-                                                    return DropdownMenuItem<Categoria>(
-                                                      value: categoria,
-                                                      child: Text(categoria.nombre),
-                                                    );
-                                                  }).toList(),
-                                                ),
-                                                DropdownButtonFormField<Vehiculo>(
-                                                  decoration: const InputDecoration(
-                                                      labelText: 'Vehiculo',
-                                                      icon: Icon(Icons.car_repair_rounded),
-                                                      iconColor: Color.fromARGB(255, 57, 127, 136),
-                                                      labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
-                                                      enabledBorder: UnderlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
-                                                      focusedBorder: UnderlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
-                                                  value: vehiculoSeleccionadoE,
-                                                  onChanged: (value) {
-                                                    updateVehiculoSeleccionado(value!);
-                                                  },
-                                                  items: vehiculos.map<DropdownMenuItem<Vehiculo>>((Vehiculo vehiculo) {
-                                                    return DropdownMenuItem<Vehiculo>(
-                                                      value: vehiculo,
-                                                      child: Text('${vehiculo.marca} ${vehiculo.matricula}'),
-                                                    );
-                                                  }).toList(),
-                                                ),
-                                                TextFormField(
-                                                  controller: controladorDescripcionE,
-                                                  decoration: const InputDecoration(
-                                                      labelText: 'Descripcion',
-                                                      icon: Icon(Icons.description_rounded),
-                                                      iconColor: Color.fromARGB(255, 57, 127, 136),
-                                                      labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
-                                                      enabledBorder: UnderlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
-                                                      focusedBorder: UnderlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
-                                                  inputFormatters: [LengthLimitingTextInputFormatter(40)],
-                                                ),
-                                                TextFormField(
-                                                    controller: controladorLugarE,
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Padding(
+                                                    padding: EdgeInsets.all(8.0),
+                                                    child: Icon(
+                                                      Icons.car_repair,
+                                                      color: Color.fromARGB(255, 57, 127, 136),
+                                                    ),
+                                                  ),
+                                                  Text('Vehiculo',style: TextStyle(fontSize: 20,color: Color.fromARGB(255,57,127,136))),
+                                                ],
+                                              ),
+                                    ),
+                                            Text(vehiculoDelGasto.matricula,style: const TextStyle(fontSize: 20)),
+                                    
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Padding(
+                                                    padding: EdgeInsets.all(8.0),
+                                                    child: Icon(
+                                                      Icons.description_outlined,
+                                                      color: Color.fromARGB(255, 57, 127, 136),
+                                                    ),
+                                                  ),
+                                                  Text('Descripcion',
+                                                      style: TextStyle(fontSize: 20,color: Color.fromARGB(255,57,127,136))),
+                                                ],
+                                              ),
+                                    ),
+                                            Text(gasto.descripcion,style: const TextStyle(fontSize: 20)),
+
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Padding(
+                                                    padding: EdgeInsets.all(8.0),
+                                                    child: Icon(
+                                                      Icons.place_outlined,
+                                                      color: Color.fromARGB(255, 57, 127, 136),
+                                                    ),
+                                                  ),
+                                                  Text('Lugar',
+                                                      style: TextStyle(fontSize: 20,color: Color.fromARGB(255,57,127,136))),
+                                                ],
+                                              ),
+                                    ),
+                                            Text(gasto.lugar,style: const TextStyle(fontSize: 20)),
+
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Padding(
+                                                    padding: EdgeInsets.all(8.0),
+                                                    child: Icon(
+                                                      Icons.attach_money_outlined,
+                                                      color: Color.fromARGB(255, 57, 127, 136),
+                                                    ),
+                                                  ),
+                                                  Text('Cantidad',
+                                                      style: TextStyle(fontSize: 20,color: Color.fromARGB(255,57,127,136))),
+                                                ],
+                                              ),
+                                    ),
+                                            Text(gasto.cantidad.toString(),style: const TextStyle(fontSize: 20)),
+
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Padding(
+                                                    padding: EdgeInsets.all(8.0),
+                                                    child: Icon(
+                                                      Icons.calendar_month_outlined,
+                                                      color: Color.fromARGB(255, 57, 127, 136),
+                                                    ),
+                                                  ),
+                                                  Text('Fecha',
+                                                      style: TextStyle(fontSize: 20,color: Color.fromARGB(255,57,127,136))),
+                                                ],
+                                              ),
+                                    ),
+                                            Text(gasto.fecha.substring(0, 10),style: const TextStyle(fontSize: 20)),
+
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                      ElevatedButton(
+                                      onPressed: () {
+                                      final controladorVehiculoIdE = TextEditingController(text: gasto.vehiculo_id.toString());
+                                      final controladorCategoriaIdE =TextEditingController(text:gasto.categoria_id.toString());
+                                      final controladorDescripcionE =TextEditingController(text: gasto.descripcion);
+                                      final controladorLugarE =TextEditingController(text: gasto.lugar);
+                                      final controladorGastoE =TextEditingController(text: gasto.cantidad.toString());
+                                      final controladorFechaE =TextEditingController(text: gasto.fecha.substring(0,10));
+                                  
+                                      final categoriaSeleccionadaE = categoriaDelGasto;
+                                      final vehiculoSeleccionadoE = vehiculoDelGasto;
+                                  
+                                      void updateCategoriaSeleccionada(Categoria value) {
+                                      setState(() {
+                                        categoriaDelGasto= value;
+                                        controladorCategoriaIdE.text = value.categoria_id.toString();
+                                      });
+                                    }
+                                  
+                                      void updateVehiculoSeleccionado(Vehiculo value) {
+                                      setState(() {
+                                        vehiculoDelGasto = value;
+                                        controladorVehiculoIdE.text = value.vehiculo_id.toString();    
+                                      });
+                                    }
+                                  
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (BuildContext context) {
+                                            return Scaffold(
+                                              appBar: AppBar(
+                                                backgroundColor: const Color.fromARGB(255,57,127,136),
+                                                title: const Text("Editar gasto"),
+                                              ),
+                                              body: Form(
+                                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                key: formKey,
+                                                child: Column(
+                                                  children: [
+                                  
+                                                  DropdownButtonFormField<Categoria>(
                                                     decoration: const InputDecoration(
-                                                        labelText: 'Lugar',
-                                                        icon: Icon(Icons.place),
+                                                        labelText: 'Categoria',
+                                                        icon: Icon(Icons.category_rounded),
+                                                        iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                        labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                        enabledBorder: UnderlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+                                                        focusedBorder: UnderlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
+                                                    value: categoriaSeleccionadaE,
+                                                    onChanged: (value) {
+                                                      updateCategoriaSeleccionada(value!);
+                                                    },
+                                                    items: categorias.map<DropdownMenuItem<Categoria>>((Categoria categoria) {
+                                                      return DropdownMenuItem<Categoria>(
+                                                        value: categoria,
+                                                        child: Text(categoria.nombre),
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                  DropdownButtonFormField<Vehiculo>(
+                                                    decoration: const InputDecoration(
+                                                        labelText: 'Vehiculo',
+                                                        icon: Icon(Icons.car_repair_rounded),
+                                                        iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                        labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                        enabledBorder: UnderlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+                                                        focusedBorder: UnderlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
+                                                    value: vehiculoSeleccionadoE,
+                                                    onChanged: (value) {
+                                                      updateVehiculoSeleccionado(value!);
+                                                    },
+                                                    items: vehiculos.map<DropdownMenuItem<Vehiculo>>((Vehiculo vehiculo) {
+                                                      return DropdownMenuItem<Vehiculo>(
+                                                        value: vehiculo,
+                                                        child: Text('${vehiculo.marca} ${vehiculo.matricula}'),
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                  TextFormField(
+                                                    controller: controladorDescripcionE,
+                                                    decoration: const InputDecoration(
+                                                        labelText: 'Descripcion',
+                                                        icon: Icon(Icons.description_rounded),
+                                                        iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                        labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                        enabledBorder: UnderlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+                                                        focusedBorder: UnderlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
+                                                    inputFormatters: [LengthLimitingTextInputFormatter(40)],
+                                                  ),
+                                                  TextFormField(
+                                                    validator: (value) {
+                                                    if (value == null || value.isEmpty) {
+                                                        return 'Por favor, ingresa el lugar';
+                                                    }
+                                                    return null;
+                                                  },
+                                                      controller: controladorLugarE,
+                                                      decoration: const InputDecoration(
+                                                          labelText: 'Lugar',
+                                                          icon: Icon(Icons.place),
+                                                          iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                          labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                          enabledBorder: UnderlineInputBorder(
+                                                              borderSide:
+                                                                  BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+                                                          focusedBorder: UnderlineInputBorder(
+                                                              borderSide:
+                                                                  BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
+                                                      keyboardType: TextInputType.number,
+                                                      inputFormatters: [LengthLimitingTextInputFormatter(8)]),
+                                                  TextFormField(
+                                                    validator: (value) {
+                                                    if (value == null || value.isEmpty) {
+                                                      return 'Por favor, ingresa la cantidad';
+                                                  }
+                                                  RegExp numbersOnlyRegExp = RegExp(r'[^0-9]');
+                                                  if (numbersOnlyRegExp.hasMatch(value)) {
+                                                    return 'Solo se permiten números del 0 al 9.';
+                                                  }
+                                                    return null;
+
+                                                  },
+                                                    controller: controladorGastoE,
+                                                    decoration: const InputDecoration(
+                                                        labelText: 'Cantidad',
+                                                        icon: Icon(Icons.attach_money_outlined),
                                                         iconColor: Color.fromARGB(255, 57, 127, 136),
                                                         labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
                                                         enabledBorder: UnderlineInputBorder(
@@ -1916,244 +2050,166 @@ class _PantallaGastosState extends State<PantallaGastos> {
                                                             borderSide:
                                                                 BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
                                                     keyboardType: TextInputType.number,
-                                                    inputFormatters: [LengthLimitingTextInputFormatter(8)]),
-                                                TextFormField(
-                                                  controller: controladorGastoE,
-                                                  decoration: const InputDecoration(
-                                                      labelText: 'Cantidad',
-                                                      icon: Icon(Icons.attach_money_outlined),
-                                                      iconColor: Color.fromARGB(255, 57, 127, 136),
-                                                      labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
-                                                      enabledBorder: UnderlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
-                                                      focusedBorder: UnderlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
-                                                  keyboardType: TextInputType.number,
-                                                  inputFormatters: <TextInputFormatter>[
-                                                    FilteringTextInputFormatter.digitsOnly,
-                                                    LengthLimitingTextInputFormatter(8),
+                                                    inputFormatters: <TextInputFormatter>[
+                                                      FilteringTextInputFormatter.digitsOnly,
+                                                      LengthLimitingTextInputFormatter(8),
+                                                    ],
+                                                  ),
+                                                  TextFormField(
+                                                    controller: controladorFechaE,
+                                                    decoration: const InputDecoration(
+                                                        icon: Icon(Icons.calendar_today),
+                                                        labelText: 'Fecha',
+                                                        iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                        labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                        enabledBorder: UnderlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+                                                        focusedBorder: UnderlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
+                                                    readOnly: true,
+                                                    onTap: () async {
+                                                      DateTime? selectedDate = await showDatePicker(
+                                                        context: context,
+                                                        initialDate: DateTime.now(),
+                                                        firstDate: DateTime(1950),
+                                                        lastDate: DateTime.now(),
+                                                        builder: (BuildContext context, Widget? child) {
+                                                          return Theme(
+                                                            data: ThemeData.light().copyWith(
+                                                              primaryColor: const Color.fromARGB(
+                                                                  255, 57, 127, 136), // Cambia el color principal
+                                                              colorScheme: const ColorScheme.light(
+                                                                  primary: Color.fromARGB(255, 57, 127, 136)),
+                                                              buttonTheme: const ButtonThemeData(
+                                                                  textTheme: ButtonTextTheme.primary),
+                                                            ),
+                                                            child: child!,
+                                                          );
+                                                        },
+                                                      );
+                                  
+                                                      if (selectedDate != null) {
+                                                        String formattedDate =
+                                                            DateFormat('yyyy-MM-dd').format(selectedDate);
+                                                        controladorFechaE.text = formattedDate;
+                                                      }
+                                                    },
+                                                    keyboardType: TextInputType.datetime,
+                                                  ),
+                                  
+                                                  Padding(
+                                                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+                                                    child: ElevatedButton(
+                                                      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(
+                                                            255,
+                                                            57,
+                                                            127,
+                                                            136), // Puedes cambiar el color según tus preferencias
+                                                      ),
+                                                      onPressed: () {
+                                                      if(formKey.currentState!.validate()) {
+                                                        final nuevaCategoria = controladorCategoriaIdE.text.trim();
+                                                        final nuevoVehiculo = controladorVehiculoIdE.text.trim();
+                                                        final nuevaDescripcion = controladorDescripcionE.text.trim();
+                                                        final nuevoLugar = controladorLugarE.text.trim();
+                                                        final nuevaCantidad = controladorGastoE.text.trim();
+                                                        final nuevaFecha = controladorFechaE.text.trim();
+                                                                                    
+                                                        Gasto nuevoGasto = Gasto(gastoId: gasto.gastoId, descripcion: nuevaDescripcion, lugar: nuevoLugar, cantidad: double.parse(nuevaCantidad), fecha: nuevaFecha, categoria_id: int.parse(nuevaCategoria), vehiculo_id: int.parse(nuevoVehiculo));
+                                                        
+                                                        
+                                                        editarGasto(gasto, nuevoGasto);
+                                                        Navigator.pop(context);
+                                                        Navigator.pop(context);
+                                                                                    
+                                                        
+                                                                                    
+                                                        
+                                                                                    
+                                                      }
+                                                    }, child: const Text('Editar')),
+                                                  )
+                                  
                                                   ],
-                                                ),
-                                                TextFormField(
-                                                  controller: controladorFechaE,
-                                                  decoration: const InputDecoration(
-                                                      icon: Icon(Icons.calendar_today),
-                                                      labelText: 'Fecha',
-                                                      iconColor: Color.fromARGB(255, 57, 127, 136),
-                                                      labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
-                                                      enabledBorder: UnderlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
-                                                      focusedBorder: UnderlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
-                                                  readOnly: true,
-                                                  onTap: () async {
-                                                    DateTime? selectedDate = await showDatePicker(
-                                                      context: context,
-                                                      initialDate: DateTime.now(),
-                                                      firstDate: DateTime(1950),
-                                                      lastDate: DateTime.now(),
-                                                      builder: (BuildContext context, Widget? child) {
-                                                        return Theme(
-                                                          data: ThemeData.light().copyWith(
-                                                            primaryColor: const Color.fromARGB(
-                                                                255, 57, 127, 136), // Cambia el color principal
-                                                            colorScheme: const ColorScheme.light(
-                                                                primary: Color.fromARGB(255, 57, 127, 136)),
-                                                            buttonTheme: const ButtonThemeData(
-                                                                textTheme: ButtonTextTheme.primary),
-                                                          ),
-                                                          child: child!,
-                                                        );
-                                                      },
-                                                    );
-
-                                                    if (selectedDate != null) {
-                                                      String formattedDate =
-                                                          DateFormat('yyyy-MM-dd').format(selectedDate);
-                                                      controladorFechaE.text = formattedDate;
-                                                    }
-                                                  },
-                                                  keyboardType: TextInputType.datetime,
-                                                ),
-
-                                                ElevatedButton(onPressed: () {
-                                                  if(formKey.currentState!.validate()) {
-                                                    final nuevaCategoria = controladorCategoriaIdE.text.trim();
-                                                    final nuevoVehiculo = controladorVehiculoIdE.text.trim();
-                                                    final nuevaDescripcion = controladorDescripcionE.text.trim();
-                                                    final nuevoLugar = controladorLugarE.text.trim();
-                                                    final nuevaCantidad = controladorGastoE.text.trim();
-                                                    final nuevaFecha = controladorFechaE.text.trim();
-
-                                                    Gasto nuevoGasto = Gasto(gastoId: gasto.gastoId, descripcion: nuevaDescripcion, lugar: nuevoLugar, cantidad: double.parse(nuevaCantidad), fecha: nuevaFecha, categoria_id: int.parse(nuevaCategoria), vehiculo_id: int.parse(nuevoVehiculo));
-                                                    
-                                                    print(gasto);
-                                                    print(nuevoGasto);
-                                                    editarGasto(gasto, nuevoGasto);
-
-                                                    
-
-                                                    
-
-                                                  }
-                                                }, child: const Text('Editar'))
-
-                                                ],
-                                              )),
-
-
-                                          );
-
-                                      }
-                                      )
-                                    );
-
-                                      }, 
-                                      child: const Row(
-                                         children: [
-                                           Icon(Icons.edit),
-                                          Text('Editar'),
-                                         ],
-                                       ),
-                                       ),
-                                      ElevatedButton(onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                           builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              content: const Text('¿Estás seguro de que quieres eliminar este gasto?'),
-                                              actions: [
-                                                TextButton(onPressed: () {
-                                                  Navigator.pop(context);
-                                                }, 
-                                                child: const Text('Cancelar',style: TextStyle(
-                                                                        color: Color.fromARGB(255,57,127,136)),
-                                                                  ),
-                                               ),
-                                               ElevatedButton(onPressed: () {
-                                                eliminarGasto(gasto.gastoId);
-                                                Navigator.pop(context);
-                                                Navigator.pop(context);
-                                                mostrarAdvertencia("Gasto eliminado correctamente");
-                                               },
-                                                child: const Text('Eliminar'))
-                                              ],
+                                                )),
                                             );
-
-                                           }
-                                          );
-                                      },
-                                       child: const Row(
-                                         children: [
-                                           Icon(Icons.delete),
-                                          Text('Eliminar'),
-                                         ],
-                                       ),
-                                       ),
-
-                                    ],
+                                        }
+                                        )
+                                      );
+                                  
+                                        }, 
+                                        style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(
+                                                            255,
+                                                            57,
+                                                            127,
+                                                            136), // Puedes cambiar el color según tus preferencias
+                                                      ),
+                                        child: const Row(
+                                           children: [
+                                            Icon(Icons.edit),
+                                            Text('Editar'),
+                                           ],
+                                         ),
+                                         ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(
+                                                            255,
+                                                            57,
+                                                            127,
+                                                            136), // Puedes cambiar el color según tus preferencias
+                                                      ),
+                                          onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                             builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                content: const Text('¿Estás seguro de que quieres eliminar este gasto?'),
+                                                actions: [
+                                                  TextButton(onPressed: () {
+                                                    Navigator.pop(context);
+                                                  }, 
+                                                  child: const Text('Cancelar',style: TextStyle(
+                                                                          color: Color.fromARGB(255,57,127,136)),
+                                                                    ),
+                                                 ),
+                                                 ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(
+                                                          255,
+                                                          57,
+                                                          127,
+                                                          136), // Puedes cambiar el color según tus preferencias
+                                                    ),
+                                                  onPressed: () {
+                                                  eliminarGasto(gasto.gastoId);
+                                                  Navigator.pop(context);
+                                                  Navigator.pop(context);
+                                                  mostrarAdvertencia("Gasto eliminado correctamente");
+                                                 },
+                                                  child: const Text('Eliminar'))
+                                                ],
+                                              );
+                                  
+                                             }
+                                            );
+                                        },
+                                         child: const Row(
+                                           children: [
+                                            Icon(Icons.delete),
+                                            Text('Eliminar'),
+                                           ],
+                                         ),
+                                         ),
+                                  
+                                      ],
+                                    ),
                                   )
-
-
                                   ],
                                 ),
                               ),
                             )
                             );
-                          
-
-                            return;
-
-                          // ignore: dead_code
-                          Navigator.push(context, MaterialPageRoute(
-                              builder: (BuildContext context) {
-                            return Scaffold(
-                              appBar: AppBar(
-                                title: Text('Gasto: ${gasto.lugar}'),
-                              ),
-                              body: const Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  
-                                ],
-                              ),
-                              floatingActionButton: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  FloatingActionButton(
-                                    onPressed: () {
-                                      eliminarGasto(gasto.gastoId);
-                                    },
-                                    tooltip: 'Borrar Gasto',
-                                    child: const Icon(Icons.delete),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  FloatingActionButton(onPressed: () {
-                                    final controladorVehiculoId = TextEditingController(text: gasto.vehiculo_id.toString());
-                                    final controladorCategoriaId =TextEditingController(text:gasto.categoria_id.toString());
-                                    final controladorDescripcion =TextEditingController(text: gasto.descripcion);
-                                    final controladorLugar =TextEditingController(text: gasto.lugar);
-                                    final controladorGasto =TextEditingController(text: gasto.cantidad.toString());
-                                    final controladorFecha =TextEditingController(text: gasto.fecha);
-
-                                    
-
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return AlertDialog(
-                                            title: const Text('Editar gasto'),
-                                            content: Column(
-                                              children: [
-                                                //TODO agregar widget de editar
-                                                TextFormField(
-                                                  controller:
-                                                      controladorCategoriaId,
-                                                  decoration:
-                                                      const InputDecoration(
-                                                          labelText:
-                                                              'Categoria'),
-                                                ),
-                                                TextFormField(
-                                                  controller:
-                                                      controladorDescripcion,
-                                                  decoration:
-                                                      const InputDecoration(
-                                                          labelText:
-                                                              'Descripcion'),
-                                                ),
-                                                TextFormField(
-                                                  controller: controladorLugar,
-                                                  decoration:
-                                                      const InputDecoration(
-                                                          labelText: 'Lugar'),
-                                                ),
-                                                TextFormField(
-                                                  controller: controladorGasto,
-                                                  decoration:
-                                                      const InputDecoration(
-                                                          labelText: 'Gasto'),
-                                                ),
-                                                TextFormField(
-                                                  controller: controladorFecha,
-                                                  decoration:
-                                                      const InputDecoration(
-                                                          labelText: 'Fecha'),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        });
-                                  })
-                                ],
-                              ),
-                            );
-                          }));
                         },
                       );
                     },
