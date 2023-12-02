@@ -1427,9 +1427,10 @@ class PantallaGastos extends StatefulWidget {
 
 class _PantallaGastosState extends State<PantallaGastos> {
   double cantidadGastada = 0.00;
+  final formKey = GlobalKey<FormState>();
 
   TextEditingController controladorFechaInicial = TextEditingController(text: '1950-01-01');
-  TextEditingController controladorFechaFinal = TextEditingController(text: '2024-12-30');
+  TextEditingController controladorFechaFinal = TextEditingController(text: DateFormat('yyyy-MM-dd').format(DateTime.now()));
   TextEditingController controladorCategoriaSeleccionada = TextEditingController(text: 'Todas las categorias');
   TextEditingController controladorVehiculoSeleccionado = TextEditingController(text: 'Todos los vehiculos');
   TextEditingController controladorLugar = TextEditingController(text: 'Todos los lugares');
@@ -1444,6 +1445,12 @@ class _PantallaGastosState extends State<PantallaGastos> {
       context
           .read<AppBloc>()
           .add(EditarGasto(gastoViejo: gastoViejo, gastoNuevo: gastoNuevo));
+    }
+    void mostrarAdvertencia(String mensaje) {
+      final snackBar = SnackBar(
+        content: Text(mensaje),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
 
     
@@ -1536,6 +1543,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
     }
 
     
+    
     Future<List<Categoria>> getCategoria(String search) async {
       List<Categoria> categoriaList = [todasLasCategorias];
       categoriaList.addAll(categorias);
@@ -1592,7 +1600,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
                 context: context,
                 initialDate: DateTime.now(),
                 firstDate: DateTime(2000),
-                lastDate: DateTime.now());
+                lastDate: DateTime(2023,12,30));
             setState(() {
               if (fechaSeleccionada != null) {
                 String formattedDate =
@@ -1667,7 +1675,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
               }).toList(),
             ]
             ),
-        
+        /*
         AsyncAutocomplete<Categoria>(
           controller: controladorCategoriaSeleccionada,
           onChanged: (value) {
@@ -1704,7 +1712,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
             title: Text(gastoSeleccionado.lugar),
           ),
           asyncSuggestions: (searchValue) => getLugar(searchValue)),
-
+        */
         Expanded(
           child: SizedBox(
             //width: 500,
@@ -1717,6 +1725,11 @@ class _PantallaGastosState extends State<PantallaGastos> {
                       child: Text('No hay gastos disponibles'),
                     );
                   }
+
+                  
+                  
+
+                  
 
                   return ListView.builder(
                     itemCount: state.listaGastosFiltrados.length,
@@ -1733,11 +1746,15 @@ class _PantallaGastosState extends State<PantallaGastos> {
                           break;
                         }
                       }
-                      
-
-                      
-                      
-                      
+                      late int y;
+                          for (var categoria in categorias) {
+                            if (categoria.categoria_id == gasto.categoria_id) {
+                              y = categorias.indexOf(categoria);
+                              break;
+                            }
+                          }
+                          Categoria categoriaDelGasto = categorias[y];
+                          Vehiculo vehiculoDelGasto = vehiculos[x];
 
                       return ListTile(
                         title: Text(
@@ -1750,29 +1767,22 @@ class _PantallaGastosState extends State<PantallaGastos> {
                           ],
                         ),
                         onTap: () {
-                          late int y;
-                          for (var categoria in categorias) {
-                            if (categoria.categoria_id == gasto.categoria_id) {
-                              y = categorias.indexOf(categoria);
-                              break;
-                            }
-                          }
+                            
                           
-                          Categoria categoriaDelGasto = categorias[y];
-
-
-                          Vehiculo vehiculoDelGasto = vehiculos[x];
-
-                          Navigator.push(context, MaterialPageRoute(
-                              builder: (BuildContext context) {
-                            return Scaffold(
-                              appBar: AppBar(
-                                title: Text('Gasto: ${gasto.lugar}'),
-                              ),
-                              body: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          showDialog(
+                            context: context, 
+                            builder: (BuildContext context) => AlertDialog(
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text('Categoria: ${categoriaDelGasto.nombre}',
+                                  Text('Gasto: ${gasto.gastoId}')
+                                ],
+                              ),
+                              content: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Categoria: ${categoriaDelGasto.nombre}',
                                       style: const TextStyle(fontSize: 20)),
                                   Text(
                                       'Vehiculo: ${vehiculoDelGasto.marca} ${vehiculoDelGasto.matricula} ',
@@ -1785,6 +1795,290 @@ class _PantallaGastosState extends State<PantallaGastos> {
                                       style: const TextStyle(fontSize: 20)),
                                   Text('Fecha: ${gasto.fecha.substring(0, 10)}',
                                       style: const TextStyle(fontSize: 20)),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                    ElevatedButton(onPressed: () {
+                                    final controladorVehiculoIdE = TextEditingController(text: gasto.vehiculo_id.toString());
+                                    final controladorCategoriaIdE =TextEditingController(text:gasto.categoria_id.toString());
+                                    final controladorDescripcionE =TextEditingController(text: gasto.descripcion);
+                                    final controladorLugarE =TextEditingController(text: gasto.lugar);
+                                    final controladorGastoE =TextEditingController(text: gasto.cantidad.toString());
+                                    final controladorFechaE =TextEditingController(text: gasto.fecha);
+
+                                    final categoriaSeleccionadaE = categoriaDelGasto;
+                                    final vehiculoSeleccionadoE = vehiculoDelGasto;
+
+
+
+                                    void updateCategoriaSeleccionada(Categoria value) {
+                                    setState(() {
+                                      categoriaDelGasto= value;
+                                      controladorCategoriaIdE.text = value.categoria_id.toString();
+                                    });
+                                  }
+
+                                    void updateVehiculoSeleccionado(Vehiculo value) {
+                                    setState(() {
+                                      vehiculoDelGasto = value;
+                                      controladorVehiculoIdE.text = value.vehiculo_id.toString();    
+                                    });
+                                  }
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) {
+                                          return Scaffold(
+                                            appBar: AppBar(
+                                              backgroundColor: const Color.fromARGB(255,57,127,136),
+                                              title: const Text("Editar gasto"),
+                                            ),
+                                            body: Form(
+                                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                                              key: formKey,
+                                              child: Column(
+                                                children: [
+
+                                                DropdownButtonFormField<Categoria>(
+                                                  decoration: const InputDecoration(
+                                                      labelText: 'Categoria',
+                                                      icon: Icon(Icons.category_rounded),
+                                                      iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                      labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                      enabledBorder: UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+                                                      focusedBorder: UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
+                                                  value: categoriaSeleccionadaE,
+                                                  onChanged: (value) {
+                                                    updateCategoriaSeleccionada(value!);
+                                                  },
+                                                  items: categorias.map<DropdownMenuItem<Categoria>>((Categoria categoria) {
+                                                    return DropdownMenuItem<Categoria>(
+                                                      value: categoria,
+                                                      child: Text(categoria.nombre),
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                                DropdownButtonFormField<Vehiculo>(
+                                                  decoration: const InputDecoration(
+                                                      labelText: 'Vehiculo',
+                                                      icon: Icon(Icons.car_repair_rounded),
+                                                      iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                      labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                      enabledBorder: UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+                                                      focusedBorder: UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
+                                                  value: vehiculoSeleccionadoE,
+                                                  onChanged: (value) {
+                                                    updateVehiculoSeleccionado(value!);
+                                                  },
+                                                  items: vehiculos.map<DropdownMenuItem<Vehiculo>>((Vehiculo vehiculo) {
+                                                    return DropdownMenuItem<Vehiculo>(
+                                                      value: vehiculo,
+                                                      child: Text('${vehiculo.marca} ${vehiculo.matricula}'),
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                                TextFormField(
+                                                  controller: controladorDescripcionE,
+                                                  decoration: const InputDecoration(
+                                                      labelText: 'Descripcion',
+                                                      icon: Icon(Icons.description_rounded),
+                                                      iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                      labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                      enabledBorder: UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+                                                      focusedBorder: UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
+                                                  inputFormatters: [LengthLimitingTextInputFormatter(40)],
+                                                ),
+                                                TextFormField(
+                                                    controller: controladorLugarE,
+                                                    decoration: const InputDecoration(
+                                                        labelText: 'Lugar',
+                                                        icon: Icon(Icons.place),
+                                                        iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                        labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                        enabledBorder: UnderlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+                                                        focusedBorder: UnderlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
+                                                    keyboardType: TextInputType.number,
+                                                    inputFormatters: [LengthLimitingTextInputFormatter(8)]),
+                                                TextFormField(
+                                                  controller: controladorGastoE,
+                                                  decoration: const InputDecoration(
+                                                      labelText: 'Cantidad',
+                                                      icon: Icon(Icons.attach_money_outlined),
+                                                      iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                      labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                      enabledBorder: UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+                                                      focusedBorder: UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
+                                                  keyboardType: TextInputType.number,
+                                                  inputFormatters: <TextInputFormatter>[
+                                                    FilteringTextInputFormatter.digitsOnly,
+                                                    LengthLimitingTextInputFormatter(8),
+                                                  ],
+                                                ),
+                                                TextFormField(
+                                                  controller: controladorFechaE,
+                                                  decoration: const InputDecoration(
+                                                      icon: Icon(Icons.calendar_today),
+                                                      labelText: 'Fecha',
+                                                      iconColor: Color.fromARGB(255, 57, 127, 136),
+                                                      labelStyle: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),
+                                                      enabledBorder: UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+                                                      focusedBorder: UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
+                                                  readOnly: true,
+                                                  onTap: () async {
+                                                    DateTime? selectedDate = await showDatePicker(
+                                                      context: context,
+                                                      initialDate: DateTime.now(),
+                                                      firstDate: DateTime(1950),
+                                                      lastDate: DateTime.now(),
+                                                      builder: (BuildContext context, Widget? child) {
+                                                        return Theme(
+                                                          data: ThemeData.light().copyWith(
+                                                            primaryColor: const Color.fromARGB(
+                                                                255, 57, 127, 136), // Cambia el color principal
+                                                            colorScheme: const ColorScheme.light(
+                                                                primary: Color.fromARGB(255, 57, 127, 136)),
+                                                            buttonTheme: const ButtonThemeData(
+                                                                textTheme: ButtonTextTheme.primary),
+                                                          ),
+                                                          child: child!,
+                                                        );
+                                                      },
+                                                    );
+
+                                                    if (selectedDate != null) {
+                                                      String formattedDate =
+                                                          DateFormat('yyyy-MM-dd').format(selectedDate);
+                                                      controladorFechaE.text = formattedDate;
+                                                    }
+                                                  },
+                                                  keyboardType: TextInputType.datetime,
+                                                ),
+
+                                                ElevatedButton(onPressed: () {
+                                                  if(formKey.currentState!.validate()) {
+                                                    final nuevaCategoria = controladorCategoriaIdE.text.trim();
+                                                    final nuevoVehiculo = controladorVehiculoIdE.text.trim();
+                                                    final nuevaDescripcion = controladorDescripcionE.text.trim();
+                                                    final nuevoLugar = controladorLugarE.text.trim();
+                                                    final nuevaCantidad = controladorGastoE.text.trim();
+                                                    final nuevaFecha = controladorFechaE.text.trim();
+
+                                                    Gasto nuevoGasto = Gasto(gastoId: gasto.gastoId, descripcion: nuevaDescripcion, lugar: nuevoLugar, cantidad: double.parse(nuevaCantidad), fecha: nuevaFecha, categoria_id: int.parse(nuevaCategoria), vehiculo_id: int.parse(nuevoVehiculo));
+                                                    
+                                                    print(gasto);
+                                                    print(nuevoGasto);
+                                                    editarGasto(gasto, nuevoGasto);
+
+                                                    
+
+                                                    
+
+                                                  }
+                                                }, child: const Text('Editar'))
+
+                                                ],
+                                              )),
+
+
+                                          );
+
+                                      }
+                                      )
+                                    );
+
+                                      }, 
+                                      child: const Row(
+                                         children: [
+                                           Icon(Icons.edit),
+                                          Text('Editar'),
+                                         ],
+                                       ),
+                                       ),
+                                      ElevatedButton(onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                           builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              content: const Text('¿Estás seguro de que quieres eliminar este gasto?'),
+                                              actions: [
+                                                TextButton(onPressed: () {
+                                                  Navigator.pop(context);
+                                                }, 
+                                                child: const Text('Cancelar',style: TextStyle(
+                                                                        color: Color.fromARGB(255,57,127,136)),
+                                                                  ),
+                                               ),
+                                               ElevatedButton(onPressed: () {
+                                                eliminarGasto(gasto.gastoId);
+                                                Navigator.pop(context);
+                                                Navigator.pop(context);
+                                                mostrarAdvertencia("Gasto eliminado correctamente");
+                                               },
+                                                child: const Text('Eliminar'))
+                                              ],
+                                            );
+
+                                           }
+                                          );
+                                      },
+                                       child: const Row(
+                                         children: [
+                                           Icon(Icons.delete),
+                                          Text('Eliminar'),
+                                         ],
+                                       ),
+                                       ),
+
+                                    ],
+                                  )
+
+
+                                  ],
+                                ),
+                              ),
+                            )
+                            );
+                          
+
+                            return;
+
+                          // ignore: dead_code
+                          Navigator.push(context, MaterialPageRoute(
+                              builder: (BuildContext context) {
+                            return Scaffold(
+                              appBar: AppBar(
+                                title: Text('Gasto: ${gasto.lugar}'),
+                              ),
+                              body: const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  
                                 ],
                               ),
                               floatingActionButton: Column(
@@ -1800,25 +2094,14 @@ class _PantallaGastosState extends State<PantallaGastos> {
                                   ),
                                   const SizedBox(height: 16),
                                   FloatingActionButton(onPressed: () {
-                                    final controladorVehiculoId =
-                                        TextEditingController(
-                                            text: gasto.vehiculo_id.toString());
-                                    final controladorCategoriaId =
-                                        TextEditingController(
-                                            text:
-                                                gasto.categoria_id.toString());
-                                    final controladorDescripcion =
-                                        TextEditingController(
-                                            text: gasto.descripcion);
-                                    final controladorLugar =
-                                        TextEditingController(
-                                            text: gasto.lugar);
-                                    final controladorGasto =
-                                        TextEditingController(
-                                            text: gasto.cantidad.toString());
-                                    final controladorFecha =
-                                        TextEditingController(
-                                            text: gasto.fecha);
+                                    final controladorVehiculoId = TextEditingController(text: gasto.vehiculo_id.toString());
+                                    final controladorCategoriaId =TextEditingController(text:gasto.categoria_id.toString());
+                                    final controladorDescripcion =TextEditingController(text: gasto.descripcion);
+                                    final controladorLugar =TextEditingController(text: gasto.lugar);
+                                    final controladorGasto =TextEditingController(text: gasto.cantidad.toString());
+                                    final controladorFecha =TextEditingController(text: gasto.fecha);
+
+                                    
 
                                     showDialog(
                                         context: context,
@@ -2146,7 +2429,7 @@ class _FormularioGastoState extends State<FormularioGasto> {
               context: context,
               initialDate: DateTime.now(),
               firstDate: DateTime(1950),
-              lastDate: DateTime(2101),
+              lastDate: DateTime.now(),
               builder: (BuildContext context, Widget? child) {
                 return Theme(
                   data: ThemeData.light().copyWith(
@@ -2174,3 +2457,4 @@ class _FormularioGastoState extends State<FormularioGasto> {
     );
   }
 }
+

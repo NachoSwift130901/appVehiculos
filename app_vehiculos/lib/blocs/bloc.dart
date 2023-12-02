@@ -189,6 +189,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   List<Gasto> _listaGastosFiltrados = [];
 
   RepositorioBD repo = RepositorioBD();
+
   
 
   Future<void> todasLasCategorias() async {
@@ -241,10 +242,15 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   }
 
   Future<void>agregarGasto(Gasto gasto) async{
-    String fechaFormateada = gasto.fecha.toString();
+
+    DateTime fechaNoFormateada = DateTime.parse(gasto.fecha);
+
+    DateTime fechaSiFormateada = DateTime(fechaNoFormateada.year, fechaNoFormateada.month, fechaNoFormateada.day, 23, 59);
+    String fechaFormateada = fechaSiFormateada.toString();
+    print(fechaFormateada);
+    
     await db.rawInsert('''INSERT INTO gastos (descripcion, lugar, cantidad, fecha, categoria_id, vehiculo_id) VALUES (?, ?, ?, ?, ?, ?)''',
                        [gasto.descripcion, gasto.lugar, gasto.cantidad, fechaFormateada, gasto.categoria_id, gasto.vehiculo_id]);
-    print(gasto.vehiculo_id);
   }
   Future<void>eliminarGasto(id) async{
     
@@ -260,20 +266,27 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     
   }
 
-  Future<void> filtrarGasto(fechaInicial, fechaFinal,categoriaId,vehiculoId, lugar) async {
+  Future<void> filtrarGasto(fechaInicial, fechaFinal ,categoriaId,vehiculoId, lugar) async {
+
+    DateTime fechaNoFormateada = DateTime.parse(fechaFinal);
+
+    DateTime fechaSiFormateada = DateTime(fechaNoFormateada.year, fechaNoFormateada.month, fechaNoFormateada.day, 23, 59);
+    String fechaFormateada = fechaSiFormateada.toString();
+    print(fechaFormateada);
 
     
     
+
     String condicionCategoria = ((categoriaId) == '999' || (categoriaId) == 'Todas las categorias')? '' : 'AND categoria_id = $categoriaId';
     
     String condicionVehiculo = ((vehiculoId) == '999' || (vehiculoId) == 'Todos los vehiculos')? '' : 'AND vehiculo_id = $vehiculoId'; 
 
     String condicionLugar = (lugar == 'Todos los lugares')? '' : 'AND lugar = \'$lugar\'';
     
-    String test= 'SELECT * FROM gastos WHERE fecha BETWEEN $fechaInicial AND $fechaFinal $condicionCategoria $condicionVehiculo $condicionLugar';
+    String test= 'SELECT * FROM gastos WHERE fecha BETWEEN $fechaInicial AND $fechaFormateada $condicionCategoria $condicionVehiculo $condicionLugar';
     print(test);
     var resultadoConsulta = await db.rawQuery('SELECT * FROM gastos WHERE fecha BETWEEN ? AND ? $condicionCategoria $condicionVehiculo $condicionLugar',
-    [fechaInicial, fechaFinal]);
+    [fechaInicial, fechaFormateada]);
 
     
     
@@ -344,6 +357,9 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
     on<EditarGasto>((event, emit)async{
+      await editarGasto(event.gastoViejo, event.gastoNuevo);
+      await todosLosGastos();
+      _listaGastosFiltrados = _listaGastos;
       
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
