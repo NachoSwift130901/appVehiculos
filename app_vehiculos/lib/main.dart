@@ -10,7 +10,7 @@ import 'modelos/categoria.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_async_autocomplete/flutter_async_autocomplete.dart';
 
-void main() {
+void main(){
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const AplicacionInyectada());
 }
@@ -157,6 +157,9 @@ class PantallaCategorias extends StatelessWidget {
           .read<AppBloc>()
           .add(ActualizarCategoria(oldCategoria: old, newCategoria: nueva));
     }
+   void borrarCategoria(categoria){
+      context.read<AppBloc>().add(EliminarCategoria(categoriaAEliminar: categoria));
+   }
 
     print(estado);
     // if(estado is Inicial) return const Text('Oh no');
@@ -270,7 +273,7 @@ class PantallaCategorias extends StatelessWidget {
                                                     }
                                                   },
                                                   child: const Text('Guardar'),
-                                                                                              ),
+                                                  ),
                                                 ),
                                               TextButton(
                                                 onPressed: () {
@@ -293,8 +296,27 @@ class PantallaCategorias extends StatelessWidget {
                         padding: const EdgeInsets.all(8.0),
                         child: IconButton(
                             onPressed: () {
-                              context.read<AppBloc>().add(EliminarCategoria(
-                                  categoriaAEliminar: categoria.nombre));
+                              showDialog(
+                                context: context, 
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    content: const Text('Estás seguro de que quieres eliminar esta categoría? (Esto tambien eliminara los gastos)'),
+                                    actions: [
+                                      TextButton(onPressed: () {
+                                        Navigator.pop(context);
+                                      }, child: const Text('Cancelar', style: TextStyle(color: Color.fromARGB(255, 57, 127, 136)),)),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 57, 127, 136)),
+                                        onPressed: () {
+                                        borrarCategoria(categoria);
+                                        Navigator.pop(context);
+                                      }, 
+                                      child: const Text('Eliminar'))
+                                    ],
+                                  );
+                                }
+                                );
+                              
                             },
                             icon: const Icon(Icons.delete)),
                       )
@@ -458,6 +480,7 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
     void mostrarAdvertencia(String mensaje) {
       final snackBar = SnackBar(
         content: Text(mensaje),
+        duration: const Duration(seconds: 2),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
@@ -1568,7 +1591,40 @@ class _PantallaGastosState extends State<PantallaGastos> {
 
     return Column(
       children: [
-        TextFormField(
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              TextFormField(
+                onTap: () async {
+                  DateTime? fechaSeleccionada = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now());
+                  setState(() {
+                    if (fechaSeleccionada != null) {
+                      String formattedDate = DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
+
+                      if(DateTime.parse(formattedDate).isBefore(DateTime.parse(controladorFechaFinal.text))){
+                        controladorFechaInicial.text = formattedDate;
+                        context.read<AppBloc>().add(FiltrarGasto(
+                          controladorFechaInicial.text,
+                          controladorFechaFinal.text,
+                          controladorCategoriaSeleccionada.text,
+                          controladorVehiculoSeleccionado.text,
+                          controladorLugar.text));
+                          return;
+                      }
+                      mostrarAdvertencia('La fecha inicial debe ser menor que la final');
+                    }
+                  });
+                },
+                controller: controladorFechaInicial,
+                decoration: const InputDecoration(labelText: 'Fecha Inicial'),
+                readOnly: true,
+              ),
+              TextFormField(
           onTap: () async {
             DateTime? fechaSeleccionada = await showDatePicker(
                 context: context,
@@ -1577,86 +1633,65 @@ class _PantallaGastosState extends State<PantallaGastos> {
                 lastDate: DateTime.now());
             setState(() {
               if (fechaSeleccionada != null) {
-                String formattedDate =
-                    DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
-                controladorFechaInicial.text = formattedDate;
+                String formattedDate = DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
 
+                if(DateTime.parse(formattedDate).isAfter(DateTime.parse(controladorFechaInicial.text))){
+                  controladorFechaFinal.text = formattedDate;
+               
                 context.read<AppBloc>().add(FiltrarGasto(
                     controladorFechaInicial.text,
                     controladorFechaFinal.text,
                     controladorCategoriaSeleccionada.text,
                     controladorVehiculoSeleccionado.text,
                     controladorLugar.text));
-              }
-            });
-          },
-          controller: controladorFechaInicial,
-          decoration: const InputDecoration(labelText: 'Fecha Inicial'),
-          readOnly: true,
-        ),
-        TextFormField(
-          onTap: () async {
-            DateTime? fechaSeleccionada = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2023,12,30));
-            setState(() {
-              if (fechaSeleccionada != null) {
-                String formattedDate =
-                    DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
-                controladorFechaFinal.text = formattedDate;
-                context.read<AppBloc>().add(FiltrarGasto(
-                    controladorFechaInicial.text,
-                    controladorFechaFinal.text,
-                    controladorCategoriaSeleccionada.text,
-                    controladorVehiculoSeleccionado.text,
-                    controladorLugar.text));
+                    return;
+                }
+                mostrarAdvertencia('La fecha final debe ser mayor que la inicial');
               }
             });
           },
           controller: controladorFechaFinal,
           decoration: const InputDecoration(labelText: 'Fecha Final'),
         ),
-        DropdownButtonFormField<Categoria>(
-            decoration: const InputDecoration(labelText: 'Categoria'),
-            value: categoriaSeleccionada,
-            onChanged: (value) {
-              updateCategoriaSeleccionada(value);
-            },
-            items: [
-              DropdownMenuItem(
-                value: todasLasCategorias,
-                child: const Text('Todas las categorias'),
-              ),
-              ...categorias.map<DropdownMenuItem<Categoria>>((categoria) {
-                return DropdownMenuItem<Categoria>(
-                  value: categoria,
-                  child: Text(categoria.nombre),
-                );
-              }).toList(),
-            ]
-            ),
-        DropdownButtonFormField<Vehiculo>(
-            decoration: const InputDecoration(labelText: 'Vehiculo'),
-            value: vehiculoSeleccionado,
-            onChanged: (value) {
-              updateVehiculoSeleccionado(value);
-            },
-            items: [
-              DropdownMenuItem(
-                value: todosLosVehiculos,
-                child: const Text("Todos los vehiculos"),
-              ),
-              ...vehiculos.map<DropdownMenuItem<Vehiculo>>((vehiculo) {
-                return DropdownMenuItem<Vehiculo>(
-                  value: vehiculo,
-                  child: Text('${vehiculo.marca} ${vehiculo.matricula}'),
-                );
-              }).toList(),
-            ]
-            ),
-        DropdownButtonFormField<Gasto>(
+              DropdownButtonFormField<Categoria>(
+                  decoration: const InputDecoration(labelText: 'Categoria'),
+                  value: categoriaSeleccionada,
+                  onChanged: (value) {
+                    updateCategoriaSeleccionada(value);
+                  },
+                  items: [
+                    DropdownMenuItem(
+                      value: todasLasCategorias,
+                      child: const Text('Todas las categorias'),
+                    ),
+                    ...categorias.map<DropdownMenuItem<Categoria>>((categoria) {
+                      return DropdownMenuItem<Categoria>(
+                        value: categoria,
+                        child: Text(categoria.nombre),
+                      );
+                    }).toList(),
+                  ]
+                  ),
+              DropdownButtonFormField<Vehiculo>(
+                  decoration: const InputDecoration(labelText: 'Vehiculo'),
+                  value: vehiculoSeleccionado,
+                  onChanged: (value) {
+                    updateVehiculoSeleccionado(value);
+                  },
+                  items: [
+                    DropdownMenuItem(
+                      value: todosLosVehiculos,
+                      child: const Text("Todos los vehiculos"),
+                    ),
+                    ...vehiculos.map<DropdownMenuItem<Vehiculo>>((vehiculo) {
+                      return DropdownMenuItem<Vehiculo>(
+                        value: vehiculo,
+                        child: Text('${vehiculo.marca} ${vehiculo.matricula}'),
+                      );
+                    }).toList(),
+                  ]
+                  ),
+              DropdownButtonFormField<Gasto>(
             decoration: const InputDecoration(labelText: 'Lugar'),
             value: gastoSeleccionado,
             onChanged: (value) {
@@ -1675,6 +1710,11 @@ class _PantallaGastosState extends State<PantallaGastos> {
               }).toList(),
             ]
             ),
+        
+            ],
+          ),
+        ),
+        
         /*
         AsyncAutocomplete<Categoria>(
           controller: controladorCategoriaSeleccionada,
@@ -2030,9 +2070,9 @@ class _PantallaGastosState extends State<PantallaGastos> {
                                                     if (value == null || value.isEmpty) {
                                                       return 'Por favor, ingresa la cantidad';
                                                   }
-                                                  RegExp numbersOnlyRegExp = RegExp(r'[^0-9]');
-                                                  if (numbersOnlyRegExp.hasMatch(value)) {
-                                                    return 'Solo se permiten números del 0 al 9.';
+                                                  RegExp numbersWithDecimalRegExp = RegExp(r'^\d*\.?\d*$');
+                                                  if (!numbersWithDecimalRegExp.hasMatch(value)) {
+                                                    return 'Solo se permiten números del 0 al 9 y un punto decimal.';
                                                   }
                                                     return null;
 
@@ -2049,9 +2089,9 @@ class _PantallaGastosState extends State<PantallaGastos> {
                                                         focusedBorder: UnderlineInputBorder(
                                                             borderSide:
                                                                 BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
-                                                    keyboardType: TextInputType.number,
+                                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                     inputFormatters: <TextInputFormatter>[
-                                                      FilteringTextInputFormatter.digitsOnly,
+                                                      
                                                       LengthLimitingTextInputFormatter(8),
                                                     ],
                                                   ),
@@ -2404,9 +2444,9 @@ class _BotonAgregarGastoState extends State<BotonAgregarGasto> {
                           if (value == null || value.isEmpty) {
                             return 'Por favor, ingresa la cantidad';
                         }
-                        RegExp numbersOnlyRegExp = RegExp(r'[^0-9]');
-                        if (numbersOnlyRegExp.hasMatch(value)) {
-                          return 'Solo se permiten números del 0 al 9.';
+                        RegExp numbersWithDecimalRegExp = RegExp(r'^\d*\.?\d*$');
+                        if (!numbersWithDecimalRegExp.hasMatch(value)) {
+                          return 'Solo se permiten números del 0 al 9 y un punto decimal.';
                         }
                           return null;
 
@@ -2425,7 +2465,6 @@ class _BotonAgregarGastoState extends State<BotonAgregarGasto> {
                                     BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(8),
                         ],
                       ),
@@ -2495,7 +2534,7 @@ class _BotonAgregarGastoState extends State<BotonAgregarGasto> {
                                 descripcionController.clear();
                                 lugarController.clear();
                                 cantidadController.clear();
-                                fechaController.clear();
+                                
                           
                                 Navigator.pop(context);
                                 }

@@ -4,19 +4,24 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+// import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
+import 'package:sqflite/sqflite.dart';
+// import 'package:sqlite3/sqlite3.dart';
 import 'package:app_vehiculos/modelos/categoria.dart';
 import 'package:app_vehiculos/modelos/gastos.dart';
 import 'package:app_vehiculos/modelos/vehiculo.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+// import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 late Database db;
 class RepositorioBD {
-  RepositorioBD();
+  
 
   Future<void> inicializar() async {
+  
   var fabricaBaseDatos = databaseFactoryFfiWeb;
-  String rutaBaseDatos = '${await fabricaBaseDatos.getDatabasesPath()}/base.db';
+  String rutaBaseDatos = '${await fabricaBaseDatos.getDatabasesPath()}/baseMovil.db';
   db = await fabricaBaseDatos.openDatabase(rutaBaseDatos,
   options: OpenDatabaseOptions(
     version: 1,
@@ -105,7 +110,7 @@ class AgregarCategoria extends AppEvento{
 }
 
 class EliminarCategoria extends AppEvento{
-  final String categoriaAEliminar;
+  final Categoria categoriaAEliminar;
 
   EliminarCategoria({required this.categoriaAEliminar});
 }
@@ -214,14 +219,12 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     await db.rawInsert('INSERT INTO categorias (categoria) VALUES(?)', [categoriaAAgregar]);  
     todasLasCategorias();
   }
-  Future<void> eliminarCategoria(categoriaAEliminar) async{
-    await db.rawDelete('DELETE FROM categorias where categoria = ?', [categoriaAEliminar]); 
-    await db.rawDelete('DELETE FROM gastos WHERE categoria_id IN (SELECT id FROM categorias WHERE categoria = ?)', [categoriaAEliminar]);
+  Future<void> eliminarCategoria(Categoria categoriaAEliminar) async{
+    await db.rawDelete('DELETE FROM categorias where categoria = ?', [categoriaAEliminar.nombre]); 
+    await db.rawDelete('DELETE FROM gastos WHERE categoria_id = ?', [categoriaAEliminar.categoria_id]);
   }
   Future<void> actualizarCategoria(oldCategoria, newCategoria) async {
     await db.rawUpdate('UPDATE categorias SET categoria = ? WHERE categoria = ?', [newCategoria, oldCategoria]);
-    
-
   }
   
   Future<void> agregarVehiculo(String marca, int modelo, String color, String matricula) async{
@@ -301,6 +304,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       await todasLasCategorias();
       await todosLosGastos();
       await todosLosVehiculos();
+
       _listaGastosFiltrados = _listaGastos;
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
@@ -314,6 +318,8 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
     on<EliminarCategoria>((event, emit) async {
       await eliminarCategoria(event.categoriaAEliminar);
       await todasLasCategorias();
+      await todosLosGastos();
+      _listaGastosFiltrados = _listaGastos;
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
     on<ActualizarCategoria>((event, emit) async {
