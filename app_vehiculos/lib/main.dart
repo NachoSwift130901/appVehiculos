@@ -111,6 +111,9 @@ class _BottomNavigationBarExampleState
               _currentIndex = index;
             });
           }
+        else{
+          mostrarAdvertencia('Debe haber al menos un vehículo y una categoría');
+        }
         },
         items: const [
           BottomNavigationBarItem(
@@ -130,14 +133,21 @@ class _BottomNavigationBarExampleState
     );
   }
 
-  bool _canNavigate(
-      int index, List<Categoria> categorias, List<Vehiculo> vehiculos) {
+  bool _canNavigate(int index, List<Categoria> categorias, List<Vehiculo> vehiculos) {
     // Verifica las condiciones antes de permitir la navegación
     if (index == 2) {
+
       return categorias.isNotEmpty && vehiculos.isNotEmpty;
     }
     return true;
   }
+  void mostrarAdvertencia(String mensaje) {
+      final snackBar = SnackBar(
+        content: Text(mensaje),
+        duration: const Duration(seconds: 2),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
 }
 
 /* PANTALLA DE CATEGORIAS */
