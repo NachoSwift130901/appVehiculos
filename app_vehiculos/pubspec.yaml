@@ -20,6 +20,8 @@ dependencies:
   sqflite_common_ffi: ^2.3.0+4
   sqflite_common_ffi_web: ^0.4.0
   sqlite3: ^2.1.0
+  syncfusion_flutter_charts: ^20.1.52
+  
 
 dev_dependencies:
   flutter_test:

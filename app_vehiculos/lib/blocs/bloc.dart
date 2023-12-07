@@ -270,24 +270,22 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   }
 
   Future<void> filtrarGasto(fechaInicial, fechaFinal ,categoriaId,vehiculoId, lugar) async {
+    print('$fechaInicial, $fechaFinal, $categoriaId, $vehiculoId, $lugar');
 
     DateTime fechaNoFormateada = DateTime.parse(fechaFinal);
 
     DateTime fechaSiFormateada = DateTime(fechaNoFormateada.year, fechaNoFormateada.month, fechaNoFormateada.day, 23, 59);
     String fechaFormateada = fechaSiFormateada.toString();
-    print(fechaFormateada);
 
+    String condicionCategoria = ((categoriaId) == '999' || (categoriaId) == 'TODAS LAS CATEGORIAS')? '' : 'AND categoria_id = $categoriaId';
     
-    
+    String condicionVehiculo = ((vehiculoId) == '999' || (vehiculoId) == 'TODOS LOS VEHICULOS')? '' : 'AND vehiculo_id = $vehiculoId'; 
 
-    String condicionCategoria = ((categoriaId) == '999' || (categoriaId) == 'Todas las categorias')? '' : 'AND categoria_id = $categoriaId';
-    
-    String condicionVehiculo = ((vehiculoId) == '999' || (vehiculoId) == 'Todos los vehiculos')? '' : 'AND vehiculo_id = $vehiculoId'; 
-
-    String condicionLugar = (lugar == 'Todos los lugares')? '' : 'AND lugar = \'$lugar\'';
+    String condicionLugar = (lugar == 'TODOS LOS LUGARES')? '' : 'AND lugar = \'$lugar\'';
     
     String test= 'SELECT * FROM gastos WHERE fecha BETWEEN $fechaInicial AND $fechaFormateada $condicionCategoria $condicionVehiculo $condicionLugar';
     print(test);
+    
     var resultadoConsulta = await db.rawQuery('SELECT * FROM gastos WHERE fecha BETWEEN ? AND ? $condicionCategoria $condicionVehiculo $condicionLugar',
     [fechaInicial, fechaFormateada]);
 
@@ -346,7 +344,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       
       await actualizarVehiculo(event.matricula, event.marca, int.parse(event.modelo), event.color, event.matriculaId);
       await todosLosVehiculos();
-      print(_listaVehiculos);
+      
       
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
