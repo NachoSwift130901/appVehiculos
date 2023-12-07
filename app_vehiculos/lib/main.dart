@@ -1732,6 +1732,7 @@ gastoEncontrado ??= todosLosGastos;
                 },
                 onTapItem: (Categoria categoria) {
                   controladorCategoriaSeleccionada.text = categoria.nombre;
+                  
                 },
                 suggestionBuilder: (data) => ListTile(
                   title: Text(data.nombre),

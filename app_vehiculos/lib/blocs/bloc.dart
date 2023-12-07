@@ -20,8 +20,8 @@ class RepositorioBD {
 
   Future<void> inicializar() async {
   
-  var fabricaBaseDatos = databaseFactoryFfiWeb;
-  String rutaBaseDatos = '${await fabricaBaseDatos.getDatabasesPath()}/baseMovil.db';
+  var fabricaBaseDatos = databaseFactory;
+  String rutaBaseDatos = '${await fabricaBaseDatos.getDatabasesPath()}/baseMovil2.db';
   db = await fabricaBaseDatos.openDatabase(rutaBaseDatos,
   options: OpenDatabaseOptions(
     version: 1,
