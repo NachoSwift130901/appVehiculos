@@ -10,7 +10,6 @@ import 'blocs/bloc.dart';
 import 'modelos/vehiculo.dart';
 import 'modelos/categoria.dart';
 import 'package:intl/intl.dart';
-import 'dart:collection';
 
 void main(){
   WidgetsFlutterBinding.ensureInitialized();
@@ -175,8 +174,6 @@ class PantallaCategorias extends StatelessWidget {
    void borrarCategoria(categoria){
       context.read<AppBloc>().add(EliminarCategoria(categoriaAEliminar: categoria));
    }
-
-    print(estado);
     // if(estado is Inicial) return const Text('Oh no');
     if (estado is Operacional) {
       categorias = (estado).listaCategorias;
@@ -2395,7 +2392,7 @@ class _BotonAgregarGastoState extends State<BotonAgregarGasto> {
     Vehiculo vehiculoSeleccionado = vehiculos[0];
     final formKey = GlobalKey<FormState>();
 
-    void _updateCategoriaSeleccionada(Categoria value) {
+    void updateCategoriaSeleccionada(Categoria value) {
     setState(() {
       categoriaSeleccionada = value;
       idCategoriaSeleccionada.text =
@@ -2403,7 +2400,7 @@ class _BotonAgregarGastoState extends State<BotonAgregarGasto> {
     });
   }
 
-  void _updateVehiculoSeleccionado(Vehiculo value) {
+    void updateVehiculoSeleccionado(Vehiculo value) {
     setState(() {
       vehiculoSeleccionado = value;
       idVehiculoSeleccionado.text =
@@ -2465,7 +2462,7 @@ class _BotonAgregarGastoState extends State<BotonAgregarGasto> {
                                         BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
                             value: categoriaSeleccionada,
                             onChanged: (value) {
-                              _updateCategoriaSeleccionada(value!);
+                              updateCategoriaSeleccionada(value!);
                             },
                             items: categorias
                                 .map<DropdownMenuItem<Categoria>>((Categoria categoria) {
@@ -2489,7 +2486,7 @@ class _BotonAgregarGastoState extends State<BotonAgregarGasto> {
                                         BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
                             value: vehiculoSeleccionado,
                             onChanged: (value) {
-                              _updateVehiculoSeleccionado(value!);
+                              updateVehiculoSeleccionado(value!);
                             },
                             items: vehiculos
                                 .map<DropdownMenuItem<Vehiculo>>((Vehiculo vehiculo) {

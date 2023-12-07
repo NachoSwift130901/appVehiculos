@@ -11,7 +11,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:app_vehiculos/modelos/categoria.dart';
 import 'package:app_vehiculos/modelos/gastos.dart';
 import 'package:app_vehiculos/modelos/vehiculo.dart';
-import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+// import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 // import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 late Database db;
@@ -250,7 +250,6 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
 
     DateTime fechaSiFormateada = DateTime(fechaNoFormateada.year, fechaNoFormateada.month, fechaNoFormateada.day, 23, 59);
     String fechaFormateada = fechaSiFormateada.toString();
-    print(fechaFormateada);
     
     await db.rawInsert('''INSERT INTO gastos (descripcion, lugar, cantidad, fecha, categoria_id, vehiculo_id) VALUES (?, ?, ?, ?, ?, ?)''',
                        [gasto.descripcion, gasto.lugar, gasto.cantidad, fechaFormateada, gasto.categoria_id, gasto.vehiculo_id]);
@@ -270,7 +269,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
   }
 
   Future<void> filtrarGasto(fechaInicial, fechaFinal ,categoriaId,vehiculoId, lugar) async {
-    print('$fechaInicial, $fechaFinal, $categoriaId, $vehiculoId, $lugar');
+    
 
     DateTime fechaNoFormateada = DateTime.parse(fechaFinal);
 
@@ -283,8 +282,8 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
 
     String condicionLugar = (lugar == 'TODOS LOS LUGARES')? '' : 'AND lugar = \'$lugar\'';
     
-    String test= 'SELECT * FROM gastos WHERE fecha BETWEEN $fechaInicial AND $fechaFormateada $condicionCategoria $condicionVehiculo $condicionLugar';
-    print(test);
+    // String test= 'SELECT * FROM gastos WHERE fecha BETWEEN $fechaInicial AND $fechaFormateada $condicionCategoria $condicionVehiculo $condicionLugar';
+    
     
     var resultadoConsulta = await db.rawQuery('SELECT * FROM gastos WHERE fecha BETWEEN ? AND ? $condicionCategoria $condicionVehiculo $condicionLugar',
     [fechaInicial, fechaFormateada]);
@@ -335,8 +334,7 @@ class AppBloc extends Bloc<AppEvento, AppEstado> {
       await todosLosVehiculos();
       await todosLosGastos();
       _listaGastosFiltrados = _listaGastos;
-    
-      print(_listaGastosFiltrados);
+
 
       emit(Operacional(listaCategorias: _listaCategorias, listaVehiculos: _listaVehiculos, listaGastos: _listaGastos, listaGastosFiltrados: _listaGastosFiltrados));
     });
