@@ -1534,9 +1534,6 @@ class _PantallaGastosState extends State<PantallaGastos> {
       gastosFiltrados = (estado).listaGastosFiltrados;
     }
     double cantidadGastada = calcularTotalGastado(gastosFiltrados);
-
-    
-
     Categoria categoriaSeleccionada = todasLasCategorias;
     Vehiculo vehiculoSeleccionado = todosLosVehiculos;
     Gasto gastoSeleccionado = todosLosGastos;
@@ -1553,6 +1550,22 @@ class _PantallaGastosState extends State<PantallaGastos> {
       vehiculoList.addAll(vehiculos);
     List<Gasto> gastoList = [todosLosGastos];
       gastoList.addAll(gastos);
+
+      
+      List<Gasto> eliminarDuplicados(List<Gasto> original){
+        List<Gasto> result = [];
+
+        for (var gasto in original) {
+          if(!result.any((element) => element.lugar == gasto.lugar)){
+            result.add(gasto);
+          }
+        }
+        return result;
+      }
+
+      gastoList = eliminarDuplicados(gastoList);
+      print(gastoList);
+
 
 /*
     void updateCategoriaSeleccionada(value) {
@@ -1728,7 +1741,19 @@ gastoEncontrado ??= todosLosGastos;
                   
                 },
                 onTapItem: (Categoria categoria) {
-                  controladorCategoriaSeleccionada.text = categoria.nombre;
+                  categoriaEncontrada = buscarCategoria(categorias, categoria.nombre);
+
+                  setState(() {
+                    categoriaSeleccionada = categoriaEncontrada!;
+                    controladorCategoriaSeleccionada.text = categoriaSeleccionada.nombre;
+
+                  context.read<AppBloc>().add(FiltrarGasto(
+                  controladorFechaInicial.text,
+                  controladorFechaFinal.text,
+                  categoriaEncontrada!.categoria_id.toString(),
+                  vehiculoEncontrado!.vehiculo_id.toString(),
+                  gastoEncontrado!.lugar.toString()));
+                  });
                   
                 },
                 suggestionBuilder: (data) => ListTile(
@@ -1755,7 +1780,20 @@ gastoEncontrado ??= todosLosGastos;
                 });
                 },
                 onTapItem: (Vehiculo vehiculo) {
-                  controladorVehiculoSeleccionado.text = vehiculo.matricula;
+                  vehiculoEncontrado = buscarVehiculo(vehiculos, vehiculo.matricula);
+
+                  setState(() {
+                    vehiculoSeleccionado = vehiculoEncontrado!;
+                    controladorVehiculoSeleccionado.text = vehiculoEncontrado!.matricula;
+
+                    context.read<AppBloc>().add(FiltrarGasto(
+                      controladorFechaInicial.text,
+                      controladorFechaFinal.text,
+                      categoriaEncontrada!.categoria_id.toString(),
+                      vehiculoEncontrado!.vehiculo_id.toString(),
+                      gastoEncontrado!.lugar.toString()));
+
+                  });
                 },
                 suggestionBuilder: (data) => ListTile(
                   title: Text(data.matricula),
@@ -1782,7 +1820,19 @@ gastoEncontrado ??= todosLosGastos;
                   
                 },
                 onTapItem: (Gasto gasto) {
-                  controladorLugar.text = gasto.lugar;
+                  gastoEncontrado = buscarGasto(gastos, gasto.lugar);
+
+                  setState(() {
+                    gastoSeleccionado = gastoEncontrado!;
+                    controladorLugar.text = gastoEncontrado!.lugar;
+
+                    context.read<AppBloc>().add(FiltrarGasto(
+                      controladorFechaInicial.text,
+                      controladorFechaFinal.text,
+                      categoriaEncontrada!.categoria_id.toString(),
+                      vehiculoEncontrado!.vehiculo_id.toString(),
+                      gastoEncontrado!.lugar));
+                  });
                 },
                 suggestionBuilder: (data) => ListTile(
                   title: Text(data.lugar),

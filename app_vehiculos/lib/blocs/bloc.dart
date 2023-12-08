@@ -4,15 +4,12 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-// import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
-
 import 'package:sqflite/sqflite.dart';
-// import 'package:sqlite3/sqlite3.dart';
 import 'package:app_vehiculos/modelos/categoria.dart';
 import 'package:app_vehiculos/modelos/gastos.dart';
 import 'package:app_vehiculos/modelos/vehiculo.dart';
 // import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
-// import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+
 
 late Database db;
 class RepositorioBD {
