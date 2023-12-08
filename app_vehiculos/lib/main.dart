@@ -1564,7 +1564,7 @@ class _PantallaGastosState extends State<PantallaGastos> {
       }
 
       gastoList = eliminarDuplicados(gastoList);
-      print(gastoList);
+      
 
 
 /*
@@ -2155,7 +2155,7 @@ gastoEncontrado ??= todosLosGastos;
                                                               borderSide:
                                                                   BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
                                                       keyboardType: TextInputType.number,
-                                                      inputFormatters: [LengthLimitingTextInputFormatter(8)]),
+                                                      inputFormatters: [LengthLimitingTextInputFormatter(14)]),
                                                   TextFormField(
                                                     validator: (value) {
                                                     if (value == null || value.isEmpty) {
@@ -2580,7 +2580,7 @@ class _BotonAgregarGastoState extends State<BotonAgregarGasto> {
                                   focusedBorder: UnderlineInputBorder(
                                       borderSide:
                                           BorderSide(color: Color.fromARGB(255, 57, 127, 136)))),
-                              inputFormatters: [LengthLimitingTextInputFormatter(8)]),
+                              inputFormatters: [LengthLimitingTextInputFormatter(14)]),
                           TextFormField(
                             validator: (value) {
                               if (value == null || value.isEmpty) {
