@@ -1493,9 +1493,6 @@ class _PantallaGastosState extends State<PantallaGastos> {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
 
-    
-
-    
     List<Gasto> gastos = [];
     List<Categoria> categorias = [];
     List<Vehiculo> vehiculos = [];
@@ -1566,48 +1563,6 @@ class _PantallaGastosState extends State<PantallaGastos> {
       gastoList = eliminarDuplicados(gastoList);
       
 
-
-/*
-    void updateCategoriaSeleccionada(value) {
-      setState(() {
-        categoriaSeleccionada = value;
-        controladorCategoriaSeleccionada.text = (value as Categoria).categoria_id.toString();
-
-        context.read<AppBloc>().add(FiltrarGasto(
-            controladorFechaInicial.text,
-            controladorFechaFinal.text,
-            controladorCategoriaSeleccionada.text,
-            controladorVehiculoSeleccionado.text,
-            controladorLugar.text));
-      });
-    }
-    void updateVehiculoSeleccionado(value) {
-      setState(() {
-        vehiculoSeleccionado = value;
-        controladorVehiculoSeleccionado.text = (value as Vehiculo).vehiculo_id.toString();
-
-        context.read<AppBloc>().add(FiltrarGasto(
-            controladorFechaInicial.text,
-            controladorFechaFinal.text,
-            controladorCategoriaSeleccionada.text,
-            controladorVehiculoSeleccionado.text,
-            controladorLugar.text));
-      });
-    }
-    void updateLugarSeleccionado(value) {
-      setState(() {
-        gastoSeleccionado = value;
-        controladorLugar.text = (value as Gasto).lugar.toString();
-        context.read<AppBloc>().add(FiltrarGasto(
-            controladorFechaInicial.text,
-            controladorFechaFinal.text,
-            controladorCategoriaSeleccionada.text,
-            controladorVehiculoSeleccionado.text,
-            controladorLugar.text));
-      });
-    }
-*/
-
 categoriaEncontrada ??= todasLasCategorias;
 vehiculoEncontrado ??= todosLosVehiculos;
 gastoEncontrado ??= todosLosGastos;
@@ -1673,7 +1628,8 @@ gastoEncontrado ??= todosLosGastos;
                     if (fechaSeleccionada != null) {
                       String formattedDate = DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
 
-                      if(DateTime.parse(formattedDate).isBefore(DateTime.parse(controladorFechaFinal.text))){
+                       if (DateTime.parse(formattedDate).isBefore(DateTime.parse(controladorFechaFinal.text)) ||
+                           DateTime.parse(formattedDate).isAtSameMomentAs(DateTime.parse(controladorFechaFinal.text))) {
                         controladorFechaInicial.text = formattedDate;
 
                         context.read<AppBloc>().add(FiltrarGasto(
@@ -1703,7 +1659,8 @@ gastoEncontrado ??= todosLosGastos;
               if (fechaSeleccionada != null) {
                 String formattedDate = DateFormat('yyyy-MM-dd').format(fechaSeleccionada);
 
-                if(DateTime.parse(formattedDate).isAfter(DateTime.parse(controladorFechaInicial.text))){
+                if (DateTime.parse(formattedDate).isAfter(DateTime.parse(controladorFechaInicial.text)) ||
+                    DateTime.parse(formattedDate).isAtSameMomentAs(DateTime.parse(controladorFechaInicial.text))) {
                   controladorFechaFinal.text = formattedDate;
                
                 context.read<AppBloc>().add(FiltrarGasto(
@@ -1883,6 +1840,7 @@ gastoEncontrado ??= todosLosGastos;
                           Vehiculo vehiculoDelGasto = vehiculos[x];
 
                       return ListTile(
+                        leading: const Icon(Icons.attach_money_outlined),
                         title: Text(
                             '${vehiculos[x].marca.toString()} ${vehiculos[x].matricula.toString()} '),
                         subtitle: Column(
