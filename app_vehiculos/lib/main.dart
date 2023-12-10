@@ -476,6 +476,9 @@ class PantallaVehiculos extends StatefulWidget {
 
 class _PantallaVehiculosState extends State<PantallaVehiculos> {
   final _formKey = GlobalKey<FormState>();
+  TextEditingController filtroCarros = TextEditingController();
+
+  List<Vehiculo>? vehiculosFiltrados;
 
   @override
   Widget build(BuildContext context) {
@@ -505,6 +508,10 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
         matriculas.add(vehiculo.matricula);
       }
     }
+    
+    
+    String search = '';
+    
     if (estado is Inicial) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -521,17 +528,32 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
         ),
       );
     }
+    print(vehiculos);
+    vehiculosFiltrados ??= vehiculos;
     return Center(
       child: Column(
         children: [
+          TextField(
+            controller: filtroCarros,
+            decoration: const InputDecoration(hintText: 'Buscar por vehículo...'),
+            onChanged: (value) {
+              setState(() {
+                search = value;
+                vehiculosFiltrados = vehiculos.where((vehiculo) {
+                  return vehiculo.toString().toUpperCase().contains(search.toUpperCase());
+                }).toList();
+                print(vehiculosFiltrados);
+              });
+            },
+          ),
           BlocBuilder<AppBloc, AppEstado>(
             builder: (context, state) {
               if (state is Operacional) {
                 return Expanded(
                   child: ListView.builder(
-                    itemCount: state.listaVehiculos.length,
+                    itemCount: vehiculosFiltrados!.length,
                     itemBuilder: (context, index) {
-                      final vehiculo = state.listaVehiculos[index];
+                      final vehiculo = vehiculosFiltrados![index];
 
                       return ListTile(
                         leading: const Icon(Icons.drive_eta_rounded),

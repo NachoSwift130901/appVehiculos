@@ -65,9 +65,6 @@ class RepositorioBD {
     return resultadoConsulta.map((e) => e['categoria'] as String).toList();
 
   }
-
-
-
 }
 
 
