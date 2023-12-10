@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 // ignore_for_file: depend_on_referenced_packages, prefer_final_fields
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -8,6 +9,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:app_vehiculos/modelos/categoria.dart';
 import 'package:app_vehiculos/modelos/gastos.dart';
 import 'package:app_vehiculos/modelos/vehiculo.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 // import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 
@@ -17,7 +19,7 @@ class RepositorioBD {
 
   Future<void> inicializar() async {
   
-  var fabricaBaseDatos = databaseFactory;
+  var fabricaBaseDatos = kIsWeb ? databaseFactoryFfiWeb : databaseFactory;
   String rutaBaseDatos = '${await fabricaBaseDatos.getDatabasesPath()}/baseMovil2.db';
   db = await fabricaBaseDatos.openDatabase(rutaBaseDatos,
   options: OpenDatabaseOptions(
