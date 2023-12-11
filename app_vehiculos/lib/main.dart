@@ -484,6 +484,8 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
   Widget build(BuildContext context) {
     void eliminarVehiculo(Vehiculo vehiculo) {
       context.read<AppBloc>().add(EliminarVehiculo(vehiculo: vehiculo));
+      
+      
     }
 
     void actualizarVehiculo(matricula, marca, modelo, color, matriculaId) {
@@ -506,6 +508,7 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
       vehiculos = (estado).listaVehiculos;
       for (Vehiculo vehiculo in vehiculos) {
         matriculas.add(vehiculo.matricula);
+        
       }
     }
     
@@ -528,23 +531,34 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
         ),
       );
     }
-    print(vehiculos);
+    
     vehiculosFiltrados ??= vehiculos;
+
+    
+
     return Center(
       child: Column(
         children: [
-          TextField(
-            controller: filtroCarros,
-            decoration: const InputDecoration(hintText: 'Buscar por vehículo...'),
-            onChanged: (value) {
-              setState(() {
-                search = value;
-                vehiculosFiltrados = vehiculos.where((vehiculo) {
-                  return vehiculo.toString().toUpperCase().contains(search.toUpperCase());
-                }).toList();
-                print(vehiculosFiltrados);
-              });
-            },
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              
+              controller: filtroCarros,
+              decoration: const InputDecoration(hintText: 'Buscar por vehículo...',
+              enabledBorder: 
+              UnderlineInputBorder(borderSide: BorderSide(color: Color.fromARGB(255, 57, 127, 136))),
+              focusedBorder: 
+              UnderlineInputBorder(borderSide: BorderSide( color: Color.fromARGB(255, 57, 127, 136))),),
+              onChanged: (value) {
+                setState(() {
+                  search = value;
+                  vehiculosFiltrados = vehiculos.where((vehiculo) {
+                    return vehiculo.toString().toUpperCase().contains(search.toUpperCase());
+                  }).toList();
+                  
+                });
+              },
+            ),
           ),
           BlocBuilder<AppBloc, AppEstado>(
             builder: (context, state) {
@@ -1126,6 +1140,7 @@ class BotonAgregarVehiculo extends StatelessWidget {
             color: color,
             matricula: matricula,
           ));
+          
     }
 
     return Padding(
@@ -1264,12 +1279,8 @@ class BotonAgregarVehiculo extends StatelessWidget {
                             iconColor: Color.fromARGB(255, 57, 127, 136),
                             labelStyle: TextStyle(
                                 color: Color.fromARGB(255, 57, 127, 136)),
-                            enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Color.fromARGB(255, 57, 127, 136))),
-                            focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Color.fromARGB(255, 57, 127, 136)))),
+                            enabledBorder: UnderlineInputBorder(borderSide: BorderSide( color: Color.fromARGB(255, 57, 127, 136))),
+                            focusedBorder: UnderlineInputBorder(  borderSide: BorderSide( color: Color.fromARGB(255, 57, 127, 136)))),
                         inputFormatters: [LengthLimitingTextInputFormatter(8)],
                       ),
                       Padding(
