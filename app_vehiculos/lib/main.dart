@@ -72,9 +72,9 @@ class _BottomNavigationBarExampleState
   String obtenerTitulo() {
     switch (_currentIndex) {
       case 0:
-        return 'Vehiculos';
+        return 'Vehículos';
       case 1:
-        return 'Categorias';
+        return 'Categorías';
       case 2:
         return 'Gastos';
       default:
@@ -479,19 +479,10 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
   TextEditingController filtroCarros = TextEditingController();
 
   List<Vehiculo>? vehiculosFiltrados;
+  
 
   @override
   Widget build(BuildContext context) {
-    void eliminarVehiculo(Vehiculo vehiculo) {
-      context.read<AppBloc>().add(EliminarVehiculo(vehiculo: vehiculo));
-      
-      
-    }
-
-    void actualizarVehiculo(matricula, marca, modelo, color, matriculaId) {
-      context.read<AppBloc>().add(
-          ActualizarVehiculo(matricula, marca, modelo, color, matriculaId));
-    }
 
     void mostrarAdvertencia(String mensaje) {
       final snackBar = SnackBar(
@@ -511,9 +502,15 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
         
       }
     }
-    
-    
-    String search = '';
+
+    String? search;
+    search ??= '';
+
+    void vaciarLista(){
+      vehiculosFiltrados = null;
+      filtroCarros.clear();
+      
+    }
     
     if (estado is Inicial) {
       return const Center(child: CircularProgressIndicator());
@@ -526,16 +523,31 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
           children: [
             const Text('Aún no hay vehículos...'),
             const SizedBox(height: 16.0),
-            BotonAgregarVehiculo()
+            BotonAgregarVehiculo(vaciarLista: vaciarLista,)
           ],
         ),
       );
     }
+    if(filtroCarros.text.isEmpty){
+      vehiculosFiltrados = vehiculos;
+    }
     
-    vehiculosFiltrados ??= vehiculos;
+    
+    print(vehiculos);
 
+    void eliminarVehiculo(Vehiculo vehiculo) {
+      context.read<AppBloc>().add(EliminarVehiculo(vehiculo: vehiculo));
+      vaciarLista();
+
+    }
     
 
+    void actualizarVehiculo(matricula, marca, modelo, color, matriculaId) {
+      
+      context.read<AppBloc>().add(ActualizarVehiculo(matricula, marca, modelo, color, matriculaId));
+      vaciarLista();
+          
+    }
     return Center(
       child: Column(
         children: [
@@ -553,9 +565,8 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
                 setState(() {
                   search = value;
                   vehiculosFiltrados = vehiculos.where((vehiculo) {
-                    return vehiculo.toString().toUpperCase().contains(search.toUpperCase());
+                    return vehiculo.toString().toUpperCase().contains(search!.toUpperCase());
                   }).toList();
-                  
                 });
               },
             ),
@@ -945,13 +956,17 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
 
                                                                               final matriculaVieja = vehiculo.matricula;
 
-                                                                              actualizarVehiculo(nuevaMatricula, nuevaMarca, nuevoModelo, nuevoColor, matriculaVieja);
+                                                                              actualizarVehiculo(nuevaMatricula.toUpperCase(), nuevaMarca.toUpperCase(), nuevoModelo, nuevoColor.toUpperCase(), matriculaVieja);
                                                                               setState(() {
                                                                                 Navigator.of(context).pop();
+                                                                              });
+                                                                              setState(() {
+                                                                                
                                                                               });
 
                                                                               mostrarAdvertencia("Vehiculo actualizado correctamente");
                                                                               Navigator.pop(context);
+                                                                              
                                                                             }
                                                                           },
                                                                           style:
@@ -1093,7 +1108,7 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
             },
           ),
           const SizedBox(height: 20),
-          BotonAgregarVehiculo()
+          BotonAgregarVehiculo(vaciarLista: vaciarLista)
         ],
       ),
     );
@@ -1106,8 +1121,10 @@ class BotonAgregarVehiculo extends StatelessWidget {
   final TextEditingController _colorController = TextEditingController();
   final TextEditingController _matriculaController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  List<Vehiculo>? vehiculosFiltrados;
+  Function vaciarLista;
 
-  BotonAgregarVehiculo({super.key});
+  BotonAgregarVehiculo({super.key, required this.vaciarLista});
 
   @override
   Widget build(BuildContext context) {
@@ -1132,14 +1149,15 @@ class BotonAgregarVehiculo extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
 
-    void agregarVehiculo(
-        String marca, int modelo, String color, String matricula) {
+    void agregarVehiculo(String marca, int modelo, String color, String matricula) {
       context.read<AppBloc>().add(AgregarVehiculo(
             marca: marca,
             modelo: modelo,
             color: color,
             matricula: matricula,
           ));
+          //vehiculosFiltrados = null;
+          
           
     }
 
@@ -1298,8 +1316,8 @@ class BotonAgregarVehiculo extends StatelessWidget {
                               String color = _colorController.text;
                               String matricula = _matriculaController.text;
 
-                              agregarVehiculo(marca.toUpperCase(), modelo,
-                                  color.toUpperCase(), matricula.toUpperCase());
+                              agregarVehiculo(marca.toUpperCase(), modelo,color.toUpperCase(), matricula.toUpperCase());
+                              vaciarLista();
 
                               _marcaController.clear();
                               _colorController.clear();
