@@ -531,30 +531,23 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
     if(filtroCarros.text.isEmpty){
       vehiculosFiltrados = vehiculos;
     }
-    
-    
-    print(vehiculos);
+
 
     void eliminarVehiculo(Vehiculo vehiculo) {
       context.read<AppBloc>().add(EliminarVehiculo(vehiculo: vehiculo));
       vaciarLista();
-
     }
-    
-
     void actualizarVehiculo(matricula, marca, modelo, color, matriculaId) {
-      
       context.read<AppBloc>().add(ActualizarVehiculo(matricula, marca, modelo, color, matriculaId));
       vaciarLista();
-          
     }
+    
     return Center(
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              
               controller: filtroCarros,
               decoration: const InputDecoration(hintText: 'Buscar por vehículo...',
               enabledBorder: 
@@ -1115,21 +1108,35 @@ class _PantallaVehiculosState extends State<PantallaVehiculos> {
   }
 }
 
-class BotonAgregarVehiculo extends StatelessWidget {
-  final TextEditingController _marcaController = TextEditingController();
-  final TextEditingController _modeloController = TextEditingController();
-  final TextEditingController _colorController = TextEditingController();
-  final TextEditingController _matriculaController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-  List<Vehiculo>? vehiculosFiltrados;
+class BotonAgregarVehiculo extends StatefulWidget {
   Function vaciarLista;
 
   BotonAgregarVehiculo({super.key, required this.vaciarLista});
 
   @override
+  State<BotonAgregarVehiculo> createState() => _BotonAgregarVehiculoState();
+}
+
+class _BotonAgregarVehiculoState extends State<BotonAgregarVehiculo> {
+  final TextEditingController _marcaController = TextEditingController();
+
+  final TextEditingController _modeloController = TextEditingController();
+
+  final TextEditingController _colorController = TextEditingController();
+
+  final TextEditingController _matriculaController = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+
+  List<Vehiculo>? vehiculosFiltrados;
+
+  bool showButton = true;
+
+  @override
   Widget build(BuildContext context) {
     var estado = context.watch<AppBloc>().state;
-
+    
+    
     List<Vehiculo> vehiculos = [];
     List<String> matriculas = [];
 
@@ -1156,16 +1163,21 @@ class BotonAgregarVehiculo extends StatelessWidget {
             color: color,
             matricula: matricula,
           ));
-          //vehiculosFiltrados = null;
-          
-          
     }
 
+    void checkShowButton() {
+      setState(() {
+        showButton = _marcaController.text.isNotEmpty &&
+        _modeloController.text.isNotEmpty &&
+        _colorController.text.isNotEmpty &&
+        _matriculaController.text.isNotEmpty;
+      });
+      
+    }
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: ElevatedButton.icon(
         onPressed: () {
-          // Mostrar el formulario como un modal
           showDialog(
             context: context,
             builder: (BuildContext context) => AlertDialog(
@@ -1180,6 +1192,9 @@ class BotonAgregarVehiculo extends StatelessWidget {
                   child: Column(
                     children: <Widget>[
                       TextFormField(
+                        onChanged: (value){
+                          checkShowButton();
+                        },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Por favor, ingresa la marca';
@@ -1207,6 +1222,9 @@ class BotonAgregarVehiculo extends StatelessWidget {
                         inputFormatters: [LengthLimitingTextInputFormatter(15)],
                       ),
                       TextFormField(
+                        onChanged: (value){
+                          checkShowButton();
+                        },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Por favor, ingresa el modelo';
@@ -1242,6 +1260,9 @@ class BotonAgregarVehiculo extends StatelessWidget {
                         ],
                       ),
                       TextFormField(
+                        onChanged: (value){
+                          checkShowButton();
+                        },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Por favor, ingresa el color';
@@ -1269,6 +1290,9 @@ class BotonAgregarVehiculo extends StatelessWidget {
                         inputFormatters: [LengthLimitingTextInputFormatter(15)],
                       ),
                       TextFormField(
+                        onChanged: (value){
+                          checkShowButton();
+                        },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Por favor, ingresa la matricula';
@@ -1303,35 +1327,34 @@ class BotonAgregarVehiculo extends StatelessWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 32.0),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 57, 127, 136)),
-                          onPressed: () {
-                            // Validate returns true if the form is valid, or false otherwise.
-                            if (_formKey.currentState!.validate()) {
-                              String marca = _marcaController.text;
-                              int modelo =
-                                  int.tryParse(_modeloController.text) ?? 0;
-                              String color = _colorController.text;
-                              String matricula = _matriculaController.text;
-
-                              agregarVehiculo(marca.toUpperCase(), modelo,color.toUpperCase(), matricula.toUpperCase());
-                              vaciarLista();
-
-                              _marcaController.clear();
-                              _colorController.clear();
-                              _matriculaController.clear();
-                              _modeloController.clear();
-
-                              // Cierra el AlertDialog
-                              Navigator.pop(context);
-                              mostrarAdvertencia("Vehiculo agregado correctamente");
-
-                              
-                            }
-                          },
-                          child: const Text('Agregar'),
+                        child: Visibility(
+                          visible: showButton,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 57, 127, 136)),
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                String marca = _marcaController.text;
+                                int modelo =
+                                    int.tryParse(_modeloController.text) ?? 0;
+                                String color = _colorController.text;
+                                String matricula = _matriculaController.text;
+                        
+                                agregarVehiculo(marca.toUpperCase(), modelo,color.toUpperCase(), matricula.toUpperCase());
+                                widget.vaciarLista();
+                        
+                                _marcaController.clear();
+                                _colorController.clear();
+                                _matriculaController.clear();
+                                _modeloController.clear();
+                        
+                                // Cierra el AlertDialog
+                                Navigator.pop(context);
+                                mostrarAdvertencia("Vehiculo agregado correctamente");
+                              }
+                            },
+                            child: const Text('Agregar'),
+                          ),
                         ),
                       ),
                       Padding(
